@@ -1,121 +1,100 @@
-use std::sync::Arc;
+use std::sync::{Arc, Weak};
 use std::cell::RefCell;
 use std::borrow::Borrow;
 use std::ops::Deref;
+use crate::provider::{Provider, FloatProvider};
+use crate::slot::{Slot, FloatSlot, SlotConnection};
 
 pub type ARef<T> = Arc<RefCell<T>>;
+pub type WeakRef<T> = Weak<RefCell<T>>;
 
-fn new_aref<T>(t: T) -> ARef<T> {
+pub fn new_aref<T>(t: T) -> ARef<T> {
     Arc::new(RefCell::new(t))
 }
 
-enum ResourceType {
-    Float32,
+pub struct Node {
+    pub slots: Vec<ARef<Slot>>,
+    pub providers: Vec<ARef<Provider>>,
+    pub inner: Box<dyn NodeInner>,
 }
 
-enum InputConnection {
-    None,
-    Single(ARef<OutputSlot>),
-    Multi(Vec<ARef<OutputSlot>>),
-}
-
-struct InputSlot {
-    name: String,
-    resource_type: ResourceType,
-    allow_multiple: bool,
-    connection: InputConnection,
-}
-
-impl InputSlot {
-    fn new(name: &str, resource_type: ResourceType, allow_multiple: bool) -> InputSlot {
-        InputSlot {
-            name: name.to_string(),
-            resource_type,
-            allow_multiple,
-            connection: InputConnection::None,
-        }
-    }
-
-    fn get_single(self: &Self) -> Option<ARef<OutputSlot>> {
-        if let InputConnection::Single(x) = &self.connection {
-            return Some(x.clone())
-        }
-        None
-    }
-}
-
-enum OutputSlotConnection {
-    None,
-    Single(ARef<InputSlot>),
-    Multi(Vec<ARef<InputSlot>>),
-}
-
-struct OutputSlot {
-    name: String,
-    resource_type: ResourceType,
-    connection: OutputSlotConnection,
-}
-
-impl OutputSlot {
-    fn new(name: &str, resource_type: ResourceType) -> OutputSlot {
-        OutputSlot {
-            name: name.to_string(),
-            resource_type,
-            connection: OutputSlotConnection::None,
-        }
-    }
-}
-
-trait NodeInner {
-    fn init(self: &mut Self, node: &mut Node);
+pub trait NodeInner {
+    fn get_slots(self: &Self) -> Vec<ARef<Slot>>;
+    fn get_providers(self: &Self) -> Vec<ARef<Provider>>;
     fn run(self: &mut Self);
 }
 
-pub struct Node {
-    input_slots: Vec<ARef<InputSlot>>,
-    output_slots: Vec<ARef<OutputSlot>>,
-    inner: Box<dyn NodeInner>,
-}
-
 impl Node {
-    fn new(inner: Box<dyn NodeInner>) -> Node {
+    pub fn new(inner: Box<dyn NodeInner>) -> Node {
         Node {
-            input_slots: vec![],
-            output_slots: vec![],
+            slots: inner.get_slots(),
+            providers: inner.get_providers(),
             inner,
         }
     }
 }
 
-struct Adder {
-    a: ARef<InputSlot>,
-    b: ARef<InputSlot>,
-    res: ARef<OutputSlot>,
+pub struct FloatNode {
+    pub a: FloatSlot,
+    pub out: FloatProvider,
+}
+
+impl FloatNode {
+    pub fn new() -> FloatNode {
+        FloatNode {
+            a: FloatSlot::new("A"),
+            out: FloatProvider::new("Value"),
+        }
+    }
+}
+
+impl NodeInner for FloatNode {
+    fn get_slots(self: &Self) -> Vec<ARef<Slot>> {
+        vec![self.a.slot.clone()]
+    }
+
+    fn get_providers(self: &Self) -> Vec<ARef<Provider>> {
+        vec![self.out.provider.clone()]
+    }
+
+    fn run(self: &mut Self) {
+        self.out.set(self.a.get());
+    }
+}
+
+pub struct Adder {
+    pub a: FloatSlot,
+    pub b: FloatSlot,
+    pub sum: FloatProvider,
 }
 
 impl Adder {
-    fn new() -> Adder {
+    pub fn new() -> Adder {
         Adder {
-            a: new_aref(InputSlot::new("A", ResourceType::Float32, false)),
-            b: new_aref(InputSlot::new("B", ResourceType::Float32, false)),
-            res: new_aref(OutputSlot::new("Sum", ResourceType::Float32)),
+            a: FloatSlot::new("A"),
+            b: FloatSlot::new("B"),
+            sum: FloatProvider::new("Sum"),
         }
     }
 }
 
 impl NodeInner for Adder {
-    fn init(self: &mut Self, node: &mut Node) {
-        unimplemented!()
+    fn get_slots(self: &Self) -> Vec<ARef<Slot>> {
+        vec![
+            self.a.slot.clone(),
+            self.b.slot.clone()
+        ]
+    }
+
+    fn get_providers(self: &Self) -> Vec<ARef<Provider>> {
+        vec![
+            self.sum.provider.clone(),
+        ]
     }
 
     fn run(self: &mut Self) {
-        if let Some(x) = (self.a.deref().borrow()).get_single() {
-
-        }
-        // if let InputConnection::Single(a_ref) = self.a.borrow().connection {
-        //     if let InputConnection::Single(b_ref) = &self.b.borrow().connection {
-        //         a_ref.borrow().name;
-        //     }
-        // }
+        let result = self.a.get() + self.b.get();
+        self.sum.set(result);
+        println!("Result: {}", result);
     }
 }
