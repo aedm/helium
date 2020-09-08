@@ -3,7 +3,7 @@ use std::cell::RefCell;
 use std::borrow::Borrow;
 use std::ops::Deref;
 
-type ARef<T> = Arc<RefCell<T>>;
+pub type ARef<T> = Arc<RefCell<T>>;
 
 fn new_aref<T>(t: T) -> ARef<T> {
     Arc::new(RefCell::new(t))
@@ -71,7 +71,7 @@ trait NodeInner {
     fn run(self: &mut Self);
 }
 
-struct Node {
+pub struct Node {
     input_slots: Vec<ARef<InputSlot>>,
     output_slots: Vec<ARef<OutputSlot>>,
     inner: Box<dyn NodeInner>,
