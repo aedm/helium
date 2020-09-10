@@ -1,8 +1,9 @@
 use crate::provider::{Provider, ProviderValue};
-use crate::node::{ARef, Node, WeakRef, new_aref};
+use crate::node::{Node};
 use std::borrow::{Borrow, BorrowMut};
 use std::cell::RefCell;
 use std::ops::{Deref, DerefMut};
+use crate::rf::Rf;
 
 pub enum SlotType {
     Custom,
@@ -23,8 +24,8 @@ pub enum SlotDefault {
 
 pub enum SlotConnection {
     None,
-    Single(ARef<Provider>),
-    Multi(Vec<ARef<Provider>>),
+    Single(Rf<Provider>),
+    Multi(Vec<Rf<Provider>>),
 }
 
 pub trait SlotInner {
@@ -43,17 +44,17 @@ pub struct Slot {
 }
 
 impl Slot {
-    fn new(name: &str, allow_multiple: bool, inner: Box<dyn SlotInner>) -> Slot {
+    fn new(name: &str, allow_multiple: bool, inner: Box<dyn SlotInner>, default: SlotDefault) -> Slot {
         Slot {
             name: name.to_string(),
             connection: SlotConnection::None,
             allow_multiple,
             inner,
-            default: SlotDefault::None,
+            default,
         }
     }
 
-    fn get_single(self: &Self) -> Option<ARef<Provider>> {
+    fn get_single(self: &Self) -> Option<Rf<Provider>> {
         if let SlotConnection::Single(x) = &self.connection {
             return Some(x.clone());
         }
@@ -61,9 +62,9 @@ impl Slot {
     }
 }
 
-pub fn connect_slot(slot: &mut ARef<Slot>, provider: &mut ARef<Provider>) {
-    let mut provider_mutref = (provider as &RefCell<Provider>).borrow_mut();
-    let mut slot_mutref = (slot as &RefCell<Slot>).borrow_mut();
+pub fn connect_slot(slot: &Rf<Slot>, provider: &Rf<Provider>) {
+    let mut provider_mutref = provider.borrow_mut();
+    let mut slot_mutref = slot.borrow_mut();
     if !slot_mutref.inner.can_connect(&provider_mutref) {
         panic!("Can't connect");
     }
@@ -73,27 +74,28 @@ pub fn connect_slot(slot: &mut ARef<Slot>, provider: &mut ARef<Provider>) {
 }
 
 pub struct FloatSlot {
-    pub slot: ARef<Slot>,
+    pub slot: Rf<Slot>,
 }
 
 impl FloatSlot {
     pub fn new(name: &str) -> FloatSlot {
+        let inner = Box::new(FloatSlotInner {});
+        let default = SlotDefault::Float32(10.0);
         FloatSlot {
-            slot: new_aref(Slot::new(name, false, Box::new(FloatSlotInner {}))),
+            slot: Rf::new(Slot::new(name, false, inner, default))
         }
     }
 
     pub fn get(self: &Self) -> f32 {
-        let x = (&self.slot as &RefCell<Slot>).borrow();
-        if let SlotConnection::Single(p) = &x.connection {
-            let v = (&p as &RefCell<Provider>).borrow();
-            if let ProviderValue::Float32(x) = v.value {
-                return x;
+        let slot = &self.slot.borrow();
+        if let SlotConnection::Single(p) = &slot.connection {
+            if let ProviderValue::Float32(value) = &p.borrow().value {
+                return *value;
             }
             panic!();
         }
-        if let SlotDefault::Float32(x) = x.default {
-            return x;
+        if let SlotDefault::Float32(value) = slot.default {
+            return value;
         }
         panic!("No default for Float slot");
     }

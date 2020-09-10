@@ -1,26 +1,29 @@
-use crate::node::{ARef, Node, WeakRef, new_aref};
-use crate::values::{Texture, Mesh};
+use crate::node::{Node};
 use crate::slot::{FloatSlot, Slot};
+use crate::rf::Rf;
 
 pub trait RenderNode {
     fn render(self);
 }
+
+pub struct Texture {}
+pub struct Mesh {}
 
 pub enum ProviderValue {
     None,
     Float32(f32),
     Int64(i64),
     Bool(bool),
-    Texture(ARef<Texture>),
-    Mesh(ARef<Mesh>),
-    Render(ARef<dyn RenderNode>),
+    Texture(Rf<Texture>),
+    Mesh(Rf<Mesh>),
+    Render(Rf<dyn RenderNode>),
 }
 
 pub struct Provider {
     // pub owner: WeakRef<Node>,
     pub name: String,
     pub value: ProviderValue,
-    pub connections: Vec<ARef<Slot>>,
+    pub connections: Vec<Rf<Slot>>,
 }
 
 impl Provider {
@@ -34,13 +37,13 @@ impl Provider {
 }
 
 pub struct FloatProvider {
-    pub provider: ARef<Provider>,
+    pub provider: Rf<Provider>,
 }
 
 impl FloatProvider {
     pub fn new(name: &str) -> FloatProvider {
         FloatProvider {
-            provider: new_aref(Provider::new(name, ProviderValue::Float32(0.0))),
+            provider: Rf::new(Provider::new(name, ProviderValue::Float32(0.0))),
         }
     }
 

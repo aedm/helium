@@ -4,33 +4,33 @@ use std::borrow::Borrow;
 use std::ops::Deref;
 use crate::provider::{Provider, FloatProvider};
 use crate::slot::{Slot, FloatSlot, SlotConnection};
-
-pub type ARef<T> = Arc<RefCell<T>>;
-pub type WeakRef<T> = Weak<RefCell<T>>;
-
-pub fn new_aref<T>(t: T) -> ARef<T> {
-    Arc::new(RefCell::new(t))
-}
+use crate::rf::Rf;
 
 pub struct Node {
-    pub slots: Vec<ARef<Slot>>,
-    pub providers: Vec<ARef<Provider>>,
-    pub inner: Box<dyn NodeInner>,
+    pub slots: Vec<Rf<Slot>>,
+    pub providers: Vec<Rf<Provider>>,
+    inner: Box<dyn NodeInner>,
 }
 
 pub trait NodeInner {
-    fn get_slots(self: &Self) -> Vec<ARef<Slot>>;
-    fn get_providers(self: &Self) -> Vec<ARef<Provider>>;
+    fn new() -> Self where Self: Sized;
+    fn get_slots(self: &Self) -> Vec<Rf<Slot>>;
+    fn get_providers(self: &Self) -> Vec<Rf<Provider>>;
     fn run(self: &mut Self);
 }
 
 impl Node {
-    pub fn new(inner: Box<dyn NodeInner>) -> Node {
+    pub fn new<T: 'static + NodeInner>() -> Node {
+        let inner = Box::new(T::new());
         Node {
             slots: inner.get_slots(),
             providers: inner.get_providers(),
             inner,
         }
+    }
+
+    pub fn run(&mut self) {
+        self.inner.run();
     }
 }
 
@@ -39,21 +39,19 @@ pub struct FloatNode {
     pub out: FloatProvider,
 }
 
-impl FloatNode {
-    pub fn new() -> FloatNode {
+impl NodeInner for FloatNode {
+    fn new() -> FloatNode {
         FloatNode {
             a: FloatSlot::new("A"),
             out: FloatProvider::new("Value"),
         }
     }
-}
 
-impl NodeInner for FloatNode {
-    fn get_slots(self: &Self) -> Vec<ARef<Slot>> {
+    fn get_slots(self: &Self) -> Vec<Rf<Slot>> {
         vec![self.a.slot.clone()]
     }
 
-    fn get_providers(self: &Self) -> Vec<ARef<Provider>> {
+    fn get_providers(self: &Self) -> Vec<Rf<Provider>> {
         vec![self.out.provider.clone()]
     }
 
@@ -62,31 +60,30 @@ impl NodeInner for FloatNode {
     }
 }
 
+
 pub struct Adder {
     pub a: FloatSlot,
     pub b: FloatSlot,
     pub sum: FloatProvider,
 }
 
-impl Adder {
-    pub fn new() -> Adder {
+impl NodeInner for Adder {
+    fn new() -> Adder {
         Adder {
             a: FloatSlot::new("A"),
             b: FloatSlot::new("B"),
             sum: FloatProvider::new("Sum"),
         }
     }
-}
 
-impl NodeInner for Adder {
-    fn get_slots(self: &Self) -> Vec<ARef<Slot>> {
+    fn get_slots(self: &Self) -> Vec<Rf<Slot>> {
         vec![
             self.a.slot.clone(),
             self.b.slot.clone()
         ]
     }
 
-    fn get_providers(self: &Self) -> Vec<ARef<Provider>> {
+    fn get_providers(self: &Self) -> Vec<Rf<Provider>> {
         vec![
             self.sum.provider.clone(),
         ]

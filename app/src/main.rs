@@ -1,25 +1,31 @@
 use crate::provider::FloatProvider;
-use crate::node::{new_aref, Adder, FloatNode, Node};
+use crate::node::{Adder, FloatNode, Node};
 use crate::slot::connect_slot;
 use std::cell::RefCell;
+use crate::rf::Rf;
 
 mod node;
 mod provider;
-mod values;
 mod slot;
+mod rf;
 
 fn main() {
-    let f1 = new_aref(Node::new(Box::new(FloatNode::new())));
-    let f2 = new_aref(Node::new(Box::new(FloatNode::new())));
-    let adder = new_aref(Node::new(Box::new(Adder::new())));
+    let f1 = Rf::new(Node::new::<FloatNode>());
+    let f2 = Rf::new(Node::new::<FloatNode>());
+    let adder = Rf::new(Node::new::<Adder>());
+    // let f1 = Rf::new(Node::new(Box::new(FloatNode::new())));
+    // let f2 = Rf::new(Node::new(Box::new(FloatNode::new())));
+    // let adder = Adder::make_node();
 
-    let f1p = &mut *f1.borrow_mut();
-    let f2p = &mut *f2.borrow_mut();
-    let a1s = &mut *adder.borrow_mut();
-    connect_slot(&mut a1s.slots[0], &mut f1p.providers[0]);
-    connect_slot(&mut a1s.slots[0], &mut f2p.providers[0]);
+    let mut f1p = f1.borrow_mut();
+    let mut f2p = f2.borrow_mut();
+    let mut a1s = adder.borrow_mut();
+    connect_slot(&a1s.slots[0], &f1p.providers[0]);
+    connect_slot(&a1s.slots[1], &f2p.providers[0]);
 
-    a1s.inner.run();
+    f1p.run();
+    f2p.run();
+    a1s.run();
 
     println!("Hi");
 }
