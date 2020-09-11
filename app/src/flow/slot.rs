@@ -1,9 +1,9 @@
-use crate::provider::{Provider, ProviderValue};
-use crate::node::{Node};
+use crate::flow::provider::{Provider, ProviderValue};
+use crate::flow::node::{Node};
 use std::borrow::{Borrow, BorrowMut};
 use std::cell::RefCell;
 use std::ops::{Deref, DerefMut};
-use crate::rf::Rf;
+use crate::flow::rf::Rf;
 
 pub enum SlotType {
     Custom,
@@ -54,11 +54,8 @@ impl Slot {
         }
     }
 
-    fn get_single(self: &Self) -> Option<Rf<Provider>> {
-        if let SlotConnection::Single(x) = &self.connection {
-            return Some(x.clone());
-        }
-        None
+    pub fn set_default(&mut self, default: SlotDefault) {
+        self.default = default;
     }
 }
 

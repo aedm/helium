@@ -1,31 +1,30 @@
-use crate::provider::FloatProvider;
-use crate::node::{Adder, FloatNode, Node};
-use crate::slot::connect_slot;
-use std::cell::RefCell;
-use crate::rf::Rf;
+use crate::flow::provider::{FloatProvider, ProviderValue};
+use crate::flow::node::{Node};
+use crate::flow::rf::Rf;
+use crate::flow::slot::{connect_slot, SlotDefault};
+use crate::nodes::sum_node::SumNode;
+use crate::nodes::float_node::FloatNode;
+use std::borrow::BorrowMut;
 
-mod node;
-mod provider;
-mod slot;
-mod rf;
+mod flow;
+mod nodes;
 
 fn main() {
     let f1 = Rf::new(Node::new::<FloatNode>());
     let f2 = Rf::new(Node::new::<FloatNode>());
-    let adder = Rf::new(Node::new::<Adder>());
-    // let f1 = Rf::new(Node::new(Box::new(FloatNode::new())));
-    // let f2 = Rf::new(Node::new(Box::new(FloatNode::new())));
-    // let adder = Adder::make_node();
+    let sum = Rf::new(Node::new::<SumNode>());
 
     let mut f1p = f1.borrow_mut();
     let mut f2p = f2.borrow_mut();
-    let mut a1s = adder.borrow_mut();
+    let mut a1s = sum.borrow_mut();
     connect_slot(&a1s.slots[0], &f1p.providers[0]);
     connect_slot(&a1s.slots[1], &f2p.providers[0]);
+
+    f1p.slots[0].borrow_mut().set_default(SlotDefault::Float32(5.0));
 
     f1p.run();
     f2p.run();
     a1s.run();
 
-    println!("Hi");
+    println!("Result: {:?}", a1s.providers[0].borrow().value);
 }

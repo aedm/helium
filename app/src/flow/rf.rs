@@ -1,6 +1,8 @@
 use std::sync::Arc;
 use std::cell::{RefCell, Ref, RefMut};
 use std::ops::{Deref, DerefMut};
+use std::fmt::{Debug, Formatter};
+use std::fmt;
 
 pub struct Rf<T: ?Sized> {
     reference: Arc<RefCell<T>>,
@@ -28,16 +30,9 @@ impl<T> Rf<T> {
     }
 }
 
-// impl<T> Deref for Rf<T> {
-//     type Target = Ref<'a, T>;
-//
-//     fn deref(&self) -> Ref<'_, T> {
-//         *(self.reference).borrow()
-//     }
-// }
-//
-// impl<T> DerefMut for Rf<T> {
-//     fn deref_mut(&mut self) -> &mut Self::Target {
-//         &mut *(self.reference).borrow_mut()
-//     }
-// }
+impl<T: ?Sized> Debug for Rf<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "Reference of {:?}", std::any::type_name::<T>())
+    }
+}
+

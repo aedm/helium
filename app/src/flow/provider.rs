@@ -1,6 +1,6 @@
-use crate::node::{Node};
-use crate::slot::{FloatSlot, Slot};
-use crate::rf::Rf;
+use crate::flow::node::{Node};
+use crate::flow::slot::{FloatSlot, Slot};
+use crate::flow::rf::Rf;
 
 pub trait RenderNode {
     fn render(self);
@@ -9,6 +9,7 @@ pub trait RenderNode {
 pub struct Texture {}
 pub struct Mesh {}
 
+#[derive(Debug)]
 pub enum ProviderValue {
     None,
     Float32(f32),
