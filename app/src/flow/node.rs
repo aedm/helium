@@ -6,6 +6,8 @@ use crate::flow::provider::{Provider, FloatProvider};
 use crate::flow::slot::{Slot, FloatSlot, SlotConnection};
 use crate::flow::rf::Rf;
 
+pub type NodeRef = Rf<Node>;
+
 pub struct Node {
     pub slots: Vec<Rf<Slot>>,
     pub providers: Vec<Rf<Provider>>,
@@ -20,13 +22,23 @@ pub trait NodeInner {
 }
 
 impl Node {
-    pub fn new<T: 'static + NodeInner>() -> Node {
+    pub fn new<T: 'static + NodeInner>() -> Rf<Node> {
         let inner = Box::new(T::new());
-        Node {
+        let rf = Rf::new(Node {
             slots: inner.get_slots(),
             providers: inner.get_providers(),
             inner,
+        });
+        {
+            let rf_mut = &rf.borrow_mut();
+            for provider in &rf_mut.providers {
+                provider.borrow_mut().owner = rf.downgrade();
+            }
+            for slot in &rf_mut.slots {
+                slot.borrow_mut().owner = rf.downgrade();
+            }
         }
+        rf
     }
 
     pub fn run(&mut self) {

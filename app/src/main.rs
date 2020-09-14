@@ -10,9 +10,9 @@ mod flow;
 mod nodes;
 
 fn main() {
-    let f1 = Rf::new(Node::new::<FloatNode>());
-    let f2 = Rf::new(Node::new::<FloatNode>());
-    let sum = Rf::new(Node::new::<SumNode>());
+    let f1 = Node::new::<FloatNode>();
+    let f2 = Node::new::<FloatNode>();
+    let sum = Node::new::<SumNode>();
 
     let mut f1p = f1.borrow_mut();
     let mut f2p = f2.borrow_mut();

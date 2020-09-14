@@ -1,6 +1,6 @@
 use crate::flow::node::{Node};
 use crate::flow::slot::{FloatSlot, Slot};
-use crate::flow::rf::Rf;
+use crate::flow::rf::{Rf, Weak};
 
 pub trait RenderNode {
     fn render(self);
@@ -21,7 +21,7 @@ pub enum ProviderValue {
 }
 
 pub struct Provider {
-    // pub owner: WeakRef<Node>,
+    pub owner: Weak<Node>,
     pub name: String,
     pub value: ProviderValue,
     pub connections: Vec<Rf<Slot>>,
@@ -30,6 +30,7 @@ pub struct Provider {
 impl Provider {
     fn new(name: &str, value: ProviderValue) -> Provider {
         Provider {
+            owner: Weak::new(),
             name: name.to_string(),
             value,
             connections: vec![],

@@ -3,7 +3,7 @@ use crate::flow::node::{Node};
 use std::borrow::{Borrow, BorrowMut};
 use std::cell::RefCell;
 use std::ops::{Deref, DerefMut};
-use crate::flow::rf::Rf;
+use crate::flow::rf::{Rf, Weak};
 
 pub enum SlotType {
     Custom,
@@ -35,7 +35,7 @@ pub trait SlotInner {
 
 
 pub struct Slot {
-    // pub owner: WeakRef<Node>,
+    pub owner: Weak<Node>,
     name: String,
     pub connection: SlotConnection,
     allow_multiple: bool,
@@ -46,6 +46,7 @@ pub struct Slot {
 impl Slot {
     fn new(name: &str, allow_multiple: bool, inner: Box<dyn SlotInner>, default: SlotDefault) -> Slot {
         Slot {
+            owner: Weak::new(),
             name: name.to_string(),
             connection: SlotConnection::None,
             allow_multiple,
