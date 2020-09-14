@@ -1,9 +1,9 @@
+use crate::flow::node::Node;
 use crate::flow::provider::{FloatProvider, ProviderValue};
-use crate::flow::node::{Node};
 use crate::flow::rf::Rf;
 use crate::flow::slot::{connect_slot, SlotDefault};
-use crate::nodes::sum_node::SumNode;
 use crate::nodes::float_node::FloatNode;
+use crate::nodes::sum_node::SumNode;
 use std::borrow::BorrowMut;
 
 mod flow;
@@ -20,7 +20,9 @@ fn main() {
     connect_slot(&a1s.slots[0], &f1p.providers[0]);
     connect_slot(&a1s.slots[1], &f2p.providers[0]);
 
-    f1p.slots[0].borrow_mut().set_default(SlotDefault::Float32(5.0));
+    f1p.slots[0]
+        .borrow_mut()
+        .set_default(SlotDefault::Float32(5.0));
 
     f1p.run();
     f2p.run();

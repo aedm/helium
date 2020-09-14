@@ -1,10 +1,10 @@
-use std::sync::Arc;
-use std::cell::{RefCell, Ref, RefMut};
-use std::ops::{Deref, DerefMut};
-use std::fmt::{Debug, Formatter};
-use std::{fmt, sync};
+use std::cell::{Ref, RefCell, RefMut};
 use std::cmp::Ordering;
+use std::fmt::{Debug, Formatter};
 use std::hash::{Hash, Hasher};
+use std::ops::{Deref, DerefMut};
+use std::sync::Arc;
+use std::{fmt, sync};
 
 pub struct Rf<T: ?Sized> {
     reference: Arc<RefCell<T>>,
@@ -31,7 +31,7 @@ impl<T> Rf<T> {
 
     pub fn clone(&self) -> Rf<T> {
         Rf {
-            reference: self.reference.clone()
+            reference: self.reference.clone(),
         }
     }
 
@@ -72,6 +72,8 @@ impl<T> Weak<T> {
     pub fn upgrade(&self) -> Option<Rf<T>> {
         if let Some(rf) = self.reference.upgrade() {
             Some(Rf { reference: rf })
-        } else { None }
+        } else {
+            None
+        }
     }
 }

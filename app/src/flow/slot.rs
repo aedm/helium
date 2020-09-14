@@ -1,9 +1,9 @@
+use crate::flow::node::Node;
 use crate::flow::provider::{Provider, ProviderValue};
-use crate::flow::node::{Node};
+use crate::flow::rf::{Rf, Weak};
 use std::borrow::{Borrow, BorrowMut};
 use std::cell::RefCell;
 use std::ops::{Deref, DerefMut};
-use crate::flow::rf::{Rf, Weak};
 
 pub enum SlotType {
     Custom,
@@ -33,7 +33,6 @@ pub trait SlotInner {
     fn get_type(self: &Self) -> SlotType;
 }
 
-
 pub struct Slot {
     pub owner: Weak<Node>,
     name: String,
@@ -44,7 +43,12 @@ pub struct Slot {
 }
 
 impl Slot {
-    fn new(name: &str, allow_multiple: bool, inner: Box<dyn SlotInner>, default: SlotDefault) -> Slot {
+    fn new(
+        name: &str,
+        allow_multiple: bool,
+        inner: Box<dyn SlotInner>,
+        default: SlotDefault,
+    ) -> Slot {
         Slot {
             owner: Weak::new(),
             name: name.to_string(),
@@ -80,7 +84,7 @@ impl FloatSlot {
         let inner = Box::new(FloatSlotInner {});
         let default = SlotDefault::Float32(10.0);
         FloatSlot {
-            slot: Rf::new(Slot::new(name, false, inner, default))
+            slot: Rf::new(Slot::new(name, false, inner, default)),
         }
     }
 
@@ -103,12 +107,14 @@ struct FloatSlotInner {}
 
 impl SlotInner for FloatSlotInner {
     fn can_connect(self: &Self, provider: &Provider) -> bool {
-        if let ProviderValue::Float32(_) = provider.value { true } else { false }
+        if let ProviderValue::Float32(_) = provider.value {
+            true
+        } else {
+            false
+        }
     }
 
     fn get_type(self: &Self) -> SlotType {
         SlotType::Float32
     }
 }
-
-

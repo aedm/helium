@@ -1,8 +1,8 @@
 use crate::flow::node::{Node, NodeRef};
 use crate::flow::rf::Rf;
-use std::collections::HashSet;
-use std::borrow::Borrow;
 use crate::flow::slot::SlotConnection;
+use std::borrow::Borrow;
+use std::collections::HashSet;
 
 pub mod node;
 pub mod provider;
@@ -28,8 +28,7 @@ impl TopologicalOrder {
         self.visited.insert(node_ref.clone());
         for slot_ref in &node_ref.borrow().slots {
             let slot = &slot_ref.borrow();
-            let connection = &slot.borrow().connection;
-            if let SlotConnection::Single(provider_ref) = connection {
+            if let SlotConnection::Single(provider_ref) = &slot.connection {
                 self.visit(&provider_ref.borrow().owner.upgrade().unwrap());
             }
         }
@@ -40,10 +39,10 @@ impl TopologicalOrder {
 #[cfg(test)]
 mod tests {
     use crate::flow::node::Node;
+    use crate::flow::slot::connect_slot;
+    use crate::flow::TopologicalOrder;
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
-    use crate::flow::slot::connect_slot;
-    use crate::flow::{TopologicalOrder};
 
     #[test]
     fn generates_correct_topological_order() {
@@ -52,9 +51,18 @@ mod tests {
         let sum1 = Node::new::<SumNode>();
         let sum2 = Node::new::<SumNode>();
 
-        connect_slot(&sum1.borrow_mut().slots[0], &float1.borrow_mut().providers[0]);
-        connect_slot(&sum1.borrow_mut().slots[1], &float2.borrow_mut().providers[0]);
-        connect_slot(&sum2.borrow_mut().slots[0], &float2.borrow_mut().providers[0]);
+        connect_slot(
+            &sum1.borrow_mut().slots[0],
+            &float1.borrow_mut().providers[0],
+        );
+        connect_slot(
+            &sum1.borrow_mut().slots[1],
+            &float2.borrow_mut().providers[0],
+        );
+        connect_slot(
+            &sum2.borrow_mut().slots[0],
+            &float2.borrow_mut().providers[0],
+        );
         connect_slot(&sum2.borrow_mut().slots[1], &sum1.borrow_mut().providers[0]);
 
         let order = TopologicalOrder::generate(&sum2);

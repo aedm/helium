@@ -1,6 +1,6 @@
-use crate::flow::node::{Node};
-use crate::flow::slot::{FloatSlot, Slot};
+use crate::flow::node::Node;
 use crate::flow::rf::{Rf, Weak};
+use crate::flow::slot::{FloatSlot, Slot};
 
 pub trait RenderNode {
     fn render(self);

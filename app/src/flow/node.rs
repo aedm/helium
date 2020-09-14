@@ -1,10 +1,10 @@
-use std::sync::{Arc, Weak};
-use std::cell::RefCell;
-use std::borrow::Borrow;
-use std::ops::Deref;
-use crate::flow::provider::{Provider, FloatProvider};
-use crate::flow::slot::{Slot, FloatSlot, SlotConnection};
+use crate::flow::provider::{FloatProvider, Provider};
 use crate::flow::rf::Rf;
+use crate::flow::slot::{FloatSlot, Slot, SlotConnection};
+use std::borrow::Borrow;
+use std::cell::RefCell;
+use std::ops::Deref;
+use std::sync::{Arc, Weak};
 
 pub type NodeRef = Rf<Node>;
 
@@ -15,7 +15,9 @@ pub struct Node {
 }
 
 pub trait NodeInner {
-    fn new() -> Self where Self: Sized;
+    fn new() -> Self
+    where
+        Self: Sized;
     fn get_slots(self: &Self) -> Vec<Rf<Slot>>;
     fn get_providers(self: &Self) -> Vec<Rf<Provider>>;
     fn run(self: &mut Self);
