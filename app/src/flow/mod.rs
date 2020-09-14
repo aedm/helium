@@ -1,6 +1,8 @@
 use crate::flow::node::{Node, NodeRef};
 use crate::flow::rf::Rf;
 use std::collections::HashSet;
+use std::borrow::Borrow;
+use crate::flow::slot::SlotConnection;
 
 pub mod node;
 pub mod provider;
@@ -13,7 +15,7 @@ struct TopologicalOrder {
 }
 
 impl TopologicalOrder {
-    pub fn generate_topological_order(node_ref: &NodeRef) -> Vec<NodeRef> {
+    pub fn generate(node_ref: &NodeRef) -> Vec<NodeRef> {
         let mut order = TopologicalOrder {
             visited: HashSet::new(),
             order: Vec::new(),
@@ -24,13 +26,15 @@ impl TopologicalOrder {
 
     fn visit(&mut self, node_ref: &NodeRef) {
         self.visited.insert(node_ref.clone());
-
+        for slot_ref in &node_ref.borrow().slots {
+            let slot = &slot_ref.borrow();
+            let connection = &slot.borrow().connection;
+            if let SlotConnection::Single(provider_ref) = connection {
+                self.visit(&provider_ref.borrow().owner.upgrade().unwrap());
+            }
+        }
         self.order.push(node_ref.clone());
     }
-}
-
-fn generate_topological_order(rf: &NodeRef) -> Vec<Rf<Node>> {
-    vec![]
 }
 
 #[cfg(test)]
@@ -39,7 +43,7 @@ mod tests {
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
     use crate::flow::slot::connect_slot;
-    use crate::flow::generate_topological_order;
+    use crate::flow::{TopologicalOrder};
 
     #[test]
     fn generates_correct_topological_order() {
@@ -53,7 +57,7 @@ mod tests {
         connect_slot(&sum2.borrow_mut().slots[0], &float2.borrow_mut().providers[0]);
         connect_slot(&sum2.borrow_mut().slots[1], &sum1.borrow_mut().providers[0]);
 
-        let order = generate_topological_order(&sum2);
+        let order = TopologicalOrder::generate(&sum2);
 
         let float1_index = order.iter().position(|r| r == &float1).unwrap();
         let float2_index = order.iter().position(|r| r == &float2).unwrap();

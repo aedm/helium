@@ -42,27 +42,21 @@ impl<T> Rf<T> {
     }
 }
 
-impl<T: ?Sized> PartialEq for Rf<T> {
-    fn eq(&self, other: &Self) -> bool {
-        Arc::ptr_eq(&self.reference, &other.reference)
-    }
-}
-
 impl<T: ?Sized> Debug for Rf<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "Reference of {:?}", std::any::type_name::<T>())
     }
 }
 
-// impl<T: ?Sized> Ord for Rf<T> {
-//     fn cmp(&self, other: &Self) -> Ordering {
-//         unimplemented!()
-//     }
-// }
-
 impl<T: ?Sized> Hash for Rf<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.reference.hash(state);
+        self.reference.as_ptr().hash(state);
+    }
+}
+
+impl<T: ?Sized> PartialEq for Rf<T> {
+    fn eq(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.reference, &other.reference)
     }
 }
 
@@ -75,7 +69,7 @@ impl<T> Weak<T> {
         }
     }
 
-    fn upgrade(&self) -> Option<Rf<T>> {
+    pub fn upgrade(&self) -> Option<Rf<T>> {
         if let Some(rf) = self.reference.upgrade() {
             Some(Rf { reference: rf })
         } else { None }
