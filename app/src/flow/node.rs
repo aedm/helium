@@ -1,10 +1,6 @@
-use crate::flow::provider::{FloatProvider, Provider};
+use crate::flow::provider::{Provider};
 use crate::flow::rf::Rf;
-use crate::flow::slot::{FloatSlot, Slot, SlotConnection};
-use std::borrow::Borrow;
-use std::cell::RefCell;
-use std::ops::Deref;
-use std::sync::{Arc, Weak};
+use crate::flow::slot::{Slot};
 
 pub type NodeRef = Rf<Node>;
 

@@ -1,23 +1,11 @@
 use crate::flow::node::Node;
 use crate::flow::rf::{Rf, Weak};
-use crate::flow::slot::{FloatSlot, Slot};
-
-pub trait RenderNode {
-    fn render(self);
-}
-
-pub struct Texture {}
-pub struct Mesh {}
+use crate::flow::slot::{Slot};
 
 #[derive(Debug)]
 pub enum ProviderValue {
-    None,
+    _None,
     Float32(f32),
-    Int64(i64),
-    Bool(bool),
-    Texture(Rf<Texture>),
-    Mesh(Rf<Mesh>),
-    Render(Rf<dyn RenderNode>),
 }
 
 pub struct Provider {
