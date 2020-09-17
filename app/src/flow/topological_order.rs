@@ -1,8 +1,8 @@
-use std::collections::HashSet;
 use crate::flow::node::NodeRef;
 use crate::flow::slot::SlotConnection;
+use std::collections::HashSet;
 
-struct TopologicalOrder {
+pub struct TopologicalOrder {
     visited: HashSet<NodeRef>,
     order: Vec<NodeRef>,
 }
@@ -18,7 +18,9 @@ impl TopologicalOrder {
     }
 
     fn visit(&mut self, node_ref: &NodeRef) {
-        self.visited.insert(node_ref.clone());
+        if !self.visited.insert(node_ref.clone()) {
+            return;
+        }
         for slot_ref in &node_ref.borrow().slots {
             let slot = &slot_ref.borrow();
             if let SlotConnection::Single(provider_ref) = &slot.connection {
@@ -33,9 +35,9 @@ impl TopologicalOrder {
 mod tests {
     use crate::flow::node::Node;
     use crate::flow::slot::connect_slot;
+    use crate::flow::topological_order::TopologicalOrder;
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
-    use crate::flow::topological_order::TopologicalOrder;
 
     #[test]
     fn generates_correct_topological_order() {
@@ -65,6 +67,7 @@ mod tests {
         let sum1_index = order.iter().position(|r| r == &sum1).unwrap();
         let sum2_index = order.iter().position(|r| r == &sum2).unwrap();
 
+        assert_eq!(order.len(), 4);
         assert!(float1_index < sum1_index);
         assert!(float2_index < sum1_index);
         assert!(sum1_index < sum2_index);

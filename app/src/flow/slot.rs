@@ -1,31 +1,21 @@
 use crate::flow::node::Node;
 use crate::flow::provider::{Provider, ProviderValue};
 use crate::flow::rf::{Rf, Weak};
-use std::borrow::{Borrow, BorrowMut};
-use std::cell::RefCell;
-use std::ops::{Deref, DerefMut};
 
 pub enum SlotType {
-    Custom,
+    _Custom,
     Float32,
-    Int64,
-    Bool,
-    Texture,
-    Mesh,
-    Render,
 }
 
 pub enum SlotDefault {
-    None,
+    _None,
     Float32(f32),
-    Int64(i64),
-    Bool(bool),
 }
 
 pub enum SlotConnection {
     None,
     Single(Rf<Provider>),
-    Multi(Vec<Rf<Provider>>),
+    _Multi(Vec<Rf<Provider>>),
 }
 
 pub trait SlotInner {
@@ -35,9 +25,9 @@ pub trait SlotInner {
 
 pub struct Slot {
     pub owner: Weak<Node>,
-    name: String,
+    _name: String,
     pub connection: SlotConnection,
-    allow_multiple: bool,
+    _allow_multiple: bool,
     pub inner: Box<dyn SlotInner>,
     default: SlotDefault,
 }
@@ -51,9 +41,9 @@ impl Slot {
     ) -> Slot {
         Slot {
             owner: Weak::new(),
-            name: name.to_string(),
+            _name: name.to_string(),
             connection: SlotConnection::None,
-            allow_multiple,
+            _allow_multiple: allow_multiple,
             inner,
             default,
         }

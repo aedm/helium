@@ -1,8 +1,6 @@
 use std::cell::{Ref, RefCell, RefMut};
-use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
 use std::hash::{Hash, Hasher};
-use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
 use std::{fmt, sync};
 
