@@ -1,6 +1,6 @@
-use crate::flow::provider::{Provider};
+use crate::flow::provider::Provider;
 use crate::flow::rf::Rf;
-use crate::flow::slot::{Slot};
+use crate::flow::slot::Slot;
 
 pub type NodeRef = Rf<Node>;
 
@@ -20,7 +20,7 @@ pub trait NodeInner {
 }
 
 impl Node {
-    pub fn new<T: 'static + NodeInner>() -> Rf<Node> {
+    pub fn new<T: 'static + NodeInner>() -> NodeRef {
         let inner = Box::new(T::new());
         let rf = Rf::new(Node {
             slots: inner.get_slots(),
