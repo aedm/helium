@@ -1,6 +1,6 @@
-use crate::flow::node::Node;
-use crate::flow::rf::{Rf, Weak};
-use crate::flow::slot::Slot;
+use crate::core::node::Node;
+use crate::core::rf::{Rf, Weak};
+use crate::core::slot::Slot;
 
 #[derive(Debug)]
 pub enum ProviderValue {

@@ -1,5 +1,5 @@
-use crate::flow::node::NodeRef;
-use crate::flow::slot::SlotConnection;
+use crate::core::node::NodeRef;
+use crate::core::slot::SlotConnection;
 use std::collections::HashSet;
 
 pub struct TopologicalOrder {
@@ -33,9 +33,9 @@ impl TopologicalOrder {
 
 #[cfg(test)]
 mod tests {
-    use crate::flow::node::Node;
-    use crate::flow::slot::connect_slot;
-    use crate::flow::topological_order::TopologicalOrder;
+    use crate::core::node::Node;
+    use crate::core::slot::connect_slot;
+    use crate::core::topological_order::TopologicalOrder;
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
 

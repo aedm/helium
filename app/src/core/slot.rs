@@ -1,6 +1,6 @@
-use crate::flow::node::Node;
-use crate::flow::provider::{Provider, ProviderValue};
-use crate::flow::rf::{Rf, Weak};
+use crate::core::node::Node;
+use crate::core::provider::{Provider, ProviderValue};
+use crate::core::rf::{Rf, Weak};
 
 pub enum SlotType {
     _Custom,

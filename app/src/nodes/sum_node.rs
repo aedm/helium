@@ -1,7 +1,7 @@
-use crate::flow::node::NodeInner;
-use crate::flow::provider::{FloatProvider, Provider};
-use crate::flow::rf::Rf;
-use crate::flow::slot::{FloatSlot, Slot};
+use crate::core::node::NodeInner;
+use crate::core::provider::{FloatProvider, Provider};
+use crate::core::rf::Rf;
+use crate::core::slot::{FloatSlot, Slot};
 
 pub struct SumNode {
     pub a: FloatSlot,

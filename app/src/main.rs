@@ -1,11 +1,12 @@
-use crate::flow::node::Node;
-use crate::flow::slot::{connect_slot, SlotDefault};
-use crate::flow::topological_order::TopologicalOrder;
+use crate::core::node::Node;
+use crate::core::slot::{connect_slot, SlotDefault};
+use crate::core::topological_order::TopologicalOrder;
 use crate::nodes::float_node::FloatNode;
 use crate::nodes::sum_node::SumNode;
 
 mod flow;
 mod nodes;
+mod core;
 
 fn main() {
     let f1 = Node::new::<FloatNode>();
