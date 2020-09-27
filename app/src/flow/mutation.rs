@@ -1,21 +1,37 @@
-use crate::core::node::NodeRef;
+use crate::core::core_mutation::CoreMutation;
+use crate::core::node::CoreNodeRef;
+use crate::flow::dom::Dom;
+use crate::flow::flow_node::{FlowNode, FlowNodeRef};
+use std::cell::RefCell;
+use std::rc::Rc;
 
-// Works on the engine graph
-trait Mutation {
-    fn run(&self);
+trait FlowMutation {
+    fn run(&self, dom: &mut Dom) -> Option<Box<dyn CoreMutation>>;
 }
 
-struct MutationSequence {
-    steps: Vec<Box<dyn Mutation>>,
+struct FlowMutationSequence {
+    steps: Vec<Box<dyn FlowMutation>>,
 }
 
-struct CreateNodeMutation {
-    new_node: NodeRef,
+struct CreateNodeFlowMutation {
+    new_node: FlowNodeRef,
 }
 
-impl Mutation for CreateNodeMutation {
-    fn run(&self) {
-        unimplemented!()
+impl FlowMutation for CreateNodeFlowMutation {
+    fn run(&self, dom: &mut Dom) -> Option<Box<dyn CoreMutation>> {
+        dom.add_flow_node(&self.new_node);
+        None
     }
 }
 
+// struct SetSlotConnectionsFlowMutation {
+//     slot: Rc<RefCell<FlowSlot>>,
+//     connection: Option<FlowNodeRef>,
+// }
+//
+// impl FlowMutation for SetSlotConnectionsFlowMutation {
+//     fn run(&self, dom: &mut Dom) -> Option<Box<dyn CoreMutation>> {
+//         // self.node.borrow_mut()
+//         unimplemented!()
+//     }
+// }

@@ -1,26 +1,26 @@
 use crate::core::node::NodeInner;
-use crate::core::provider::{FloatProvider, Provider};
+use crate::core::provider::{CoreProvider, FloatCoreProvider};
 use crate::core::rf::Rf;
-use crate::core::slot::{FloatSlot, Slot};
+use crate::core::slot::{CoreSlot, FloatCoreSlot};
 
 pub struct FloatNode {
-    pub a: FloatSlot,
-    pub out: FloatProvider,
+    pub a: FloatCoreSlot,
+    pub out: FloatCoreProvider,
 }
 
 impl NodeInner for FloatNode {
     fn new() -> FloatNode {
         FloatNode {
-            a: FloatSlot::new("A"),
-            out: FloatProvider::new("Value"),
+            a: FloatCoreSlot::new("A"),
+            out: FloatCoreProvider::new("Value"),
         }
     }
 
-    fn get_slots(self: &Self) -> Vec<Rf<Slot>> {
+    fn get_slots(self: &Self) -> Vec<Rf<CoreSlot>> {
         vec![self.a.slot.clone()]
     }
 
-    fn get_providers(self: &Self) -> Vec<Rf<Provider>> {
+    fn get_providers(self: &Self) -> Vec<Rf<CoreProvider>> {
         vec![self.out.provider.clone()]
     }
 

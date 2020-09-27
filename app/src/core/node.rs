@@ -1,34 +1,33 @@
-use crate::core::provider::Provider;
+use crate::core::provider::CoreProvider;
 use crate::core::rf::Rf;
-use crate::core::slot::Slot;
+use crate::core::slot::CoreSlot;
 use std::sync::atomic::{AtomicU64, Ordering};
 
-pub type NodeRef = Rf<Node>;
+pub type CoreNodeRef = Rf<CoreNode>;
 pub type NodeId = u64;
 
-static NODE_ID_GENERATOR: AtomicU64 = AtomicU64::new(1);
-
-pub struct Node {
-    pub id: NodeId,
-    pub slots: Vec<Rf<Slot>>,
-    pub providers: Vec<Rf<Provider>>,
+pub struct CoreNode {
+    pub slots: Vec<Rf<CoreSlot>>,
+    pub providers: Vec<Rf<CoreProvider>>,
     inner: Box<dyn NodeInner>,
+    pub dependency_list: Vec<CoreNodeRef>,
 }
 
 pub trait NodeInner {
     fn new() -> Self
-        where
-            Self: Sized;
-    fn get_slots(self: &Self) -> Vec<Rf<Slot>>;
-    fn get_providers(self: &Self) -> Vec<Rf<Provider>>;
+    where
+        Self: Sized;
+    fn get_slots(self: &Self) -> Vec<Rf<CoreSlot>>;
+    fn get_providers(self: &Self) -> Vec<Rf<CoreProvider>>;
     fn run(self: &mut Self);
 }
 
-impl Node {
-    pub fn new<T: 'static + NodeInner>() -> NodeRef {
+impl CoreNode {
+    pub fn new<T: 'static + NodeInner>() -> CoreNodeRef {
         let inner = Box::new(T::new());
-        let rf = Rf::new(Node {
-            id: NODE_ID_GENERATOR.fetch_add(1, Ordering::Relaxed),
+        let rf = Rf::new(CoreNode {
+            // id: NODE_ID_GENERATOR.fetch_add(1, Ordering::Relaxed),
+            dependency_list: vec![],
             slots: inner.get_slots(),
             providers: inner.get_providers(),
             inner,
@@ -47,5 +46,12 @@ impl Node {
 
     pub fn run(&mut self) {
         self.inner.run();
+    }
+
+    pub fn run_deps(&mut self) {
+        for dep in &self.dependency_list {
+            dep.borrow_mut().run();
+        }
+        self.run();
     }
 }

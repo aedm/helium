@@ -1,14 +1,14 @@
-use crate::core::node::NodeRef;
-use crate::core::slot::SlotConnection;
+use crate::core::node::CoreNodeRef;
+use crate::core::slot::CoreSlotConnection;
 use std::collections::HashSet;
 
 pub struct TopologicalOrder {
-    visited: HashSet<NodeRef>,
-    order: Vec<NodeRef>,
+    visited: HashSet<CoreNodeRef>,
+    order: Vec<CoreNodeRef>,
 }
 
 impl TopologicalOrder {
-    pub fn generate(node_ref: &NodeRef) -> Vec<NodeRef> {
+    pub fn generate(node_ref: &CoreNodeRef) -> Vec<CoreNodeRef> {
         let mut order = TopologicalOrder {
             visited: HashSet::new(),
             order: Vec::new(),
@@ -17,13 +17,13 @@ impl TopologicalOrder {
         order.order
     }
 
-    fn visit(&mut self, node_ref: &NodeRef) {
+    fn visit(&mut self, node_ref: &CoreNodeRef) {
         if !self.visited.insert(node_ref.clone()) {
             return;
         }
         for slot_ref in &node_ref.borrow().slots {
             let slot = &slot_ref.borrow();
-            if let SlotConnection::Single(provider_ref) = &slot.connection {
+            if let CoreSlotConnection::Single(provider_ref) = &slot.connection {
                 self.visit(&provider_ref.borrow().owner.upgrade().unwrap());
             }
         }
@@ -33,7 +33,7 @@ impl TopologicalOrder {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::node::Node;
+    use crate::core::node::CoreNode;
     use crate::core::slot::connect_slot;
     use crate::core::topological_order::TopologicalOrder;
     use crate::nodes::float_node::FloatNode;
@@ -41,10 +41,10 @@ mod tests {
 
     #[test]
     fn generates_correct_topological_order() {
-        let float1 = Node::new::<FloatNode>();
-        let float2 = Node::new::<FloatNode>();
-        let sum1 = Node::new::<SumNode>();
-        let sum2 = Node::new::<SumNode>();
+        let float1 = CoreNode::new::<FloatNode>();
+        let float2 = CoreNode::new::<FloatNode>();
+        let sum1 = CoreNode::new::<SumNode>();
+        let sum2 = CoreNode::new::<SumNode>();
 
         connect_slot(
             &sum1.borrow_mut().slots[0],

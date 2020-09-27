@@ -1,43 +1,43 @@
-use crate::core::node::Node;
+use crate::core::node::CoreNode;
 use crate::core::rf::{Rf, Weak};
-use crate::core::slot::Slot;
+use crate::core::slot::CoreSlot;
 
 #[derive(Debug)]
-pub enum ProviderValue {
+pub enum CoreProviderValue {
     _None,
     Float32(f32),
 }
 
-pub struct Provider {
-    pub owner: Weak<Node>,
+pub struct CoreProvider {
+    pub owner: Weak<CoreNode>,
     pub name: String,
-    pub value: ProviderValue,
-    pub connections: Vec<Rf<Slot>>,
+    pub provider_value: CoreProviderValue,
+    // pub connections: Vec<Rf<CoreSlot>>,
 }
 
-impl Provider {
-    fn new(name: &str, value: ProviderValue) -> Provider {
-        Provider {
+impl CoreProvider {
+    fn new(name: &str, value: CoreProviderValue) -> CoreProvider {
+        CoreProvider {
             owner: Weak::new(),
             name: name.to_string(),
-            value,
-            connections: vec![],
+            provider_value: value,
+            // connections: vec![],
         }
     }
 }
 
-pub struct FloatProvider {
-    pub provider: Rf<Provider>,
+pub struct FloatCoreProvider {
+    pub provider: Rf<CoreProvider>,
 }
 
-impl FloatProvider {
-    pub fn new(name: &str) -> FloatProvider {
-        FloatProvider {
-            provider: Rf::new(Provider::new(name, ProviderValue::Float32(0.0))),
+impl FloatCoreProvider {
+    pub fn new(name: &str) -> FloatCoreProvider {
+        FloatCoreProvider {
+            provider: Rf::new(CoreProvider::new(name, CoreProviderValue::Float32(0.0))),
         }
     }
 
     pub fn set(self: &mut Self, value: f32) {
-        self.provider.borrow_mut().value = ProviderValue::Float32(value);
+        self.provider.borrow_mut().provider_value = CoreProviderValue::Float32(value);
     }
 }

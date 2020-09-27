@@ -1,5 +1,5 @@
-use crate::core::node::Node;
-use crate::core::provider::{Provider, ProviderValue};
+use crate::core::node::CoreNode;
+use crate::core::provider::{CoreProvider, CoreProviderValue};
 use crate::core::rf::{Rf, Weak};
 
 pub enum SlotType {
@@ -7,100 +7,98 @@ pub enum SlotType {
     Float32,
 }
 
-pub enum SlotDefault {
+pub enum CoreSlotDefault {
     _None,
     Float32(f32),
 }
 
-pub enum SlotConnection {
+pub enum CoreSlotConnection {
     None,
-    Single(Rf<Provider>),
-    _Multi(Vec<Rf<Provider>>),
+    Single(Rf<CoreProvider>),
+    _Multi(Vec<Rf<CoreProvider>>),
 }
 
-pub trait SlotInner {
-    fn can_connect(self: &Self, provider: &Provider) -> bool;
+pub trait CoreSlotInner {
+    fn can_connect(self: &Self, provider: &CoreProvider) -> bool;
     fn get_type(self: &Self) -> SlotType;
 }
 
-pub struct Slot {
-    pub owner: Weak<Node>,
+pub struct CoreSlot {
+    pub owner: Weak<CoreNode>,
     _name: String,
-    pub connection: SlotConnection,
+    pub connection: CoreSlotConnection,
     _allow_multiple: bool,
-    pub inner: Box<dyn SlotInner>,
-    default: SlotDefault,
+    pub inner: Box<dyn CoreSlotInner>,
+    default: CoreSlotDefault,
 }
 
-impl Slot {
+impl CoreSlot {
     fn new(
         name: &str,
         allow_multiple: bool,
-        inner: Box<dyn SlotInner>,
-        default: SlotDefault,
-    ) -> Slot {
-        Slot {
+        inner: Box<dyn CoreSlotInner>,
+        default: CoreSlotDefault,
+    ) -> CoreSlot {
+        CoreSlot {
             owner: Weak::new(),
             _name: name.to_string(),
-            connection: SlotConnection::None,
+            connection: CoreSlotConnection::None,
             _allow_multiple: allow_multiple,
             inner,
             default,
         }
     }
 
-    pub fn set_default(&mut self, default: SlotDefault) {
+    pub fn set_default(&mut self, default: CoreSlotDefault) {
         self.default = default;
     }
 }
 
-pub fn connect_slot(slot: &Rf<Slot>, provider: &Rf<Provider>) {
+pub fn connect_slot(slot: &Rf<CoreSlot>, provider: &Rf<CoreProvider>) {
     let mut provider_mutref = provider.borrow_mut();
     let mut slot_mutref = slot.borrow_mut();
     if !slot_mutref.inner.can_connect(&provider_mutref) {
         panic!("Can't connect");
     }
-
-    slot_mutref.connection = SlotConnection::Single(provider.clone());
-    provider_mutref.connections.push(slot.clone());
+    slot_mutref.connection = CoreSlotConnection::Single(provider.clone());
+    // provider_mutref.connections.push(slot.clone());
 }
 
-pub struct FloatSlot {
-    pub slot: Rf<Slot>,
+pub struct FloatCoreSlot {
+    pub slot: Rf<CoreSlot>,
 }
 
-impl FloatSlot {
-    pub fn new(name: &str) -> FloatSlot {
-        let inner = Box::new(FloatSlotInner {});
-        let default = SlotDefault::Float32(10.0);
-        FloatSlot {
-            slot: Rf::new(Slot::new(name, false, inner, default)),
+impl FloatCoreSlot {
+    pub fn new(name: &str) -> FloatCoreSlot {
+        let inner = Box::new(FloatCoreSlotInner {});
+        let default = CoreSlotDefault::Float32(10.0);
+        FloatCoreSlot {
+            slot: Rf::new(CoreSlot::new(name, false, inner, default)),
         }
     }
 
     pub fn get(self: &Self) -> f32 {
         let slot = &self.slot.borrow();
-        if let SlotConnection::Single(p) = &slot.connection {
-            if let ProviderValue::Float32(value) = &p.borrow().value {
+        if let CoreSlotConnection::Single(p) = &slot.connection {
+            if let CoreProviderValue::Float32(value) = &p.borrow().provider_value {
                 return *value;
             }
             panic!();
         }
-        if let SlotDefault::Float32(value) = slot.default {
+        if let CoreSlotDefault::Float32(value) = slot.default {
             return value;
         }
         panic!("No default for Float slot");
     }
 }
 
-struct FloatSlotInner {}
+struct FloatCoreSlotInner {}
 
-impl SlotInner for FloatSlotInner {
-    fn can_connect(self: &Self, provider: &Provider) -> bool {
-        if let ProviderValue::Float32(_) = provider.value {
-            true
-        } else {
-            false
+impl CoreSlotInner for FloatCoreSlotInner {
+    fn can_connect(self: &Self, provider: &CoreProvider) -> bool {
+        match provider.provider_value {
+            CoreProviderValue::Float32(_) => true,
+            _ => false,
         }
     }
 
