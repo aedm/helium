@@ -1,5 +1,5 @@
 use crate::core::node::CoreNode;
-use crate::core::rf::{Rf, Weak};
+use crate::core::rf::{ACell, Weak};
 use crate::core::slot::CoreSlot;
 
 #[derive(Debug)]
@@ -27,13 +27,13 @@ impl CoreProvider {
 }
 
 pub struct FloatCoreProvider {
-    pub provider: Rf<CoreProvider>,
+    pub provider: ACell<CoreProvider>,
 }
 
 impl FloatCoreProvider {
     pub fn new(name: &str) -> FloatCoreProvider {
         FloatCoreProvider {
-            provider: Rf::new(CoreProvider::new(name, CoreProviderValue::Float32(0.0))),
+            provider: ACell::new(CoreProvider::new(name, CoreProviderValue::Float32(0.0))),
         }
     }
 

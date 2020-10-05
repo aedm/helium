@@ -4,7 +4,7 @@ use std::hash::{Hash, Hasher};
 use std::sync::Arc;
 use std::{fmt, sync};
 
-pub struct Rf<T: ?Sized> {
+pub struct ACell<T: ?Sized> {
     reference: Arc<RefCell<T>>,
 }
 
@@ -12,9 +12,9 @@ pub struct Weak<T: ?Sized> {
     reference: sync::Weak<RefCell<T>>,
 }
 
-impl<T> Rf<T> {
-    pub fn new(t: T) -> Rf<T> {
-        Rf {
+impl<T> ACell<T> {
+    pub fn new(t: T) -> ACell<T> {
+        ACell {
             reference: Arc::new(RefCell::new(t)),
         }
     }
@@ -27,8 +27,8 @@ impl<T> Rf<T> {
         (*self.reference).borrow_mut()
     }
 
-    pub fn clone(&self) -> Rf<T> {
-        Rf {
+    pub fn clone(&self) -> ACell<T> {
+        ACell {
             reference: self.reference.clone(),
         }
     }
@@ -40,25 +40,25 @@ impl<T> Rf<T> {
     }
 }
 
-impl<T: ?Sized> Debug for Rf<T> {
+impl<T: ?Sized> Debug for ACell<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "Reference of {:?}", std::any::type_name::<T>())
     }
 }
 
-impl<T: ?Sized> Hash for Rf<T> {
+impl<T: ?Sized> Hash for ACell<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.reference.as_ptr().hash(state);
     }
 }
 
-impl<T: ?Sized> PartialEq for Rf<T> {
+impl<T: ?Sized> PartialEq for ACell<T> {
     fn eq(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.reference, &other.reference)
     }
 }
 
-impl<T: ?Sized> Eq for Rf<T> {}
+impl<T: ?Sized> Eq for ACell<T> {}
 
 impl<T> Weak<T> {
     pub fn new() -> Weak<T> {
@@ -67,9 +67,9 @@ impl<T> Weak<T> {
         }
     }
 
-    pub fn upgrade(&self) -> Option<Rf<T>> {
+    pub fn upgrade(&self) -> Option<ACell<T>> {
         if let Some(rf) = self.reference.upgrade() {
-            Some(Rf { reference: rf })
+            Some(ACell { reference: rf })
         } else {
             None
         }

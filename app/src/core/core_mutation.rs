@@ -1,5 +1,5 @@
 use crate::core::node::CoreNodeRef;
-use crate::core::rf::Rf;
+use crate::core::rf::ACell;
 use crate::core::slot::{CoreSlot, CoreSlotConnection};
 use std::mem;
 
@@ -13,9 +13,7 @@ pub struct CoreMutationSequence {
 
 impl CoreMutationSequence {
     pub fn new(steps: Vec<Box<dyn CoreMutation>>) -> CoreMutationSequence {
-        CoreMutationSequence {
-            steps,
-        }
+        CoreMutationSequence { steps }
     }
 
     pub fn run(&mut self) {
@@ -26,7 +24,7 @@ impl CoreMutationSequence {
 }
 
 pub struct SetSlotConnectionsCoreMutation {
-    pub slot: Rf<CoreSlot>,
+    pub slot: ACell<CoreSlot>,
     pub connection: CoreSlotConnection,
 }
 

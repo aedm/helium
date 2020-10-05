@@ -1,4 +1,4 @@
-mod dom;
-mod flow;
-mod flow_node;
-mod mutation;
+pub mod dom;
+pub mod flow;
+pub mod flow_node;
+pub mod mutation;

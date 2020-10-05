@@ -1,32 +1,40 @@
 use crate::core::provider::CoreProvider;
-use crate::core::rf::Rf;
+use crate::core::rf::ACell;
 use crate::core::slot::CoreSlot;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::any::{Any, TypeId};
+use std::borrow::Borrow;
 
-pub type CoreNodeRef = Rf<CoreNode>;
+pub type CoreNodeRef = ACell<CoreNode>;
 pub type NodeId = u64;
 
 pub struct CoreNode {
-    pub slots: Vec<Rf<CoreSlot>>,
-    pub providers: Vec<Rf<CoreProvider>>,
-    inner: Box<dyn NodeInner>,
+    pub slots: Vec<ACell<CoreSlot>>,
+    pub providers: Vec<ACell<CoreProvider>>,
+    pub inner: Box<dyn NodeInner>,
     pub dependency_list: Vec<CoreNodeRef>,
+}
+
+pub enum NodeType {
+    _Custom,
+    Float,
+    Sum,
 }
 
 pub trait NodeInner {
     fn new() -> Self
     where
-        Self: Sized;
-    fn get_slots(self: &Self) -> Vec<Rf<CoreSlot>>;
-    fn get_providers(self: &Self) -> Vec<Rf<CoreProvider>>;
-    fn run(self: &mut Self);
+        Self: std::marker::Sized;
+    fn get_slots(&self) -> Vec<ACell<CoreSlot>> { vec![] }
+    fn get_providers(&self) -> Vec<ACell<CoreProvider>> { vec![] }
+    fn run(&mut self) {}
+    fn type_id(&self) -> TypeId;
+    fn as_any(&self) -> &dyn Any;
 }
 
 impl CoreNode {
     pub fn new<T: 'static + NodeInner>() -> CoreNodeRef {
         let inner = Box::new(T::new());
-        let rf = Rf::new(CoreNode {
-            // id: NODE_ID_GENERATOR.fetch_add(1, Ordering::Relaxed),
+        let rf = ACell::new(CoreNode {
             dependency_list: vec![],
             slots: inner.get_slots(),
             providers: inner.get_providers(),
@@ -53,5 +61,9 @@ impl CoreNode {
             dep.borrow_mut().run();
         }
         self.run();
+    }
+
+    pub fn inner_type_id(&self) -> TypeId {
+        (*self.inner).type_id()
     }
 }

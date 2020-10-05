@@ -1,6 +1,6 @@
 use crate::core::node::CoreNode;
 use crate::core::provider::{CoreProvider, CoreProviderValue};
-use crate::core::rf::{Rf, Weak};
+use crate::core::rf::{ACell, Weak};
 
 pub enum SlotType {
     _Custom,
@@ -14,8 +14,8 @@ pub enum CoreSlotDefault {
 
 pub enum CoreSlotConnection {
     None,
-    Single(Rf<CoreProvider>),
-    _Multi(Vec<Rf<CoreProvider>>),
+    Single(ACell<CoreProvider>),
+    _Multi(Vec<ACell<CoreProvider>>),
 }
 
 pub trait CoreSlotInner {
@@ -54,7 +54,7 @@ impl CoreSlot {
     }
 }
 
-pub fn connect_slot(slot: &Rf<CoreSlot>, provider: &Rf<CoreProvider>) {
+pub fn connect_slot(slot: &ACell<CoreSlot>, provider: &ACell<CoreProvider>) {
     let mut provider_mutref = provider.borrow_mut();
     let mut slot_mutref = slot.borrow_mut();
     if !slot_mutref.inner.can_connect(&provider_mutref) {
@@ -65,7 +65,7 @@ pub fn connect_slot(slot: &Rf<CoreSlot>, provider: &Rf<CoreProvider>) {
 }
 
 pub struct FloatCoreSlot {
-    pub slot: Rf<CoreSlot>,
+    pub slot: ACell<CoreSlot>,
 }
 
 impl FloatCoreSlot {
@@ -73,7 +73,7 @@ impl FloatCoreSlot {
         let inner = Box::new(FloatCoreSlotInner {});
         let default = CoreSlotDefault::Float32(10.0);
         FloatCoreSlot {
-            slot: Rf::new(CoreSlot::new(name, false, inner, default)),
+            slot: ACell::new(CoreSlot::new(name, false, inner, default)),
         }
     }
 

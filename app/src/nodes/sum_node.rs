@@ -1,7 +1,8 @@
 use crate::core::node::NodeInner;
 use crate::core::provider::{CoreProvider, FloatCoreProvider};
-use crate::core::rf::Rf;
+use crate::core::rf::ACell;
 use crate::core::slot::{CoreSlot, FloatCoreSlot};
+use std::any::{TypeId, Any};
 
 pub struct SumNode {
     pub a: FloatCoreSlot,
@@ -18,16 +19,24 @@ impl NodeInner for SumNode {
         }
     }
 
-    fn get_slots(self: &Self) -> Vec<Rf<CoreSlot>> {
+    fn get_slots(self: &Self) -> Vec<ACell<CoreSlot>> {
         vec![self.a.slot.clone(), self.b.slot.clone()]
     }
 
-    fn get_providers(self: &Self) -> Vec<Rf<CoreProvider>> {
+    fn get_providers(self: &Self) -> Vec<ACell<CoreProvider>> {
         vec![self.sum.provider.clone()]
     }
 
     fn run(self: &mut Self) {
         let result = self.a.get() + self.b.get();
         self.sum.set(result);
+    }
+
+    fn type_id(&self) -> TypeId {
+        TypeId::of::<SumNode>()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
