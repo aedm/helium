@@ -17,20 +17,21 @@ enum ProviderType {
 pub struct FlowNode {
     pub id: NodeId,
     pub key: String,
-    core_node_ref: CoreNodeRef,
+    pub core_node: CoreNodeRef,
     pub slots: Vec<FlowSlot>,
     pub providers: Vec<FlowProvider>,
 }
 
 pub type FlowNodeRef = Rc<RefCell<FlowNode>>;
 
+#[derive(Clone)]
 pub struct FlowConnection {
-    node: FlowNodeRef,
-    index: usize,
+    pub node: FlowNodeRef,
+    pub index: usize,
 }
 
 pub struct FlowSlot {
-    connections: Vec<FlowConnection>,
+    pub connections: Vec<FlowConnection>,
 }
 
 impl FlowSlot {
@@ -63,7 +64,7 @@ impl FlowNode {
         Rc::new(RefCell::new(FlowNode {
             id: NODE_ID_GENERATOR.fetch_add(1, Ordering::Relaxed),
             key: "".into(),
-            core_node_ref: core_node_ref.clone(),
+            core_node: core_node_ref.clone(),
             slots,
             providers,
         }))

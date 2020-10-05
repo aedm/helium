@@ -8,8 +8,9 @@ use crate::nodes::float_node::FloatNode;
 use crate::nodes::sum_node::SumNode;
 use std::any::TypeId;
 use crate::stillaxis::Stillaxis;
-use crate::flow::flow_node::FlowNode;
-use crate::flow::mutation::CreateNodeFlowMutation;
+use crate::flow::flow_node::{FlowNode, FlowConnection};
+use crate::flow::mutation::{CreateNodeFlowMutation, FlowMutationSequence, SetSlotConnectionsFlowMutation};
+use crate::flow::dom::Dom;
 
 mod core;
 mod flow;
@@ -18,17 +19,31 @@ mod stillaxis;
 
 fn case_3() {
     println!("---- case 3 ----");
-    let mut sa = Stillaxis::new();
+    let mut dom = Dom::new();
 
     let cf1 = CoreNode::new::<FloatNode>();
     let ff1 = FlowNode::from_core_node(&cf1);
-    let m1 = CreateNodeFlowMutation { new_node: ff1.clone() };
+    let m1 = Box::new(CreateNodeFlowMutation { new_node: ff1.clone() });
 
     let cf2 = CoreNode::new::<FloatNode>();
-    let ff2 = FlowNode::from_core_node(&cf1);
-    let m1 = CreateNodeFlowMutation { new_node: ff2.clone() };
+    let ff2 = FlowNode::from_core_node(&cf2);
+    let m2 = Box::new(CreateNodeFlowMutation { new_node: ff2.clone() });
 
+    let csum = CoreNode::new::<SumNode>();
+    let fsum = FlowNode::from_core_node(&csum);
+    let m3 = Box::new(CreateNodeFlowMutation { new_node: fsum.clone() });
 
+    let m4 = Box::new(SetSlotConnectionsFlowMutation {
+        node: fsum.clone(),
+        slot_index: 0,
+        connections: vec![FlowConnection{ node: ff1.clone(), index: 0 }]
+    });
+
+    let mut mutseq = FlowMutationSequence {
+        steps: vec![m1, m2, m3, m4],
+    };
+
+    mutseq.run(&mut dom);
 }
 
 fn case_2() {

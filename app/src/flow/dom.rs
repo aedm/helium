@@ -4,14 +4,12 @@ use std::collections::HashMap;
 
 pub struct Dom {
     flow_nodes: HashMap<NodeId, FlowNodeRef>,
-    // core_nodes: HashMap<NodeId, CoreNodeRef>,
 }
 
 impl Dom {
     pub fn new() -> Dom {
         Dom {
             flow_nodes: Default::default(),
-            // core_nodes: Default::default(),
         }
     }
 
