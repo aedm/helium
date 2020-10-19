@@ -4,13 +4,15 @@ use crate::core::core_mutation::{
 use crate::core::node::CoreNode;
 use crate::core::slot::{connect_slot, CoreSlotConnection, CoreSlotDefault};
 use crate::core::topological_order::TopologicalOrder;
+use crate::flow::dom::Dom;
+use crate::flow::flow_node::{FlowSlotIndex, FlowNode};
+use crate::flow::mutation::{
+    CreateNodeFlowMutation, FlowMutation, SetSlotConnectionsFlowMutation,
+};
 use crate::nodes::float_node::FloatNode;
 use crate::nodes::sum_node::SumNode;
-use std::any::TypeId;
 use crate::stillaxis::Stillaxis;
-use crate::flow::flow_node::{FlowNode, FlowConnection};
-use crate::flow::mutation::{CreateNodeFlowMutation, FlowMutationSequence, SetSlotConnectionsFlowMutation};
-use crate::flow::dom::Dom;
+use std::any::TypeId;
 
 mod core;
 mod flow;
@@ -23,23 +25,32 @@ fn case_3() {
 
     let cf1 = CoreNode::new::<FloatNode>();
     let ff1 = FlowNode::from_core_node(&cf1);
-    let m1 = Box::new(CreateNodeFlowMutation { new_node: ff1.clone() });
+    let m1 = Box::new(CreateNodeFlowMutation {
+        new_node: ff1.clone(),
+    });
 
     let cf2 = CoreNode::new::<FloatNode>();
     let ff2 = FlowNode::from_core_node(&cf2);
-    let m2 = Box::new(CreateNodeFlowMutation { new_node: ff2.clone() });
+    let m2 = Box::new(CreateNodeFlowMutation {
+        new_node: ff2.clone(),
+    });
 
     let csum = CoreNode::new::<SumNode>();
     let fsum = FlowNode::from_core_node(&csum);
-    let m3 = Box::new(CreateNodeFlowMutation { new_node: fsum.clone() });
+    let m3 = Box::new(CreateNodeFlowMutation {
+        new_node: fsum.clone(),
+    });
 
     let m4 = Box::new(SetSlotConnectionsFlowMutation {
         node: fsum.clone(),
         slot_index: 0,
-        connections: vec![FlowConnection{ node: ff1.clone(), index: 0 }]
+        connections: vec![FlowSlotIndex {
+            node: ff1.clone(),
+            slot_index: 0,
+        }],
     });
 
-    let mut mutseq = FlowMutationSequence {
+    let mut mutseq = FlowMutation {
         steps: vec![m1, m2, m3, m4],
     };
 

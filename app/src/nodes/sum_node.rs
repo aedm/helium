@@ -2,7 +2,7 @@ use crate::core::node::NodeInner;
 use crate::core::provider::{CoreProvider, FloatCoreProvider};
 use crate::core::rf::ACell;
 use crate::core::slot::{CoreSlot, FloatCoreSlot};
-use std::any::{TypeId, Any};
+use std::any::{Any, TypeId};
 
 pub struct SumNode {
     pub a: FloatCoreSlot,

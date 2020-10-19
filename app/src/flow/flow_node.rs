@@ -1,11 +1,11 @@
-use crate::core::node::{NodeId, CoreNode, CoreNodeRef};
+use crate::core::node::{CoreNode, CoreNodeRef, NodeId};
+use crate::core::provider::CoreProvider;
+use crate::core::rf::ACell;
+use crate::core::slot::CoreSlot;
+use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
-use crate::core::slot::CoreSlot;
-use crate::core::provider::CoreProvider;
-use std::borrow::Borrow;
-use crate::core::rf::ACell;
 
 static NODE_ID_GENERATOR: AtomicU64 = AtomicU64::new(1);
 
@@ -24,14 +24,8 @@ pub struct FlowNode {
 
 pub type FlowNodeRef = Rc<RefCell<FlowNode>>;
 
-#[derive(Clone)]
-pub struct FlowConnection {
-    pub node: FlowNodeRef,
-    pub index: usize,
-}
-
 pub struct FlowSlot {
-    pub connections: Vec<FlowConnection>,
+    pub connections: Vec<FlowSlotIndex>,
 }
 
 impl FlowSlot {
@@ -43,7 +37,7 @@ impl FlowSlot {
 }
 
 pub struct FlowProvider {
-    connections: Vec<FlowConnection>,
+    connections: Vec<FlowSlotIndex>,
 }
 
 impl FlowProvider {
@@ -54,13 +48,31 @@ impl FlowProvider {
     }
 }
 
+#[derive(Clone)]
+pub struct FlowSlotIndex {
+    pub node: FlowNodeRef,
+    pub slot_index: usize,
+}
+
+#[derive(Clone)]
+pub struct FlowProviderIndex {
+    pub node: FlowNodeRef,
+    pub provider_index: usize,
+}
+
 impl FlowNode {
     pub fn from_core_node(core_node_ref: &CoreNodeRef) -> FlowNodeRef {
         let mut core_node = core_node_ref.borrow_mut();
-        let slots: Vec<_> = core_node.slots.iter()
-            .map(|x| FlowSlot::from_core_slot(&x.borrow())).collect();
-        let providers: Vec<_> = core_node.providers.iter()
-            .map(|x| FlowProvider::from_core_provider(&x.borrow())).collect();
+        let slots: Vec<_> = core_node
+            .slots
+            .iter()
+            .map(|x| FlowSlot::from_core_slot(&x.borrow()))
+            .collect();
+        let providers: Vec<_> = core_node
+            .providers
+            .iter()
+            .map(|x| FlowProvider::from_core_provider(&x.borrow()))
+            .collect();
         Rc::new(RefCell::new(FlowNode {
             id: NODE_ID_GENERATOR.fetch_add(1, Ordering::Relaxed),
             key: "".into(),

@@ -1,5 +1,5 @@
-use crate::core::node::{CoreNodeRef, CoreNode};
-use crate::flow::flow_node::{FlowNodeRef, FlowNode};
+use crate::core::node::{CoreNode, CoreNodeRef};
+use crate::flow::flow_node::{FlowNode, FlowNodeRef};
 use crate::nodes::root_node::CoreRootNode;
 
 pub struct Stillaxis {
@@ -17,4 +17,3 @@ impl Stillaxis {
         }
     }
 }
-

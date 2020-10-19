@@ -1,22 +1,24 @@
 use crate::core::core_mutation::{CoreMutation, SetSlotConnectionsCoreMutation};
 use crate::core::node::CoreNodeRef;
-use crate::flow::dom::Dom;
-use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowSlot, FlowConnection};
-use std::cell::RefCell;
-use std::rc::Rc;
-use std::borrow::BorrowMut;
-use std::mem;
 use crate::core::slot::CoreSlotConnection;
+use crate::flow::dom::Dom;
+use crate::flow::flow_node::{FlowSlotIndex, FlowNode, FlowNodeRef, FlowSlot};
+use std::borrow::BorrowMut;
+use std::cell::RefCell;
+use std::mem;
+use std::rc::Rc;
+use std::collections::HashSet;
 
-pub trait FlowMutation {
+pub trait FlowMutationStep {
     fn run(&self, dom: &mut Dom) -> Option<Box<dyn CoreMutation>>;
 }
 
-pub struct FlowMutationSequence {
-    pub steps: Vec<Box<dyn FlowMutation>>,
+pub struct FlowMutation {
+    pub steps: Vec<Box<dyn FlowMutationStep>>,
+    pub changed_slots: HashSet<FlowSlotIndex>,
 }
 
-impl FlowMutationSequence {
+impl FlowMutation {
     pub fn run(&mut self, dom: &mut Dom) {
         for step in &mut self.steps {
             step.run(dom);
@@ -28,7 +30,7 @@ pub struct CreateNodeFlowMutation {
     pub new_node: FlowNodeRef,
 }
 
-impl FlowMutation for CreateNodeFlowMutation {
+impl FlowMutationStep for CreateNodeFlowMutation {
     fn run(&self, dom: &mut Dom) -> Option<Box<dyn CoreMutation>> {
         dom.add_flow_node(&self.new_node);
         None
@@ -38,19 +40,24 @@ impl FlowMutation for CreateNodeFlowMutation {
 pub struct SetSlotConnectionsFlowMutation {
     pub node: FlowNodeRef,
     pub slot_index: usize,
-    pub connections: Vec<FlowConnection>,
+    pub connections: Vec<FlowSlotIndex>,
 }
 
-impl FlowMutation for SetSlotConnectionsFlowMutation {
+impl FlowMutationStep for SetSlotConnectionsFlowMutation {
     fn run(&self, dom: &mut Dom) -> Option<Box<dyn CoreMutation>> {
         let mut node = (*self.node).borrow_mut();
         node.slots[self.slot_index].connections = self.connections.to_vec();
-        let core_node = node.core_node.borrow();
-        let core_slot = &core_node.slots[self.slot_index];
-        unimplemented!()
-        // Some(Box::new(SetSlotConnectionsCoreMutation{
-        //     slot: core_slot.clone(),
-        //     connection: CoreSlotConnection::None
-        // }))
+        assert_eq!(self.connections.len(), 1);
+        let flow_connection = &self.connections[0];
+        let core_source_node = node.core_node.borrow();
+        let core_source_slot = &core_source_node.slots[self.slot_index];
+        let core_target_provider = flow_connection.node.borrow().core_node.borrow().providers
+            [flow_connection.slot_index]
+            .clone();
+        let core_connection = CoreSlotConnection::Single(core_target_provider);
+        Some(Box::new(SetSlotConnectionsCoreMutation {
+            slot: core_source_slot.clone(),
+            connection: core_connection,
+        }))
     }
 }

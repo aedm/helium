@@ -24,8 +24,12 @@ pub trait NodeInner {
     fn new() -> Self
     where
         Self: std::marker::Sized;
-    fn get_slots(&self) -> Vec<ACell<CoreSlot>> { vec![] }
-    fn get_providers(&self) -> Vec<ACell<CoreProvider>> { vec![] }
+    fn get_slots(&self) -> Vec<ACell<CoreSlot>> {
+        vec![]
+    }
+    fn get_providers(&self) -> Vec<ACell<CoreProvider>> {
+        vec![]
+    }
     fn run(&mut self) {}
     fn type_id(&self) -> TypeId;
     fn as_any(&self) -> &dyn Any;
