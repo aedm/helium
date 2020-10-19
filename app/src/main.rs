@@ -50,9 +50,7 @@ fn case_3() {
         }],
     });
 
-    let mut mutseq = FlowMutation {
-        steps: vec![m1, m2, m3, m4],
-    };
+    let mut mutseq = FlowMutation::new(vec![m1, m2, m3, m4]);
 
     mutseq.run(&mut dom);
 }
