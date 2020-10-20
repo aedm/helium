@@ -12,12 +12,6 @@ pub enum CoreSlotDefault {
     Float32(f32),
 }
 
-pub enum CoreSlotConnection {
-    None,
-    Single(ACell<CoreProvider>),
-    _Multi(Vec<ACell<CoreProvider>>),
-}
-
 pub trait CoreSlotInner {
     fn can_connect(self: &Self, provider: &CoreProvider) -> bool;
     fn get_type(self: &Self) -> SlotType;
@@ -26,7 +20,7 @@ pub trait CoreSlotInner {
 pub struct CoreSlot {
     pub owner: Weak<CoreNode>,
     _name: String,
-    pub connection: CoreSlotConnection,
+    pub connection: Vec<ACell<CoreProvider>>,
     _allow_multiple: bool,
     pub inner: Box<dyn CoreSlotInner>,
     default: CoreSlotDefault,
@@ -42,7 +36,7 @@ impl CoreSlot {
         CoreSlot {
             owner: Weak::new(),
             _name: name.to_string(),
-            connection: CoreSlotConnection::None,
+            connection: vec![],
             _allow_multiple: allow_multiple,
             inner,
             default,
@@ -60,8 +54,7 @@ pub fn connect_slot(slot: &ACell<CoreSlot>, provider: &ACell<CoreProvider>) {
     if !slot_mutref.inner.can_connect(&provider_mutref) {
         panic!("Can't connect");
     }
-    slot_mutref.connection = CoreSlotConnection::Single(provider.clone());
-    // provider_mutref.connections.push(slot.clone());
+    slot_mutref.connection = vec![provider.clone()];
 }
 
 pub struct FloatCoreSlot {
@@ -79,16 +72,21 @@ impl FloatCoreSlot {
 
     pub fn get(self: &Self) -> f32 {
         let slot = &self.slot.borrow();
-        if let CoreSlotConnection::Single(p) = &slot.connection {
-            if let CoreProviderValue::Float32(value) = &p.borrow().provider_value {
-                return *value;
+        match slot.connection.len() {
+            0 => {
+                if let CoreSlotDefault::Float32(value) = slot.default {
+                    return value;
+                }
+                panic!("No default for Float slot");
             }
-            panic!();
+            1 => {
+                if let CoreProviderValue::Float32(value) = &p.borrow().provider_value {
+                    return *value;
+                }
+                panic!();
+            }
+            _ => panic!("No default for Float slot")
         }
-        if let CoreSlotDefault::Float32(value) = slot.default {
-            return value;
-        }
-        panic!("No default for Float slot");
     }
 }
 

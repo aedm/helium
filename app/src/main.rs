@@ -2,7 +2,7 @@ use crate::core::core_mutation::{
     CoreMutationSequence, SetNodeDependencyListCoreMutation, SetSlotConnectionsCoreMutation,
 };
 use crate::core::node::CoreNode;
-use crate::core::slot::{connect_slot, CoreSlotConnection, CoreSlotDefault};
+use crate::core::slot::{connect_slot, CoreSlotDefault};
 use crate::core::topological_order::TopologicalOrder;
 use crate::flow::dom::Dom;
 use crate::flow::flow_node::{FlowSlotIndex, FlowNode};

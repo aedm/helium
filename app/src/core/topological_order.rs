@@ -1,5 +1,4 @@
 use crate::core::node::CoreNodeRef;
-use crate::core::slot::CoreSlotConnection;
 use std::collections::HashSet;
 
 pub struct TopologicalOrder {
@@ -23,7 +22,7 @@ impl TopologicalOrder {
         }
         for slot_ref in &node_ref.borrow().slots {
             let slot = &slot_ref.borrow();
-            if let CoreSlotConnection::Single(provider_ref) = &slot.connection {
+            for provider_ref in &slot.connection {
                 self.visit(&provider_ref.borrow().owner.upgrade().unwrap());
             }
         }

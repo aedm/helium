@@ -1,6 +1,5 @@
 use crate::core::core_mutation::{CoreMutation, SetSlotConnectionsCoreMutation};
 use crate::core::node::CoreNodeRef;
-use crate::core::slot::CoreSlotConnection;
 use crate::flow::dom::Dom;
 use crate::flow::flow_node::{FlowSlotIndex, FlowNode, FlowNodeRef, FlowSlot};
 use std::borrow::BorrowMut;

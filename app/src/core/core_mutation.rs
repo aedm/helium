@@ -1,6 +1,6 @@
 use crate::core::node::CoreNodeRef;
 use crate::core::rf::ACell;
-use crate::core::slot::{CoreSlot, CoreSlotConnection};
+use crate::core::slot::{CoreSlot};
 use std::mem;
 
 pub trait CoreMutation {
