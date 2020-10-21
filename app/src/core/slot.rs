@@ -46,6 +46,14 @@ impl CoreSlot {
     pub fn set_default(&mut self, default: CoreSlotDefault) {
         self.default = default;
     }
+
+    pub fn get_single_provider(&self) -> Option<&ACell<CoreProvider>> {
+        match self.connection.len() {
+            0 => None,
+            1 => Some(&self.connection[0]),
+            _ => panic!("'get_single_provider' called, multiple providers connected.")
+        }
+    }
 }
 
 pub fn connect_slot(slot: &ACell<CoreSlot>, provider: &ACell<CoreProvider>) {
@@ -72,21 +80,16 @@ impl FloatCoreSlot {
 
     pub fn get(self: &Self) -> f32 {
         let slot = &self.slot.borrow();
-        match slot.connection.len() {
-            0 => {
-                if let CoreSlotDefault::Float32(value) = slot.default {
-                    return value;
-                }
-                panic!("No default for Float slot");
+        if let Some(provider) = slot.get_single_provider() {
+            if let CoreProviderValue::Float32(value) = &provider.borrow().provider_value {
+                return *value;
             }
-            1 => {
-                if let CoreProviderValue::Float32(value) = &p.borrow().provider_value {
-                    return *value;
-                }
-                panic!();
-            }
-            _ => panic!("No default for Float slot")
+            panic!("Float slot connected to a non-float provider");
         }
+        if let CoreSlotDefault::Float32(value) = slot.default {
+            return value;
+        }
+        panic!("Float slot's default value is not a float.");
     }
 }
 

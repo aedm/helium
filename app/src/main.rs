@@ -1,14 +1,12 @@
 use crate::core::core_mutation::{
     CoreMutationSequence, SetNodeDependencyListCoreMutation, SetSlotConnectionsCoreMutation,
 };
-use crate::core::node::CoreNode;
+use crate::core::node::{CoreNode, CoreProviderIndex};
 use crate::core::slot::{connect_slot, CoreSlotDefault};
 use crate::core::topological_order::TopologicalOrder;
 use crate::flow::dom::Dom;
-use crate::flow::flow_node::{FlowSlotIndex, FlowNode};
-use crate::flow::mutation::{
-    CreateNodeFlowMutation, FlowMutation, SetSlotConnectionsFlowMutation,
-};
+use crate::flow::flow_node::{FlowNode, FlowSlotIndex};
+use crate::flow::mutation::{CreateNodeFlowMutation, FlowMutation, SetSlotConnectionsFlowMutation};
 use crate::nodes::float_node::FloatNode;
 use crate::nodes::sum_node::SumNode;
 use crate::stillaxis::Stillaxis;
@@ -42,8 +40,10 @@ fn case_3() {
     });
 
     let m4 = Box::new(SetSlotConnectionsFlowMutation {
-        node: fsum.clone(),
-        slot_index: 0,
+        node_slot: FlowSlotIndex {
+            node: fsum.clone(),
+            slot_index: 0,
+        },
         connections: vec![FlowSlotIndex {
             node: ff1.clone(),
             slot_index: 0,
@@ -63,11 +63,13 @@ fn case_2() {
 
     let conn_1 = Box::new(SetSlotConnectionsCoreMutation {
         slot: sum.borrow().slots[0].clone(),
-        connection: CoreSlotConnection::Single(f1.borrow().providers[0].clone()),
+        connection: vec![CoreProviderIndex { node: f1.clone(), provider_index: 0 }],
+        swap_vector: Vec::with_capacity(1),
     });
     let conn_2 = Box::new(SetSlotConnectionsCoreMutation {
         slot: sum.borrow().slots[1].clone(),
-        connection: CoreSlotConnection::Single(f2.borrow().providers[0].clone()),
+        connection: vec![CoreProviderIndex { node: f2.clone(), provider_index: 0 }],
+        swap_vector: Vec::with_capacity(1),
     });
     let dep = Box::new(SetNodeDependencyListCoreMutation {
         node: sum.clone(),
