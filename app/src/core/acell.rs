@@ -8,7 +8,7 @@ pub struct ACell<T: ?Sized> {
     reference: Arc<RefCell<T>>,
 }
 
-pub struct Weak<T: ?Sized> {
+pub struct AWeak<T: ?Sized> {
     reference: sync::Weak<RefCell<T>>,
 }
 
@@ -33,8 +33,8 @@ impl<T> ACell<T> {
         }
     }
 
-    pub fn downgrade(&self) -> Weak<T> {
-        Weak {
+    pub fn downgrade(&self) -> AWeak<T> {
+        AWeak {
             reference: Arc::downgrade(&self.reference),
         }
     }
@@ -60,9 +60,9 @@ impl<T: ?Sized> PartialEq for ACell<T> {
 
 impl<T: ?Sized> Eq for ACell<T> {}
 
-impl<T> Weak<T> {
-    pub fn new() -> Weak<T> {
-        Weak {
+impl<T> AWeak<T> {
+    pub fn new() -> AWeak<T> {
+        AWeak {
             reference: sync::Weak::new(),
         }
     }

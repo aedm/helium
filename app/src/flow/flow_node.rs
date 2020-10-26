@@ -1,11 +1,15 @@
 use crate::core::node::{CoreNode, CoreNodeRef, NodeId};
 use crate::core::provider::CoreProvider;
-use crate::core::rf::ACell;
+use crate::core::acell::ACell;
 use crate::core::slot::CoreSlot;
 use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
+use std::fmt::{Debug, Formatter, Write};
+use std::fmt;
+use std::hash::{Hash, Hasher};
+use crate::core::rcell::RCell;
 
 static NODE_ID_GENERATOR: AtomicU64 = AtomicU64::new(1);
 
@@ -22,7 +26,7 @@ pub struct FlowNode {
     pub providers: Vec<FlowProvider>,
 }
 
-pub type FlowNodeRef = Rc<RefCell<FlowNode>>;
+pub type FlowNodeRef = RCell<FlowNode>;
 
 pub struct FlowSlot {
     pub connections: Vec<FlowSlotIndex>,
@@ -48,7 +52,7 @@ impl FlowProvider {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct FlowSlotIndex {
     pub node: FlowNodeRef,
     pub slot_index: usize,
@@ -73,12 +77,18 @@ impl FlowNode {
             .iter()
             .map(|x| FlowProvider::from_core_provider(&x.borrow()))
             .collect();
-        Rc::new(RefCell::new(FlowNode {
+        RCell::new(FlowNode {
             id: NODE_ID_GENERATOR.fetch_add(1, Ordering::Relaxed),
             key: "".into(),
             core_node: core_node_ref.clone(),
             slots,
             providers,
-        }))
+        })
+    }
+}
+
+impl Debug for FlowNode {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.write_str(&format!("{}", self.id))
     }
 }

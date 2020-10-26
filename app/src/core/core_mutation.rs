@@ -1,5 +1,5 @@
 use crate::core::node::{CoreNodeRef, CoreProviderIndex, CoreSlotIndex};
-use crate::core::rf::ACell;
+use crate::core::acell::ACell;
 use crate::core::slot::CoreSlot;
 use std::mem;
 use crate::core::provider::CoreProvider;

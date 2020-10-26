@@ -1,5 +1,5 @@
 use crate::core::node::CoreNode;
-use crate::core::rf::{ACell, Weak};
+use crate::core::acell::{ACell, AWeak};
 use crate::core::slot::CoreSlot;
 
 #[derive(Debug)]
@@ -9,7 +9,7 @@ pub enum CoreProviderValue {
 }
 
 pub struct CoreProvider {
-    pub owner: Weak<CoreNode>,
+    pub owner: AWeak<CoreNode>,
     pub name: String,
     pub provider_value: CoreProviderValue,
     // pub connections: Vec<Rf<CoreSlot>>,
@@ -18,7 +18,7 @@ pub struct CoreProvider {
 impl CoreProvider {
     fn new(name: &str, value: CoreProviderValue) -> CoreProvider {
         CoreProvider {
-            owner: Weak::new(),
+            owner: AWeak::new(),
             name: name.to_string(),
             provider_value: value,
             // connections: vec![],

@@ -10,7 +10,7 @@ pub struct SetSlotConnectionsFlowMutation {
 impl FlowMutationStep for SetSlotConnectionsFlowMutation {
     fn run(&self, dom: &mut Dom) -> FlowMutationStepResult {
         // Change shadow DOM
-        let mut node = (*self.node_slot.node).borrow_mut();
+        let mut node = self.node_slot.node.borrow_mut();
         node.slots[self.node_slot.slot_index].connections = self.connections.to_vec();
 
         // Generate core mutation

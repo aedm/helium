@@ -1,5 +1,5 @@
 use crate::core::provider::CoreProvider;
-use crate::core::rf::ACell;
+use crate::core::acell::ACell;
 use crate::core::slot::CoreSlot;
 use std::any::{Any, TypeId};
 use std::borrow::Borrow;
