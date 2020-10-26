@@ -26,6 +26,11 @@ pub struct CoreProviderIndex {
     pub provider_index: usize,
 }
 
+pub struct CoreSlotIndex {
+    pub node: CoreNodeRef,
+    pub slot_index: usize,
+}
+
 pub trait NodeInner {
     fn new() -> Self
     where

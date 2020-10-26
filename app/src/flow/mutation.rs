@@ -1,15 +1,16 @@
-use crate::core::core_mutation::{CoreMutation, SetSlotConnectionsCoreMutation};
-use crate::core::node::CoreNodeRef;
+use crate::core::core_mutation::{CoreMutation, SetSlotConnectionsCoreMutation, CoreMutationSequence};
+use crate::core::node::{CoreNodeRef, CoreSlotIndex, CoreProviderIndex};
 use crate::flow::dom::Dom;
 use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowSlot, FlowSlotIndex};
-use std::borrow::BorrowMut;
+use std::borrow::{BorrowMut, Borrow};
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::mem;
 use std::rc::Rc;
+use std::ops::Deref;
 
 pub struct FlowMutationStepResult {
-    changed_slots: Vec<FlowSlotIndex>,
+    pub changed_slots: Vec<FlowSlotIndex>,
 }
 
 pub trait FlowMutationStep {
@@ -29,40 +30,34 @@ impl FlowMutation {
         }
     }
 
-    pub fn run(&mut self, dom: &mut Dom) {
+    pub fn run(&mut self, dom: &mut Dom) -> CoreMutationSequence {
         for step in &mut self.steps {
             step.run(dom);
         }
+        self.create_core_mutations()
     }
-}
 
-pub struct CreateNodeFlowMutation {
-    pub new_node: FlowNodeRef,
-}
-
-impl FlowMutationStep for CreateNodeFlowMutation {
-    fn run(&self, dom: &mut Dom) -> FlowMutationStepResult {
-        dom.add_flow_node(&self.new_node);
-        FlowMutationStepResult {
-            changed_slots: vec![],
+    fn create_core_mutations(&self) -> CoreMutationSequence {
+        let mut steps = Vec::<Box<dyn CoreMutation>>::new();
+        for flow_slot_index in &self.changed_slots {
+            let flow_slot = &(*flow_slot_index.node).borrow().slots[flow_slot_index.slot_index];
+            let connection: Vec<_> = flow_slot.connections.iter()
+                .map(|x| CoreProviderIndex {
+                    node: (*x.node).borrow().core_node.clone(),
+                    provider_index: x.slot_index })
+                .collect();
+            let core_mutation = SetSlotConnectionsCoreMutation {
+                slot: CoreSlotIndex {
+                    node: flow_slot_index.node.borrow().core_node.clone(),
+                    slot_index: flow_slot_index.slot_index,
+                },
+                connection,
+                swap_vector: Vec::with_capacity(connection.len()),
+            };
+            steps.push(Box::new(core_mutation));
         }
+        CoreMutationSequence { steps }
     }
 }
 
-pub struct SetSlotConnectionsFlowMutation {
-    pub node_slot: FlowSlotIndex,
-    pub connections: Vec<FlowSlotIndex>,
-}
 
-impl FlowMutationStep for SetSlotConnectionsFlowMutation {
-    fn run(&self, dom: &mut Dom) -> FlowMutationStepResult {
-        // Change shadow DOM
-        let mut node = (*self.node_slot.node).borrow_mut();
-        node.slots[self.node_slot.slot_index].connections = self.connections.to_vec();
-
-        // Generate core mutation
-        FlowMutationStepResult {
-            changed_slots: vec![self.node_slot.clone()],
-        }
-    }
-}
