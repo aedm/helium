@@ -56,15 +56,6 @@ impl CoreSlot {
     }
 }
 
-pub fn connect_slot(slot: &ACell<CoreSlot>, provider: &ACell<CoreProvider>) {
-    let mut provider_mutref = provider.borrow_mut();
-    let mut slot_mutref = slot.borrow_mut();
-    if !slot_mutref.inner.can_connect(&provider_mutref) {
-        panic!("Can't connect");
-    }
-    slot_mutref.connection = vec![provider.clone()];
-}
-
 pub struct FloatCoreSlot {
     pub slot: ACell<CoreSlot>,
 }

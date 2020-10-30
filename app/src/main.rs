@@ -2,8 +2,8 @@ use crate::core::core_mutation::{
     CoreMutationSequence, SetNodeDependencyListCoreMutation, SetSlotConnectionsCoreMutation,
 };
 use crate::core::node::{CoreNode, CoreProviderIndex, CoreSlotIndex};
-use crate::core::slot::{connect_slot, CoreSlotDefault};
-use crate::core::topological_order::TopologicalOrder;
+use crate::core::slot::{CoreSlotDefault};
+use flow::topological_order::TopologicalOrder;
 use crate::flow::dom::Dom;
 use crate::flow::flow_node::{FlowNode, FlowSlotIndex};
 use crate::flow::mutation::{FlowMutation, FlowMutationStepResult};
@@ -69,6 +69,8 @@ fn case_3() {
     let mut core_mutation = mutseq.run(&mut dom);
     core_mutation.run();
 
+    csum.borrow_mut().run_deps();
+
     println!("{:?}", csum.borrow().providers[0].borrow().provider_value);
 }
 
@@ -118,31 +120,7 @@ fn case_2() {
     }
 }
 
-fn case_1() {
-    println!("---- case 1 ----");
-    let f1 = CoreNode::new::<FloatNode>();
-    let f2 = CoreNode::new::<FloatNode>();
-    let sum = CoreNode::new::<SumNode>();
-
-    connect_slot(&sum.borrow_mut().slots[0], &f1.borrow_mut().providers[0]);
-    connect_slot(&sum.borrow_mut().slots[1], &f2.borrow_mut().providers[0]);
-    f1.borrow_mut().slots[0]
-        .borrow_mut()
-        .set_default(CoreSlotDefault::Float32(5.0));
-
-    let nodes = TopologicalOrder::generate(&sum);
-    for node in &nodes {
-        node.borrow_mut().run();
-    }
-
-    println!(
-        "Result: {:?}",
-        sum.borrow().providers[0].borrow().provider_value
-    );
-}
-
 fn main() {
     case_3();
-    case_1();
     case_2();
 }
