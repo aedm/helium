@@ -1,14 +1,13 @@
-use crate::flow::node::NodeRef;
-use crate::flow::slot::SlotConnection;
+use crate::flow::flow_node::FlowNodeRef;
 use std::collections::HashSet;
 
 pub struct TopologicalOrder {
-    visited: HashSet<NodeRef>,
-    order: Vec<NodeRef>,
+    visited: HashSet<FlowNodeRef>,
+    order: Vec<FlowNodeRef>,
 }
 
 impl TopologicalOrder {
-    pub fn generate(node_ref: &NodeRef) -> Vec<NodeRef> {
+    pub fn generate(node_ref: &FlowNodeRef) -> Vec<FlowNodeRef> {
         let mut order = TopologicalOrder {
             visited: HashSet::new(),
             order: Vec::new(),
@@ -17,14 +16,13 @@ impl TopologicalOrder {
         order.order
     }
 
-    fn visit(&mut self, node_ref: &NodeRef) {
+    fn visit(&mut self, node_ref: &FlowNodeRef) {
         if !self.visited.insert(node_ref.clone()) {
             return;
         }
-        for slot_ref in &node_ref.borrow().slots {
-            let slot = &slot_ref.borrow();
-            if let SlotConnection::Single(provider_ref) = &slot.connection {
-                self.visit(&provider_ref.borrow().owner.upgrade().unwrap());
+        for slot in &node_ref.borrow().slots {
+            for provider_ref in &slot.connections {
+                self.visit(&provider_ref.node);
             }
         }
         self.order.push(node_ref.clone());
@@ -33,39 +31,48 @@ impl TopologicalOrder {
 
 #[cfg(test)]
 mod tests {
-    use crate::flow::node::Node;
-    use crate::flow::slot::connect_slot;
+    use crate::core::node::CoreNode;
+    use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowProviderIndex, FlowSlotIndex};
     use crate::flow::topological_order::TopologicalOrder;
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
 
+    fn connect(
+        slot_node: &FlowNodeRef,
+        slot_index: usize,
+        provider_node: &FlowNodeRef,
+        provider_index: usize,
+    ) {
+        slot_node.borrow_mut().slots[slot_index].connections = vec![FlowSlotIndex {
+            node: provider_node.clone(),
+            slot_index: provider_index,
+        }];
+    }
+
     #[test]
     fn generates_correct_topological_order() {
-        let float1 = Node::new::<FloatNode>();
-        let float2 = Node::new::<FloatNode>();
-        let sum1 = Node::new::<SumNode>();
-        let sum2 = Node::new::<SumNode>();
+        let float1 = CoreNode::new::<FloatNode>();
+        let float2 = CoreNode::new::<FloatNode>();
+        let sum1 = CoreNode::new::<SumNode>();
+        let sum2 = CoreNode::new::<SumNode>();
 
-        connect_slot(
-            &sum1.borrow_mut().slots[0],
-            &float1.borrow_mut().providers[0],
-        );
-        connect_slot(
-            &sum1.borrow_mut().slots[1],
-            &float2.borrow_mut().providers[0],
-        );
-        connect_slot(
-            &sum2.borrow_mut().slots[0],
-            &float2.borrow_mut().providers[0],
-        );
-        connect_slot(&sum2.borrow_mut().slots[1], &sum1.borrow_mut().providers[0]);
+        let core_nodes = vec![&float1, &float2, &sum1, &sum2];
+        let flow_nodes: Vec<_> = core_nodes
+            .iter()
+            .map(|x| FlowNode::from_core_node(*x))
+            .collect();
 
-        let order = TopologicalOrder::generate(&sum2);
+        connect(&flow_nodes[2], 0, &flow_nodes[0], 0);
+        connect(&flow_nodes[2], 1, &flow_nodes[1], 0);
+        connect(&flow_nodes[3], 0, &flow_nodes[0], 0);
+        connect(&flow_nodes[3], 1, &flow_nodes[2], 0);
 
-        let float1_index = order.iter().position(|r| r == &float1).unwrap();
-        let float2_index = order.iter().position(|r| r == &float2).unwrap();
-        let sum1_index = order.iter().position(|r| r == &sum1).unwrap();
-        let sum2_index = order.iter().position(|r| r == &sum2).unwrap();
+        let order = TopologicalOrder::generate(&flow_nodes[3]);
+
+        let float1_index = order.iter().position(|r| r == &flow_nodes[0]).unwrap();
+        let float2_index = order.iter().position(|r| r == &flow_nodes[1]).unwrap();
+        let sum1_index = order.iter().position(|r| r == &flow_nodes[2]).unwrap();
+        let sum2_index = order.iter().position(|r| r == &flow_nodes[3]).unwrap();
 
         assert_eq!(order.len(), 4);
         assert!(float1_index < sum1_index);

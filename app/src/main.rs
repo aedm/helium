@@ -1,27 +1,40 @@
-use crate::flow::node::Node;
-use crate::flow::slot::{connect_slot, SlotDefault};
-use crate::flow::topological_order::TopologicalOrder;
+use crate::core::node::CoreNode;
+use crate::flow::dom::Dom;
+use crate::flow::flow_node::FlowNode;
+use crate::flow::mutation::FlowMutation;
+use crate::flow::mutation_create_node::CreateNodeFlowMutation;
+use crate::flow::mutation_set_connections::SetSlotConnectionsFlowMutation;
 use crate::nodes::float_node::FloatNode;
 use crate::nodes::sum_node::SumNode;
 
+mod core;
 mod flow;
 mod nodes;
+mod stillaxis;
 
 fn main() {
-    let f1 = Node::new::<FloatNode>();
-    let f2 = Node::new::<FloatNode>();
-    let sum = Node::new::<SumNode>();
+    let mut dom = Dom::new();
 
-    connect_slot(&sum.borrow_mut().slots[0], &f1.borrow_mut().providers[0]);
-    connect_slot(&sum.borrow_mut().slots[1], &f2.borrow_mut().providers[0]);
-    f1.borrow_mut().slots[0]
-        .borrow_mut()
-        .set_default(SlotDefault::Float32(5.0));
+    let cf1 = CoreNode::new::<FloatNode>();
+    let cf2 = CoreNode::new::<FloatNode>();
+    let csum = CoreNode::new::<SumNode>();
 
-    let nodes = TopologicalOrder::generate(&sum);
-    for node in &nodes {
-        node.borrow_mut().run();
-    }
+    let ff1 = FlowNode::from_core_node(&cf1);
+    let ff2 = FlowNode::from_core_node(&cf2);
+    let fsum = FlowNode::from_core_node(&csum);
 
-    println!("Result: {:?}", sum.borrow().providers[0].borrow().value);
+    let mut flow_mutation = FlowMutation::new(vec![
+        CreateNodeFlowMutation::new(&ff1),
+        CreateNodeFlowMutation::new(&ff2),
+        CreateNodeFlowMutation::new(&fsum),
+        SetSlotConnectionsFlowMutation::new_single(&fsum, 0, &ff1, 0),
+        SetSlotConnectionsFlowMutation::new_single(&fsum, 1, &ff2, 0),
+    ]);
+
+    let mut core_mutation = flow_mutation.run(&mut dom);
+    core_mutation.run();
+
+    csum.borrow_mut().run_deps();
+
+    println!("{:?}", csum.borrow().providers[0].borrow().provider_value);
 }
