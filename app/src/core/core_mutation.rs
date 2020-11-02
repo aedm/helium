@@ -1,7 +1,6 @@
 use crate::core::acell::ACell;
 use crate::core::node::{CoreNodeRef, CoreProviderIndex, CoreSlotIndex};
 use crate::core::provider::CoreProvider;
-use crate::core::slot::CoreSlot;
 use std::mem;
 
 pub trait CoreMutation {
@@ -35,7 +34,7 @@ impl CoreMutation for SetSlotConnectionsCoreMutation {
         debug_assert_eq!(self.swap_vector.len(), 0);
         debug_assert_eq!(self.swap_vector.capacity(), self.connection.len());
 
-        let mut node = self.slot.node.borrow_mut();
+        let node = self.slot.node.borrow_mut();
         let mut slot = node.slots[self.slot.slot_index].borrow_mut();
         mem::swap(&mut slot.connection, &mut self.swap_vector);
         for connection in &self.connection {

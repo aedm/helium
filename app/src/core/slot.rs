@@ -1,5 +1,4 @@
-use crate::core::acell::{ACell, AWeak};
-use crate::core::node::CoreNode;
+use crate::core::acell::ACell;
 use crate::core::provider::{CoreProvider, CoreProviderValue};
 
 pub enum SlotType {
@@ -18,7 +17,6 @@ pub trait CoreSlotInner {
 }
 
 pub struct CoreSlot {
-    pub owner: AWeak<CoreNode>,
     _name: String,
     pub connection: Vec<ACell<CoreProvider>>,
     _allow_multiple: bool,
@@ -34,7 +32,6 @@ impl CoreSlot {
         default: CoreSlotDefault,
     ) -> CoreSlot {
         CoreSlot {
-            owner: AWeak::new(),
             _name: name.to_string(),
             connection: vec![],
             _allow_multiple: allow_multiple,
@@ -43,9 +40,9 @@ impl CoreSlot {
         }
     }
 
-    pub fn set_default(&mut self, default: CoreSlotDefault) {
-        self.default = default;
-    }
+    // pub fn set_default(&mut self, default: CoreSlotDefault) {
+    //     self.default = default;
+    // }
 
     pub fn get_single_provider(&self) -> Option<&ACell<CoreProvider>> {
         match self.connection.len() {

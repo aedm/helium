@@ -7,10 +7,12 @@ pub mod slot;
 
 #[cfg(test)]
 mod module_tests {
-    use crate::core::node::{CoreNode, CoreSlotIndex, CoreProviderIndex};
+    use crate::core::core_mutation::{
+        CoreMutationSequence, SetNodeDependencyListCoreMutation, SetSlotConnectionsCoreMutation,
+    };
+    use crate::core::node::{CoreNode, CoreProviderIndex, CoreSlotIndex};
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
-    use crate::core::core_mutation::{SetSlotConnectionsCoreMutation, SetNodeDependencyListCoreMutation, CoreMutationSequence};
     use std::any::TypeId;
 
     #[test]
@@ -56,9 +58,9 @@ mod module_tests {
             sum.borrow().providers[0].borrow().provider_value
         );
 
-        println!("sum type: {:?}", sum.borrow_mut().inner_type_id());
-        println!("f1 type: {:?}", f1.borrow_mut().inner_type_id());
-        println!("f2 type: {:?}", f2.borrow_mut().inner_type_id());
+        // println!("sum type: {:?}", sum.borrow_mut().inner_type_id());
+        // println!("f1 type: {:?}", f1.borrow_mut().inner_type_id());
+        // println!("f2 type: {:?}", f2.borrow_mut().inner_type_id());
         println!("floatnode type: {:?}", TypeId::of::<FloatNode>());
         println!("sumnode type: {:?}", TypeId::of::<SumNode>());
 
@@ -69,6 +71,5 @@ mod module_tests {
             let s = sumany.unwrap();
             println!("{}", &s.a.get());
         }
-
     }
 }

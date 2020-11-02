@@ -5,17 +5,16 @@ pub mod mutation_create_node;
 pub mod mutation_set_connections;
 pub mod topological_order;
 
-
 #[cfg(test)]
 mod module_tests {
-    use crate::flow::dom::Dom;
     use crate::core::node::CoreNode;
-    use crate::nodes::float_node::FloatNode;
-    use crate::nodes::sum_node::SumNode;
+    use crate::flow::dom::Dom;
     use crate::flow::flow_node::FlowNode;
     use crate::flow::mutation::FlowMutation;
     use crate::flow::mutation_create_node::CreateNodeFlowMutation;
     use crate::flow::mutation_set_connections::SetSlotConnectionsFlowMutation;
+    use crate::nodes::float_node::FloatNode;
+    use crate::nodes::sum_node::SumNode;
 
     #[test]
     fn generates_simple_sum_graph() {
@@ -44,5 +43,4 @@ mod module_tests {
 
         println!("{:?}", csum.borrow().providers[0].borrow().provider_value);
     }
-
 }

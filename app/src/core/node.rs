@@ -2,8 +2,6 @@ use crate::core::acell::ACell;
 use crate::core::provider::CoreProvider;
 use crate::core::slot::CoreSlot;
 use std::any::{Any, TypeId};
-use std::borrow::Borrow;
-use std::mem;
 
 pub type CoreNodeRef = ACell<CoreNode>;
 pub type NodeId = u64;
@@ -15,11 +13,11 @@ pub struct CoreNode {
     pub dependency_list: Vec<CoreNodeRef>,
 }
 
-pub enum NodeType {
-    _Custom,
-    Float,
-    Sum,
-}
+// pub enum NodeType {
+//     _Custom,
+//     Float,
+//     Sum,
+// }
 
 pub struct CoreProviderIndex {
     pub node: CoreNodeRef,
@@ -55,15 +53,6 @@ impl CoreNode {
             providers: inner.get_providers(),
             inner,
         });
-        {
-            let rf_mut = &rf.borrow_mut();
-            for provider in &rf_mut.providers {
-                provider.borrow_mut().owner = rf.downgrade();
-            }
-            for slot in &rf_mut.slots {
-                slot.borrow_mut().owner = rf.downgrade();
-            }
-        }
         rf
     }
 
@@ -78,7 +67,7 @@ impl CoreNode {
         self.run();
     }
 
-    pub fn inner_type_id(&self) -> TypeId {
-        (*self.inner).type_id()
-    }
+    // pub fn inner_type_id(&self) -> TypeId {
+    //     (*self.inner).type_id()
+    // }
 }

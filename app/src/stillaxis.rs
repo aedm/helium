@@ -2,16 +2,16 @@ use crate::core::node::{CoreNode, CoreNodeRef};
 use crate::flow::flow_node::{FlowNode, FlowNodeRef};
 use crate::nodes::root_node::CoreRootNode;
 
-pub struct Stillaxis {
+pub struct _Stillaxis {
     core_root: CoreNodeRef,
     flow_root: FlowNodeRef,
 }
 
-impl Stillaxis {
-    pub fn new() -> Stillaxis {
+impl _Stillaxis {
+    pub fn _new() -> _Stillaxis {
         let core_root = CoreNode::new::<CoreRootNode>();
         let flow_root = FlowNode::from_core_node(&core_root);
-        Stillaxis {
+        _Stillaxis {
             core_root,
             flow_root,
         }

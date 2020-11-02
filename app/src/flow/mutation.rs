@@ -1,14 +1,12 @@
-use crate::core::core_mutation::{CoreMutation, CoreMutationSequence, SetSlotConnectionsCoreMutation, SetNodeDependencyListCoreMutation};
-use crate::core::node::{CoreNodeRef, CoreProviderIndex, CoreSlotIndex};
+use crate::core::core_mutation::{
+    CoreMutation, CoreMutationSequence, SetNodeDependencyListCoreMutation,
+    SetSlotConnectionsCoreMutation,
+};
+use crate::core::node::{CoreProviderIndex, CoreSlotIndex};
 use crate::flow::dom::Dom;
-use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowSlot, FlowSlotIndex};
-use std::borrow::{Borrow, BorrowMut};
-use std::cell::RefCell;
-use std::collections::HashSet;
-use std::mem;
-use std::ops::Deref;
-use std::rc::Rc;
+use crate::flow::flow_node::{FlowNodeRef, FlowSlotIndex};
 use crate::flow::topological_order::TopologicalOrder;
+use std::collections::HashSet;
 
 pub struct FlowMutationStepResult {
     pub changed_slots: Vec<FlowSlotIndex>,
@@ -73,15 +71,17 @@ impl FlowMutation {
             let mut flow_dependencies = TopologicalOrder::generate(flow_node);
             // removes self from dependencies
             flow_dependencies.pop();
-            let dependency_list =
-                flow_dependencies.iter().map(|x| x.borrow().core_node.clone()).collect();
+            let dependency_list = flow_dependencies
+                .iter()
+                .map(|x| x.borrow().core_node.clone())
+                .collect();
             let core_mutation = SetNodeDependencyListCoreMutation {
                 node: flow_node.borrow().core_node.clone(),
                 dependency_list,
             };
             steps.push(Box::new(core_mutation));
         }
-        CoreMutationSequence { steps }
+        CoreMutationSequence::new(steps)
     }
 }
 

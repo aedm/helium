@@ -1,4 +1,4 @@
-use crate::core::node::{CoreNodeRef, NodeId};
+use crate::core::node::NodeId;
 use crate::flow::flow_node::FlowNodeRef;
 use std::collections::HashMap;
 
@@ -18,7 +18,7 @@ impl Dom {
             .insert(flow_node.borrow().id, flow_node.clone());
     }
 
-    pub fn remove_flow_node(&mut self, node_id: NodeId) {
-        self.flow_nodes.remove(&node_id);
-    }
+    // pub fn remove_flow_node(&mut self, node_id: NodeId) {
+    //     self.flow_nodes.remove(&node_id);
+    // }
 }

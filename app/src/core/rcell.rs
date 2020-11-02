@@ -1,16 +1,16 @@
 use std::cell::{Ref, RefCell, RefMut};
+use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::hash::{Hash, Hasher};
-use std::rc::{Rc, Weak};
-use std::{fmt, sync};
+use std::rc::Rc;
 
 pub struct RCell<T: ?Sized> {
     reference: Rc<RefCell<T>>,
 }
 
-pub struct RWeak<T: ?Sized> {
-    reference: Weak<RefCell<T>>,
-}
+// pub struct RWeak<T: ?Sized> {
+//     reference: Weak<RefCell<T>>,
+// }
 
 impl<T> RCell<T> {
     pub fn new(t: T) -> RCell<T> {
@@ -27,11 +27,11 @@ impl<T> RCell<T> {
         (*self.reference).borrow_mut()
     }
 
-    pub fn downgrade(&self) -> RWeak<T> {
-        RWeak {
-            reference: Rc::downgrade(&self.reference),
-        }
-    }
+    // pub fn downgrade(&self) -> RWeak<T> {
+    //     RWeak {
+    //         reference: Rc::downgrade(&self.reference),
+    //     }
+    // }
 }
 
 impl<T: ?Sized> Debug for RCell<T> {
@@ -62,18 +62,18 @@ impl<T: ?Sized> Clone for RCell<T> {
 
 impl<T: ?Sized> Eq for RCell<T> {}
 
-impl<T> RWeak<T> {
-    pub fn new() -> RWeak<T> {
-        RWeak {
-            reference: Weak::new(),
-        }
-    }
-
-    pub fn upgrade(&self) -> Option<RCell<T>> {
-        if let Some(rf) = self.reference.upgrade() {
-            Some(RCell { reference: rf })
-        } else {
-            None
-        }
-    }
-}
+// impl<T> RWeak<T> {
+//     pub fn new() -> RWeak<T> {
+//         RWeak {
+//             reference: Weak::new(),
+//         }
+//     }
+//
+//     pub fn upgrade(&self) -> Option<RCell<T>> {
+//         if let Some(rf) = self.reference.upgrade() {
+//             Some(RCell { reference: rf })
+//         } else {
+//             None
+//         }
+//     }
+// }

@@ -1,22 +1,13 @@
-use crate::core::acell::ACell;
-use crate::core::node::{CoreNode, CoreNodeRef, NodeId};
+use crate::core::node::{CoreNodeRef, NodeId};
 use crate::core::provider::CoreProvider;
 use crate::core::rcell::RCell;
 use crate::core::slot::CoreSlot;
-use std::borrow::Borrow;
-use std::cell::RefCell;
 use std::fmt;
-use std::fmt::{Debug, Formatter, Write};
-use std::hash::{Hash, Hasher};
-use std::rc::Rc;
+use std::fmt::{Debug, Formatter};
+use std::hash::Hash;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 static NODE_ID_GENERATOR: AtomicU64 = AtomicU64::new(1);
-
-enum ProviderType {
-    None,
-    Float32,
-}
 
 pub struct FlowNode {
     pub id: NodeId,
@@ -33,8 +24,9 @@ pub struct FlowSlot {
 }
 
 impl FlowSlot {
-    fn from_core_slot(core_slot: &CoreSlot) -> FlowSlot {
+    fn from_core_slot(_core_slot: &CoreSlot) -> FlowSlot {
         FlowSlot {
+            // TODO
             connections: Vec::new(),
         }
     }
@@ -45,8 +37,9 @@ pub struct FlowProvider {
 }
 
 impl FlowProvider {
-    fn from_core_provider(core_provider: &CoreProvider) -> FlowProvider {
+    fn from_core_provider(_core_provider: &CoreProvider) -> FlowProvider {
         FlowProvider {
+            // TODO
             connections: Vec::new(),
         }
     }
@@ -66,7 +59,7 @@ pub struct FlowProviderIndex {
 
 impl FlowNode {
     pub fn from_core_node(core_node_ref: &CoreNodeRef) -> FlowNodeRef {
-        let mut core_node = core_node_ref.borrow_mut();
+        let core_node = core_node_ref.borrow_mut();
         let slots: Vec<_> = core_node
             .slots
             .iter()

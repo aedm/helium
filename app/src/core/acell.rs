@@ -1,16 +1,16 @@
 use std::cell::{Ref, RefCell, RefMut};
+use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
-use std::{fmt, sync};
 
 pub struct ACell<T: ?Sized> {
     reference: Arc<RefCell<T>>,
 }
 
-pub struct AWeak<T: ?Sized> {
-    reference: sync::Weak<RefCell<T>>,
-}
+// pub struct AWeak<T: ?Sized> {
+//     _reference: sync::Weak<RefCell<T>>,
+// }
 
 impl<T> ACell<T> {
     pub fn new(t: T) -> ACell<T> {
@@ -33,11 +33,11 @@ impl<T> ACell<T> {
         }
     }
 
-    pub fn downgrade(&self) -> AWeak<T> {
-        AWeak {
-            reference: Arc::downgrade(&self.reference),
-        }
-    }
+    // pub fn downgrade(&self) -> AWeak<T> {
+    //     AWeak {
+    //         _reference: Arc::downgrade(&self.reference),
+    //     }
+    // }
 }
 
 impl<T: ?Sized> Debug for ACell<T> {
@@ -60,18 +60,18 @@ impl<T: ?Sized> PartialEq for ACell<T> {
 
 impl<T: ?Sized> Eq for ACell<T> {}
 
-impl<T> AWeak<T> {
-    pub fn new() -> AWeak<T> {
-        AWeak {
-            reference: sync::Weak::new(),
-        }
-    }
-
-    pub fn upgrade(&self) -> Option<ACell<T>> {
-        if let Some(rf) = self.reference.upgrade() {
-            Some(ACell { reference: rf })
-        } else {
-            None
-        }
-    }
-}
+// impl<T> AWeak<T> {
+//     pub fn new() -> AWeak<T> {
+//         AWeak {
+//             _reference: sync::Weak::new(),
+//         }
+//     }
+//
+//     pub fn upgrade(&self) -> Option<ACell<T>> {
+//         if let Some(rf) = self._reference.upgrade() {
+//             Some(ACell { reference: rf })
+//         } else {
+//             None
+//         }
+//     }
+// }
