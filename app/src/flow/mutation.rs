@@ -70,7 +70,9 @@ impl FlowMutation {
             collect_affected_dependencies(&flow_slot_index.node, &mut set);
         }
         for flow_node in &set {
-            let flow_dependencies = TopologicalOrder::generate(flow_node);
+            let mut flow_dependencies = TopologicalOrder::generate(flow_node);
+            // removes self from dependencies
+            flow_dependencies.pop();
             let dependency_list =
                 flow_dependencies.iter().map(|x| x.borrow().core_node.clone()).collect();
             let core_mutation = SetNodeDependencyListCoreMutation {

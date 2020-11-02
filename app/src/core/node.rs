@@ -73,9 +73,6 @@ impl CoreNode {
 
     pub fn run_deps(&mut self) {
         for dep in &self.dependency_list {
-            if dep == self {
-                continue;
-            }
             dep.borrow_mut().run();
         }
         self.run();
@@ -84,23 +81,4 @@ impl CoreNode {
     pub fn inner_type_id(&self) -> TypeId {
         (*self.inner).type_id()
     }
-
-    // pub fn set_slot_connection(
-    //     &mut self,
-    //     slot_index: usize,
-    //     provider_indexes: &[CoreProviderIndex],
-    //     connection_vector: &mut Vec<ACell<CoreProvider>>,
-    // ) {
-    //     assert_eq!(connection_vector.len(), 0);
-    //     assert_eq!(connection_vector.capacity(), provider_indexes.len());
-    //     for provider_index in provider_indexes.iter() {
-    //         let provider =
-    //             provider_index.node.borrow().providers[provider_index.provider_index].clone();
-    //         connection_vector.push(provider);
-    //     }
-    //     assert_eq!(connection_vector.capacity(), provider_indexes.len());
-    //
-    //     let slot = self.slots[slot_index].borrow_mut();
-    //     mem::swap(&mut slot.connection, connection_vector);
-    // }
 }
