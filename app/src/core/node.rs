@@ -1,5 +1,5 @@
-use crate::core::provider::CoreProvider;
 use crate::core::acell::ACell;
+use crate::core::provider::CoreProvider;
 use crate::core::slot::CoreSlot;
 use std::any::{Any, TypeId};
 use std::borrow::Borrow;
@@ -73,6 +73,9 @@ impl CoreNode {
 
     pub fn run_deps(&mut self) {
         for dep in &self.dependency_list {
+            if dep == self {
+                continue;
+            }
             dep.borrow_mut().run();
         }
         self.run();

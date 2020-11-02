@@ -1,8 +1,8 @@
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::{Debug, Formatter};
 use std::hash::{Hash, Hasher};
-use std::{fmt, sync};
 use std::rc::{Rc, Weak};
+use std::{fmt, sync};
 
 pub struct RCell<T: ?Sized> {
     reference: Rc<RefCell<T>>,

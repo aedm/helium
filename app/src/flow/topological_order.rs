@@ -1,5 +1,5 @@
-use std::collections::HashSet;
 use crate::flow::flow_node::FlowNodeRef;
+use std::collections::HashSet;
 
 pub struct TopologicalOrder {
     visited: HashSet<FlowNodeRef>,
@@ -32,19 +32,21 @@ impl TopologicalOrder {
 #[cfg(test)]
 mod tests {
     use crate::core::node::CoreNode;
+    use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowProviderIndex, FlowSlotIndex};
     use crate::flow::topological_order::TopologicalOrder;
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
-    use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowProviderIndex, FlowSlotIndex};
 
-    fn connect(slot_node: &FlowNodeRef, slot_index: usize, provider_node: &FlowNodeRef,
-               provider_index: usize) {
-        slot_node.borrow_mut().slots[slot_index].connections = vec![
-            FlowSlotIndex {
-                node: provider_node.clone(),
-                slot_index: provider_index,
-            }
-        ];
+    fn connect(
+        slot_node: &FlowNodeRef,
+        slot_index: usize,
+        provider_node: &FlowNodeRef,
+        provider_index: usize,
+    ) {
+        slot_node.borrow_mut().slots[slot_index].connections = vec![FlowSlotIndex {
+            node: provider_node.clone(),
+            slot_index: provider_index,
+        }];
     }
 
     #[test]
@@ -55,8 +57,10 @@ mod tests {
         let sum2 = CoreNode::new::<SumNode>();
 
         let core_nodes = vec![&float1, &float2, &sum1, &sum2];
-        let flow_nodes: Vec<_> =
-            core_nodes.iter().map(|x| FlowNode::from_core_node(*x)).collect();
+        let flow_nodes: Vec<_> = core_nodes
+            .iter()
+            .map(|x| FlowNode::from_core_node(*x))
+            .collect();
 
         connect(&flow_nodes[2], 0, &flow_nodes[0], 0);
         connect(&flow_nodes[2], 1, &flow_nodes[1], 0);

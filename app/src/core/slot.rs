@@ -1,6 +1,6 @@
+use crate::core::acell::{ACell, AWeak};
 use crate::core::node::CoreNode;
 use crate::core::provider::{CoreProvider, CoreProviderValue};
-use crate::core::acell::{ACell, AWeak};
 
 pub enum SlotType {
     _Custom,
@@ -51,7 +51,7 @@ impl CoreSlot {
         match self.connection.len() {
             0 => None,
             1 => Some(&self.connection[0]),
-            _ => panic!("'get_single_provider' called, multiple providers connected.")
+            _ => panic!("'get_single_provider' called, multiple providers connected."),
         }
     }
 }

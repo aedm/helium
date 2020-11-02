@@ -1,6 +1,6 @@
+use super::dom::Dom;
 use super::flow_node::FlowSlotIndex;
 use super::mutation::{FlowMutationStep, FlowMutationStepResult};
-use super::dom::Dom;
 
 pub struct SetSlotConnectionsFlowMutation {
     pub node_slot: FlowSlotIndex,

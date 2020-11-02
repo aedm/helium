@@ -1,8 +1,8 @@
-use crate::core::node::{CoreNodeRef, CoreProviderIndex, CoreSlotIndex};
 use crate::core::acell::ACell;
+use crate::core::node::{CoreNodeRef, CoreProviderIndex, CoreSlotIndex};
+use crate::core::provider::CoreProvider;
 use crate::core::slot::CoreSlot;
 use std::mem;
-use crate::core::provider::CoreProvider;
 
 pub trait CoreMutation {
     fn run(&mut self);

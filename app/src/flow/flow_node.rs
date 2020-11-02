@@ -1,15 +1,15 @@
+use crate::core::acell::ACell;
 use crate::core::node::{CoreNode, CoreNodeRef, NodeId};
 use crate::core::provider::CoreProvider;
-use crate::core::acell::ACell;
+use crate::core::rcell::RCell;
 use crate::core::slot::CoreSlot;
 use std::borrow::Borrow;
 use std::cell::RefCell;
+use std::fmt;
+use std::fmt::{Debug, Formatter, Write};
+use std::hash::{Hash, Hasher};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::fmt::{Debug, Formatter, Write};
-use std::fmt;
-use std::hash::{Hash, Hasher};
-use crate::core::rcell::RCell;
 
 static NODE_ID_GENERATOR: AtomicU64 = AtomicU64::new(1);
 
@@ -41,7 +41,7 @@ impl FlowSlot {
 }
 
 pub struct FlowProvider {
-    connections: Vec<FlowSlotIndex>,
+    pub connections: Vec<FlowSlotIndex>,
 }
 
 impl FlowProvider {

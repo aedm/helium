@@ -1,6 +1,6 @@
+use crate::flow::dom::Dom;
 use crate::flow::flow_node::FlowNodeRef;
 use crate::flow::mutation::{FlowMutationStep, FlowMutationStepResult};
-use crate::flow::dom::Dom;
 
 pub struct CreateNodeFlowMutation {
     pub new_node: FlowNodeRef,

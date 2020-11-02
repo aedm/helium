@@ -1,5 +1,5 @@
-use crate::core::node::CoreNode;
 use crate::core::acell::{ACell, AWeak};
+use crate::core::node::CoreNode;
 use crate::core::slot::CoreSlot;
 
 #[derive(Debug)]

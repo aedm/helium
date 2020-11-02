@@ -2,17 +2,17 @@ use crate::core::core_mutation::{
     CoreMutationSequence, SetNodeDependencyListCoreMutation, SetSlotConnectionsCoreMutation,
 };
 use crate::core::node::{CoreNode, CoreProviderIndex, CoreSlotIndex};
-use crate::core::slot::{CoreSlotDefault};
-use flow::topological_order::TopologicalOrder;
+use crate::core::slot::CoreSlotDefault;
 use crate::flow::dom::Dom;
 use crate::flow::flow_node::{FlowNode, FlowSlotIndex};
 use crate::flow::mutation::{FlowMutation, FlowMutationStepResult};
+use crate::flow::mutation_create_node::CreateNodeFlowMutation;
+use crate::flow::mutation_set_connections::SetSlotConnectionsFlowMutation;
 use crate::nodes::float_node::FloatNode;
 use crate::nodes::sum_node::SumNode;
 use crate::stillaxis::Stillaxis;
+use flow::topological_order::TopologicalOrder;
 use std::any::TypeId;
-use crate::flow::mutation_set_connections::SetSlotConnectionsFlowMutation;
-use crate::flow::mutation_create_node::CreateNodeFlowMutation;
 use std::borrow::Borrow;
 
 mod core;
@@ -81,13 +81,25 @@ fn case_2() {
     let sum = CoreNode::new::<SumNode>();
 
     let conn_1 = Box::new(SetSlotConnectionsCoreMutation {
-        slot: CoreSlotIndex { node: sum.clone(), slot_index: 0 },
-        connection: vec![CoreProviderIndex { node: f1.clone(), provider_index: 0 }],
+        slot: CoreSlotIndex {
+            node: sum.clone(),
+            slot_index: 0,
+        },
+        connection: vec![CoreProviderIndex {
+            node: f1.clone(),
+            provider_index: 0,
+        }],
         swap_vector: Vec::with_capacity(1),
     });
     let conn_2 = Box::new(SetSlotConnectionsCoreMutation {
-        slot: CoreSlotIndex { node: sum.clone(), slot_index: 1 },
-        connection: vec![CoreProviderIndex { node: f2.clone(), provider_index: 0 }],
+        slot: CoreSlotIndex {
+            node: sum.clone(),
+            slot_index: 1,
+        },
+        connection: vec![CoreProviderIndex {
+            node: f2.clone(),
+            provider_index: 0,
+        }],
         swap_vector: Vec::with_capacity(1),
     });
     let dep = Box::new(SetNodeDependencyListCoreMutation {
