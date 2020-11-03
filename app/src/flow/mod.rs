@@ -8,7 +8,7 @@ pub mod topological_order;
 #[cfg(test)]
 mod module_tests {
     use crate::core::node::CoreNode;
-    use crate::flow::dom::Dom;
+    use crate::flow::dom::FlowDom;
     use crate::flow::flow_node::FlowNode;
     use crate::flow::mutation::FlowMutation;
     use crate::flow::mutation_create_node::CreateNodeFlowMutation;
@@ -18,7 +18,7 @@ mod module_tests {
 
     #[test]
     fn generates_simple_sum_graph() {
-        let mut dom = Dom::new();
+        let mut dom = FlowDom::new();
 
         let cf1 = CoreNode::new::<FloatNode>();
         let cf2 = CoreNode::new::<FloatNode>();

@@ -3,7 +3,7 @@ use crate::core::core_mutation::{
     SetSlotConnectionsCoreMutation,
 };
 use crate::core::node::{CoreProviderIndex, CoreSlotIndex};
-use crate::flow::dom::Dom;
+use crate::flow::dom::FlowDom;
 use crate::flow::flow_node::{FlowNodeRef, FlowSlotIndex};
 use crate::flow::topological_order::TopologicalOrder;
 use std::collections::HashSet;
@@ -13,7 +13,7 @@ pub struct FlowMutationStepResult {
 }
 
 pub trait FlowMutationStep {
-    fn run(&self, dom: &mut Dom) -> FlowMutationStepResult;
+    fn run(&self, dom: &mut FlowDom) -> FlowMutationStepResult;
 }
 
 pub struct FlowMutation {
@@ -29,7 +29,7 @@ impl FlowMutation {
         }
     }
 
-    pub fn run(&mut self, dom: &mut Dom) -> CoreMutationSequence {
+    pub fn run(&mut self, dom: &mut FlowDom) -> CoreMutationSequence {
         for step in &mut self.steps {
             let result = step.run(dom);
             for changed_slot in &result.changed_slots {

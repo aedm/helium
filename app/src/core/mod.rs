@@ -4,6 +4,7 @@ pub mod node;
 pub mod provider;
 pub mod rcell;
 pub mod slot;
+pub mod core_dom;
 
 #[cfg(test)]
 mod module_tests {

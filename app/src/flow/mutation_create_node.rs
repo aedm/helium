@@ -1,4 +1,4 @@
-use crate::flow::dom::Dom;
+use crate::flow::dom::FlowDom;
 use crate::flow::flow_node::FlowNodeRef;
 use crate::flow::mutation::{FlowMutationStep, FlowMutationStepResult};
 
@@ -15,7 +15,7 @@ impl CreateNodeFlowMutation {
 }
 
 impl FlowMutationStep for CreateNodeFlowMutation {
-    fn run(&self, dom: &mut Dom) -> FlowMutationStepResult {
+    fn run(&self, dom: &mut FlowDom) -> FlowMutationStepResult {
         dom.add_flow_node(&self.new_node);
         FlowMutationStepResult {
             changed_slots: vec![],

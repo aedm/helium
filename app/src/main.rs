@@ -1,11 +1,12 @@
 use crate::core::node::CoreNode;
-use crate::flow::dom::Dom;
+use crate::flow::dom::FlowDom;
 use crate::flow::flow_node::FlowNode;
 use crate::flow::mutation::FlowMutation;
 use crate::flow::mutation_create_node::CreateNodeFlowMutation;
 use crate::flow::mutation_set_connections::SetSlotConnectionsFlowMutation;
 use crate::nodes::float_node::FloatNode;
 use crate::nodes::sum_node::SumNode;
+use crate::stillaxis::Stillaxis;
 
 mod core;
 mod flow;
@@ -13,7 +14,7 @@ mod nodes;
 mod stillaxis;
 
 fn main() {
-    let mut dom = Dom::new();
+    let mut stillaxis = Stillaxis::_new();
 
     let cf1 = CoreNode::new::<FloatNode>();
     let cf2 = CoreNode::new::<FloatNode>();
@@ -31,10 +32,10 @@ fn main() {
         SetSlotConnectionsFlowMutation::new_single(&fsum, 1, &ff2, 0),
     ]);
 
-    let mut core_mutation = flow_mutation.run(&mut dom);
-    core_mutation.run();
-
-    csum.borrow_mut().run_deps();
-
-    println!("{:?}", csum.borrow().providers[0].borrow().provider_value);
+    stillaxis.run_mutation(&mut flow_mutation);
+    // core_mutation.run();
+    //
+    // csum.borrow_mut().run_deps();
+    //
+    // println!("{:?}", csum.borrow().providers[0].borrow().provider_value);
 }
