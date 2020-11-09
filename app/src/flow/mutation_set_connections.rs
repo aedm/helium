@@ -37,6 +37,7 @@ impl FlowMutationStep for SetSlotConnectionsFlowMutation {
         // Generate core mutation
         FlowMutationStepResult {
             changed_slots: vec![self.node_slot.clone()],
+            core_mutations: vec![],
         }
     }
 }

@@ -24,27 +24,42 @@ pub struct CoreDom {
 struct RenderThread {
     core_root: CoreNodeRef,
     receiver: Receiver<Box<CoreMessage>>,
+    frame_count: u64,
 }
 
 impl RenderThread {
     fn start(&mut self) {
+        println!("R: start");
+        let mut should_print_state = true;
         loop {
-            println!("R: wake");
             while let Ok(x) = self.receiver.try_recv() {
                 match *x {
                     CoreMessage::Mutate(mut x) => {
                         println!("R: mutate");
                         x.run();
+                        should_print_state = true;
                     }
                     CoreMessage::Stop => {
-                        println!("R: stop");
+                        println!("R: stop. Total frame count: {}", self.frame_count);
                         return;
                     }
                 }
             }
+            self.frame_count += 1;
             self.core_root.borrow_mut().run();
-            println!("Core: {:?}", self.core_root.borrow().slots[0].borrow().get_single_provider().unwrap().borrow().provider_value);
-            thread::sleep(Duration::from_millis(100));
+            if should_print_state {
+                self.print_state();
+                should_print_state = false;
+            }
+        }
+    }
+
+    fn print_state(&self) {
+        let mut core_root = self.core_root.borrow();
+        let connections = &core_root.slots[0].borrow().connection;
+        println!("R: Connection count: {}", connections.len());
+        for provider in connections {
+            println!("R:   provider value: {:?}", provider.borrow().provider_value);
         }
     }
 }
@@ -57,12 +72,12 @@ impl CoreDom {
         let mut render_thread = RenderThread {
             receiver,
             core_root: core_root.clone(),
+            frame_count: 0,
         };
 
         let join_handle = thread::Builder::new()
             .name("render core".into())
             .spawn(move || {
-                println!("Core thread start. {:?}", thread::current().id());
                 render_thread.start();
             })
             .unwrap();
@@ -75,7 +90,6 @@ impl CoreDom {
     }
 
     pub fn stop(&mut self) {
-        dbg!();
         println!("Stopping render thread...");
         let _ = self.sender.send(Box::new(Stop));
         self.join_handle.take().map(JoinHandle::join);

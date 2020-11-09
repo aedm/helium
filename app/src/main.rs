@@ -9,6 +9,8 @@ use crate::nodes::sum_node::SumNode;
 use crate::stillaxis::Stillaxis;
 use std::thread;
 use std::time::Duration;
+use crate::flow::mutation_set_slot_value::SetSlotValueFlowMutation;
+use crate::core::slot::CoreSlotDefault::Float32;
 
 mod core;
 mod flow;
@@ -35,9 +37,16 @@ fn main() {
         SetSlotConnectionsFlowMutation::new_single(&stillaxis.get_root(), 0, &fsum, 0),
     ]);
 
+    thread::sleep(Duration::from_millis(100));
     stillaxis.run_mutation(&mut flow_mutation);
 
-    thread::sleep(Duration::from_millis(1000));
+    let mut flow_mutation = FlowMutation::new(vec![
+        SetSlotValueFlowMutation::new(&ff1, 0, Float32(10.0)),
+    ]);
+    thread::sleep(Duration::from_millis(100));
+    stillaxis.run_mutation(&mut flow_mutation);
+
+    thread::sleep(Duration::from_millis(900));
     // core_mutation.run();
     //
     // csum.borrow_mut().run_deps();

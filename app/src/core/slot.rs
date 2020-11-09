@@ -6,6 +6,7 @@ pub enum SlotType {
     Float32,
 }
 
+#[derive(Clone, Copy)]
 pub enum CoreSlotDefault {
     _None,
     Float32(f32),
@@ -40,9 +41,9 @@ impl CoreSlot {
         }
     }
 
-    // pub fn set_default(&mut self, default: CoreSlotDefault) {
-    //     self.default = default;
-    // }
+    pub fn set_default(&mut self, default: &CoreSlotDefault) {
+        self.default = *default;
+    }
 
     pub fn get_single_provider(&self) -> Option<&ACell<CoreProvider>> {
         match self.connection.len() {

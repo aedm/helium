@@ -19,6 +19,7 @@ impl FlowMutationStep for CreateNodeFlowMutation {
         dom.add_flow_node(&self.new_node);
         FlowMutationStepResult {
             changed_slots: vec![],
+            core_mutations: vec![],
         }
     }
 }
