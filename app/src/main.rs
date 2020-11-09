@@ -7,6 +7,8 @@ use crate::flow::mutation_set_connections::SetSlotConnectionsFlowMutation;
 use crate::nodes::float_node::FloatNode;
 use crate::nodes::sum_node::SumNode;
 use crate::stillaxis::Stillaxis;
+use std::thread;
+use std::time::Duration;
 
 mod core;
 mod flow;
@@ -14,7 +16,7 @@ mod nodes;
 mod stillaxis;
 
 fn main() {
-    let mut stillaxis = Stillaxis::_new();
+    let mut stillaxis = Stillaxis::new();
 
     let cf1 = CoreNode::new::<FloatNode>();
     let cf2 = CoreNode::new::<FloatNode>();
@@ -30,9 +32,12 @@ fn main() {
         CreateNodeFlowMutation::new(&fsum),
         SetSlotConnectionsFlowMutation::new_single(&fsum, 0, &ff1, 0),
         SetSlotConnectionsFlowMutation::new_single(&fsum, 1, &ff2, 0),
+        SetSlotConnectionsFlowMutation::new_single(&stillaxis.get_root(), 0, &fsum, 0),
     ]);
 
     stillaxis.run_mutation(&mut flow_mutation);
+
+    thread::sleep(Duration::from_millis(1000));
     // core_mutation.run();
     //
     // csum.borrow_mut().run_deps();

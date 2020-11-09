@@ -1,11 +1,22 @@
 use crate::core::node::NodeInner;
 use std::any::{Any, TypeId};
+use crate::core::acell::ACell;
+use crate::core::slot::{CoreSlot, FloatCoreSlot};
 
-pub struct CoreRootNode {}
+pub struct CoreRootNode {
+    pub slot: FloatCoreSlot,
+
+}
 
 impl NodeInner for CoreRootNode {
     fn new() -> CoreRootNode {
-        CoreRootNode {}
+        CoreRootNode {
+            slot: FloatCoreSlot::new("all_nodes"),
+        }
+    }
+
+    fn get_slots(self: &Self) -> Vec<ACell<CoreSlot>> {
+        vec![self.slot.slot.clone()]
     }
 
     fn type_id(&self) -> TypeId {

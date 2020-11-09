@@ -5,7 +5,7 @@ use crate::core::core_dom::CoreDom;
 
 pub struct FlowDom {
     flow_nodes: HashMap<NodeId, FlowNodeRef>,
-    flow_root: FlowNodeRef,
+    pub flow_root: FlowNodeRef,
 }
 
 impl FlowDom {

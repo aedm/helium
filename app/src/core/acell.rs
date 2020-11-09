@@ -60,6 +60,8 @@ impl<T: ?Sized> PartialEq for ACell<T> {
 
 impl<T: ?Sized> Eq for ACell<T> {}
 
+unsafe impl<T: ?Sized> Send for ACell<T> {}
+
 // impl<T> AWeak<T> {
 //     pub fn new() -> AWeak<T> {
 //         AWeak {

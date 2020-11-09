@@ -25,7 +25,7 @@ pub struct CoreSlot {
 }
 
 impl CoreSlot {
-    fn new(
+    pub fn new(
         name: &str,
         allow_multiple: bool,
         inner: Box<dyn CoreSlotInner>,
