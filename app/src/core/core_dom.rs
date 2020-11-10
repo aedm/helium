@@ -46,7 +46,7 @@ impl RenderThread {
                 }
             }
             self.frame_count += 1;
-            self.core_root.borrow_mut().run();
+            self.core_root.borrow_mut().run_deps();
             if should_print_state {
                 self.print_state();
                 should_print_state = false;

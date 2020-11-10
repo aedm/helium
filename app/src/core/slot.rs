@@ -61,7 +61,7 @@ pub struct FloatCoreSlot {
 impl FloatCoreSlot {
     pub fn new(name: &str) -> FloatCoreSlot {
         let inner = Box::new(FloatCoreSlotInner {});
-        let default = CoreSlotDefault::Float32(10.0);
+        let default = CoreSlotDefault::Float32(0.0);
         FloatCoreSlot {
             slot: ACell::new(CoreSlot::new(name, false, inner, default)),
         }
