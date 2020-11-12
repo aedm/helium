@@ -13,10 +13,8 @@ mod module_tests {
     };
     use crate::core::node::{CoreNode, CoreProviderIndex, CoreSlotIndex};
     use crate::core::provider::CoreProviderValue;
-    use crate::core::slot::SlotType::Float32;
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
-    use std::any::TypeId;
 
     #[test]
     fn generates_simple_sum_graph() {

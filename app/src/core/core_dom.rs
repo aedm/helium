@@ -51,6 +51,7 @@ impl RenderThread {
                         return;
                     }
                     CoreMessage::GetProviderValue(request) => {
+                        self.core_root.borrow_mut().run_deps();
                         Self::handle_provider_value_request(request);
                     }
                 }
