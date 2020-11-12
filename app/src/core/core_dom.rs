@@ -1,12 +1,12 @@
-use crate::core::node::{CoreNodeRef, CoreNode, NodeInner, CoreProviderIndex};
+use crate::core::core_dom::CoreMessage::Stop;
+use crate::core::core_mutation::CoreMutationSequence;
+use crate::core::node::{CoreNode, CoreNodeRef, CoreProviderIndex, NodeInner};
+use crate::core::provider::CoreProviderValue;
 use crate::nodes::root_node::CoreRootNode;
+use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
 use std::thread::{JoinHandle, ThreadId};
-use std::sync::mpsc::{Receiver, Sender, channel};
-use crate::core::core_mutation::CoreMutationSequence;
 use std::time::Duration;
-use crate::core::core_dom::CoreMessage::Stop;
-use crate::core::provider::CoreProviderValue;
 use strum_macros::IntoStaticStr;
 
 #[derive(IntoStaticStr)]

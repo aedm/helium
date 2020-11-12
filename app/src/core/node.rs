@@ -2,8 +2,8 @@ use crate::core::acell::ACell;
 use crate::core::provider::CoreProvider;
 use crate::core::slot::CoreSlot;
 use std::any::{Any, TypeId};
-use std::thread::ThreadId;
 use std::thread;
+use std::thread::ThreadId;
 
 pub type CoreNodeRef = ACell<CoreNode>;
 pub type NodeId = u64;
@@ -28,8 +28,8 @@ pub struct CoreSlotIndex {
 
 pub trait NodeInner {
     fn new() -> Self
-        where
-            Self: std::marker::Sized;
+    where
+        Self: std::marker::Sized;
     fn get_slots(&self) -> Vec<ACell<CoreSlot>> {
         vec![]
     }
@@ -84,5 +84,3 @@ impl Drop for CoreNode {
         debug_assert!(self.check_render_thread(false));
     }
 }
-
-

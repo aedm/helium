@@ -1,10 +1,10 @@
 pub mod acell;
+pub mod core_dom;
 pub mod core_mutation;
 pub mod node;
 pub mod provider;
 pub mod rcell;
 pub mod slot;
-pub mod core_dom;
 
 #[cfg(test)]
 mod module_tests {
@@ -12,11 +12,11 @@ mod module_tests {
         CoreMutationSequence, SetNodeDependencyListCoreMutation, SetSlotConnectionsCoreMutation,
     };
     use crate::core::node::{CoreNode, CoreProviderIndex, CoreSlotIndex};
+    use crate::core::provider::CoreProviderValue;
+    use crate::core::slot::SlotType::Float32;
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
     use std::any::TypeId;
-    use crate::core::slot::SlotType::Float32;
-    use crate::core::provider::CoreProviderValue;
 
     #[test]
     fn generates_simple_sum_graph() {
@@ -56,7 +56,10 @@ mod module_tests {
         seq.run();
 
         sum.borrow_mut().run_deps();
-        assert_eq!(sum.borrow().providers[0].borrow().provider_value, CoreProviderValue::Float32(0.0));
+        assert_eq!(
+            sum.borrow().providers[0].borrow().provider_value,
+            CoreProviderValue::Float32(0.0)
+        );
 
         // TODO: test non-zero values
     }

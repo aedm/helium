@@ -1,11 +1,10 @@
-use crate::core::node::NodeInner;
-use std::any::{Any, TypeId};
 use crate::core::acell::ACell;
+use crate::core::node::NodeInner;
 use crate::core::slot::{CoreSlot, FloatCoreSlot};
+use std::any::{Any, TypeId};
 
 pub struct CoreRootNode {
     pub slot: FloatCoreSlot,
-
 }
 
 impl NodeInner for CoreRootNode {
