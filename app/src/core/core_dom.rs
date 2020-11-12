@@ -1,16 +1,19 @@
-use crate::core::node::{CoreNodeRef, CoreNode};
+use crate::core::node::{CoreNodeRef, CoreNode, NodeInner, CoreProviderIndex};
 use crate::nodes::root_node::CoreRootNode;
 use std::thread;
-use std::thread::{JoinHandle, Result};
+use std::thread::{JoinHandle, ThreadId};
 use std::sync::mpsc::{Receiver, Sender, channel};
 use crate::core::core_mutation::CoreMutationSequence;
 use std::time::Duration;
 use crate::core::core_dom::CoreMessage::Stop;
-use std::borrow::BorrowMut;
+use crate::core::provider::CoreProviderValue;
+use strum_macros::IntoStaticStr;
 
+#[derive(IntoStaticStr)]
 pub enum CoreMessage {
     Mutate(CoreMutationSequence),
     Stop,
+    GetProviderValue(ProviderValueRequest),
 }
 
 unsafe impl Send for CoreMessage {}
@@ -18,59 +21,64 @@ unsafe impl Send for CoreMessage {}
 pub struct CoreDom {
     pub core_root: CoreNodeRef,
     join_handle: Option<JoinHandle<()>>,
-    pub sender: Sender<Box<CoreMessage>>,
+    pub sender_to_render_thread: Sender<Box<CoreMessage>>,
+    pub receiver_from_render_thread: Receiver<Box<CoreMessage>>,
 }
 
-struct RenderThread {
+pub struct RenderThread {
     core_root: CoreNodeRef,
-    receiver: Receiver<Box<CoreMessage>>,
+    receiver_to_render_thread: Receiver<Box<CoreMessage>>,
+    sender_from_render_thread: Sender<Box<CoreMessage>>,
     frame_count: u64,
+}
+
+pub struct ProviderValueRequest {
+    pub provider: CoreProviderIndex,
+    pub response_value: Option<CoreProviderValue>,
 }
 
 impl RenderThread {
     fn start(&mut self) {
         println!("R: start");
-        let mut should_print_state = true;
         loop {
-            while let Ok(x) = self.receiver.try_recv() {
-                match *x {
-                    CoreMessage::Mutate(mut x) => {
-                        println!("R: mutate");
-                        x.run();
-                        should_print_state = true;
+            while let Ok(mut x) = self.receiver_to_render_thread.try_recv() {
+                match x.as_mut() {
+                    CoreMessage::Mutate(mutation) => {
+                        mutation.run();
                     }
                     CoreMessage::Stop => {
                         println!("R: stop. Total frame count: {}", self.frame_count);
                         return;
                     }
+                    CoreMessage::GetProviderValue(request) => {
+                        Self::handle_provider_value_request(request);
+                    }
                 }
+                // Send message back to main thread
+                let _ = self.sender_from_render_thread.send(x);
             }
             self.frame_count += 1;
             self.core_root.borrow_mut().run_deps();
-            if should_print_state {
-                self.print_state();
-                should_print_state = false;
-            }
+            thread::sleep(Duration::from_millis(1));
         }
     }
 
-    fn print_state(&self) {
-        let mut core_root = self.core_root.borrow();
-        let connections = &core_root.slots[0].borrow().connection;
-        println!("R: Connection count: {}", connections.len());
-        for provider in connections {
-            println!("R:   provider value: {:?}", provider.borrow().provider_value);
-        }
+    fn handle_provider_value_request(request: &mut ProviderValueRequest) {
+        let node = request.provider.node.borrow_mut();
+        let provider = node.providers[request.provider.provider_index].borrow();
+        request.response_value = Some(provider.provider_value);
     }
 }
 
 impl CoreDom {
     pub fn new() -> CoreDom {
-        let (sender, receiver) = channel();
+        let (sender_to_render_thread, receiver_to_render_thread) = channel();
+        let (sender_from_render_thread, receiver_from_render_thread) = channel();
         let core_root = CoreNode::new::<CoreRootNode>();
 
         let mut render_thread = RenderThread {
-            receiver,
+            receiver_to_render_thread,
+            sender_from_render_thread,
             core_root: core_root.clone(),
             frame_count: 0,
         };
@@ -82,16 +90,32 @@ impl CoreDom {
             })
             .unwrap();
 
+        core_root.borrow_mut().seal(join_handle.thread().id());
+
         CoreDom {
             core_root,
             join_handle: Some(join_handle),
-            sender,
+            sender_to_render_thread,
+            receiver_from_render_thread,
+        }
+    }
+
+    pub fn new_node<T: 'static + NodeInner>(&self) -> CoreNodeRef {
+        let core_node = CoreNode::new::<T>();
+        core_node.borrow_mut().seal(self.get_render_thread_id());
+        core_node
+    }
+
+    fn get_render_thread_id(&self) -> ThreadId {
+        match &self.join_handle {
+            Some(handle) => handle.thread().id(),
+            None => panic!(),
         }
     }
 
     pub fn stop(&mut self) {
         println!("Stopping render thread...");
-        let _ = self.sender.send(Box::new(Stop));
+        let _ = self.sender_to_render_thread.send(Box::new(Stop));
         self.join_handle.take().map(JoinHandle::join);
         println!("Render thread stopped.");
     }
@@ -99,7 +123,7 @@ impl CoreDom {
 
 impl Drop for CoreDom {
     fn drop(&mut self) {
-        dbg!();
+        dbg!("CoreDom.drop");
         self.stop();
     }
 }

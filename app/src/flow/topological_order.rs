@@ -32,7 +32,7 @@ impl TopologicalOrder {
 #[cfg(test)]
 mod tests {
     use crate::core::node::CoreNode;
-    use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowProviderIndex, FlowSlotIndex};
+    use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowSlotIndex};
     use crate::flow::topological_order::TopologicalOrder;
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;

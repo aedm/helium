@@ -2,6 +2,8 @@ use crate::core::acell::ACell;
 use crate::core::provider::CoreProvider;
 use crate::core::slot::CoreSlot;
 use std::any::{Any, TypeId};
+use std::thread::ThreadId;
+use std::thread;
 
 pub type CoreNodeRef = ACell<CoreNode>;
 pub type NodeId = u64;
@@ -11,13 +13,8 @@ pub struct CoreNode {
     pub providers: Vec<ACell<CoreProvider>>,
     pub inner: Box<dyn NodeInner>,
     pub dependency_list: Vec<CoreNodeRef>,
+    render_thread_id: Option<ThreadId>,
 }
-
-// pub enum NodeType {
-//     _Custom,
-//     Float,
-//     Sum,
-// }
 
 pub struct CoreProviderIndex {
     pub node: CoreNodeRef,
@@ -31,8 +28,8 @@ pub struct CoreSlotIndex {
 
 pub trait NodeInner {
     fn new() -> Self
-    where
-        Self: std::marker::Sized;
+        where
+            Self: std::marker::Sized;
     fn get_slots(&self) -> Vec<ACell<CoreSlot>> {
         vec![]
     }
@@ -52,11 +49,13 @@ impl CoreNode {
             slots: inner.get_slots(),
             providers: inner.get_providers(),
             inner,
+            render_thread_id: None,
         });
         rf
     }
 
     pub fn run(&mut self) {
+        debug_assert!(self.check_render_thread(true));
         self.inner.run();
     }
 
@@ -67,7 +66,23 @@ impl CoreNode {
         self.run();
     }
 
-    // pub fn inner_type_id(&self) -> TypeId {
-    //     (*self.inner).type_id()
-    // }
+    pub fn seal(&mut self, render_thread_id: ThreadId) {
+        self.render_thread_id = Some(render_thread_id);
+    }
+
+    fn check_render_thread(&self, is_render_thread: bool) -> bool {
+        match self.render_thread_id {
+            Some(thread_id) => (thread_id == thread::current().id()) == is_render_thread,
+            None => true,
+        }
+    }
 }
+
+impl Drop for CoreNode {
+    fn drop(&mut self) {
+        // Core node should never be deallocated on the render thread
+        debug_assert!(self.check_render_thread(false));
+    }
+}
+
+

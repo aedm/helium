@@ -24,7 +24,7 @@ impl SetSlotValueFlowMutation {
 }
 
 impl FlowMutationStep for SetSlotValueFlowMutation {
-    fn run(&self, dom: &mut FlowDom) -> FlowMutationStepResult {
+    fn run(&self, _dom: &mut FlowDom) -> FlowMutationStepResult {
         let core_mutation = SetSlotDefaultValueCoreMutation {
             node: self.node_slot.node.borrow().core_node.clone(),
             slot_index: self.node_slot.slot_index,

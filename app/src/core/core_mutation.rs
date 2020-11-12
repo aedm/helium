@@ -1,8 +1,8 @@
 use crate::core::acell::ACell;
-use crate::core::node::{CoreNodeRef, CoreProviderIndex, CoreSlotIndex, CoreNode};
+use crate::core::node::{CoreNodeRef, CoreProviderIndex, CoreSlotIndex};
 use crate::core::provider::CoreProvider;
 use std::mem;
-use crate::core::slot::{CoreSlot, CoreSlotDefault};
+use crate::core::slot::{CoreSlotDefault};
 
 pub trait CoreMutation {
     fn run(&mut self);
@@ -69,7 +69,7 @@ pub struct SetSlotDefaultValueCoreMutation {
 
 impl CoreMutation for SetSlotDefaultValueCoreMutation {
     fn run(&mut self) {
-        let mut node = self.node.borrow_mut();
+        let node = self.node.borrow_mut();
         let mut slot = node.slots[self.slot_index].borrow_mut();
         slot.set_default(&self.value);
     }

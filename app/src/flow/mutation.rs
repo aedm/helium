@@ -43,7 +43,6 @@ impl FlowMutation {
     }
 
     fn create_core_mutations(&self, mut steps: Vec<Box<dyn CoreMutation>>) -> CoreMutationSequence {
-        println!("changed_slots: {:?}", &self.changed_slots.len());
         for flow_slot_index in &self.changed_slots {
             let flow_slot = &flow_slot_index.node.borrow().slots[flow_slot_index.slot_index];
             let connection: Vec<_> = flow_slot
