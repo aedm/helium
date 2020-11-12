@@ -1,4 +1,5 @@
 pub mod acell;
+pub mod core_dom;
 pub mod core_mutation;
 pub mod node;
 pub mod provider;
@@ -11,9 +12,9 @@ mod module_tests {
         CoreMutationSequence, SetNodeDependencyListCoreMutation, SetSlotConnectionsCoreMutation,
     };
     use crate::core::node::{CoreNode, CoreProviderIndex, CoreSlotIndex};
+    use crate::core::provider::CoreProviderValue;
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
-    use std::any::TypeId;
 
     #[test]
     fn generates_simple_sum_graph() {
@@ -53,23 +54,11 @@ mod module_tests {
         seq.run();
 
         sum.borrow_mut().run_deps();
-        println!(
-            "Result: {:?}",
-            sum.borrow().providers[0].borrow().provider_value
+        assert_eq!(
+            sum.borrow().providers[0].borrow().provider_value,
+            CoreProviderValue::Float32(0.0)
         );
 
-        // println!("sum type: {:?}", sum.borrow_mut().inner_type_id());
-        // println!("f1 type: {:?}", f1.borrow_mut().inner_type_id());
-        // println!("f2 type: {:?}", f2.borrow_mut().inner_type_id());
-        println!("floatnode type: {:?}", TypeId::of::<FloatNode>());
-        println!("sumnode type: {:?}", TypeId::of::<SumNode>());
-
-        {
-            let rf = sum.borrow();
-            let sumany = rf.inner.as_any().downcast_ref::<SumNode>();
-            println!("{}", matches!(sumany, Some(_)));
-            let s = sumany.unwrap();
-            println!("{}", &s.a.get());
-        }
+        // TODO: test non-zero values
     }
 }

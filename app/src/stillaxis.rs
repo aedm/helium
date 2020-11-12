@@ -1,19 +1,131 @@
-use crate::core::node::{CoreNode, CoreNodeRef};
+use crate::core::core_dom::CoreMessage::{GetProviderValue, Mutate};
+use crate::core::core_dom::{CoreDom, ProviderValueRequest};
+use crate::core::node::{CoreProviderIndex, NodeInner};
+use crate::flow::dom::FlowDom;
 use crate::flow::flow_node::{FlowNode, FlowNodeRef};
-use crate::nodes::root_node::CoreRootNode;
+use crate::flow::mutation::FlowMutation;
 
-pub struct _Stillaxis {
-    core_root: CoreNodeRef,
-    flow_root: FlowNodeRef,
+pub struct Stillaxis {
+    pub core_dom: CoreDom,
+    pub flow_dom: FlowDom,
 }
 
-impl _Stillaxis {
-    pub fn _new() -> _Stillaxis {
-        let core_root = CoreNode::new::<CoreRootNode>();
-        let flow_root = FlowNode::from_core_node(&core_root);
-        _Stillaxis {
-            core_root,
-            flow_root,
+impl Stillaxis {
+    pub fn new() -> Stillaxis {
+        let core_dom = CoreDom::new();
+        let flow_dom = FlowDom::new(&core_dom);
+
+        Stillaxis { core_dom, flow_dom }
+    }
+
+    pub fn new_node<T: 'static + NodeInner>(&self) -> FlowNodeRef {
+        let core_node = self.core_dom.new_node::<T>();
+        FlowNode::from_core_node(&core_node)
+    }
+
+    pub fn run_mutation(&mut self, flow_mutation: &mut FlowMutation) {
+        let core_mutation = flow_mutation.run(&mut self.flow_dom);
+        let _ = self
+            .core_dom
+            .sender_to_render_thread
+            .send(Box::new(Mutate(core_mutation)));
+    }
+
+    pub fn get_root(&self) -> FlowNodeRef {
+        self.flow_dom.flow_root.clone()
+    }
+
+    pub fn send_value_request(&mut self, node: &FlowNodeRef, provider_index: usize) {
+        let request: ProviderValueRequest = ProviderValueRequest {
+            provider: CoreProviderIndex {
+                node: node.borrow().core_node.clone(),
+                provider_index,
+            },
+            response_value: None,
+        };
+        let _ = self
+            .core_dom
+            .sender_to_render_thread
+            .send(Box::new(GetProviderValue(request)));
+    }
+}
+
+impl Drop for Stillaxis {
+    fn drop(&mut self) {
+        dbg!("Stillaxis.drop");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::core::core_dom::CoreMessage;
+    use crate::core::provider::CoreProviderValue;
+    use crate::core::slot::CoreSlotDefault;
+    use crate::flow::mutation::FlowMutation;
+    use crate::flow::mutation_create_node::CreateNodeFlowMutation;
+    use crate::flow::mutation_set_connections::SetSlotConnectionsFlowMutation;
+    use crate::flow::mutation_set_slot_value::SetSlotValueFlowMutation;
+    use crate::nodes::float_node::FloatNode;
+    use crate::nodes::sum_node::SumNode;
+    use crate::stillaxis::Stillaxis;
+
+    fn get_incoming(stillaxis: &mut Stillaxis) -> Box<CoreMessage> {
+        stillaxis
+            .core_dom
+            .receiver_from_render_thread
+            .recv()
+            .unwrap()
+    }
+
+    fn assert_mutation_response(stillaxis: &mut Stillaxis) {
+        let message = get_incoming(stillaxis);
+        assert!(matches!(message.as_ref(), CoreMessage::Mutate { .. }));
+    }
+
+    fn assert_value_response(stillaxis: &mut Stillaxis, value: &CoreProviderValue) {
+        let message = get_incoming(stillaxis);
+        match message.as_ref() {
+            CoreMessage::GetProviderValue(value_request) => {
+                assert_eq!(value_request.response_value.unwrap(), *value);
+            }
+            _ => panic!(),
         }
+    }
+
+    #[test]
+    fn simple_sum_graph() {
+        let mut stillaxis = Stillaxis::new();
+
+        let ff1 = stillaxis.new_node::<FloatNode>();
+        let ff2 = stillaxis.new_node::<FloatNode>();
+        let fsum = stillaxis.new_node::<SumNode>();
+
+        let mut flow_mutation = FlowMutation::new(vec![
+            CreateNodeFlowMutation::new(&ff1),
+            CreateNodeFlowMutation::new(&ff2),
+            CreateNodeFlowMutation::new(&fsum),
+            SetSlotConnectionsFlowMutation::new_single(&fsum, 0, &ff1, 0),
+            SetSlotConnectionsFlowMutation::new_single(&fsum, 1, &ff2, 0),
+            SetSlotConnectionsFlowMutation::new_single(&stillaxis.get_root(), 0, &fsum, 0),
+        ]);
+
+        // thread::sleep(Duration::from_millis(100));
+        stillaxis.run_mutation(&mut flow_mutation);
+        assert_mutation_response(&mut stillaxis);
+
+        stillaxis.send_value_request(&fsum, 0);
+        assert_value_response(&mut stillaxis, &CoreProviderValue::Float32(0.0));
+
+        let mut flow_mutation = FlowMutation::new(vec![SetSlotValueFlowMutation::new(
+            &ff1,
+            0,
+            CoreSlotDefault::Float32(10.0),
+        )]);
+        // thread::sleep(Duration::from_millis(100));
+        stillaxis.run_mutation(&mut flow_mutation);
+        assert_mutation_response(&mut stillaxis);
+
+        stillaxis.send_value_request(&fsum, 0);
+        assert_value_response(&mut stillaxis, &CoreProviderValue::Float32(10.0));
     }
 }

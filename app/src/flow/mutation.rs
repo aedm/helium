@@ -3,17 +3,18 @@ use crate::core::core_mutation::{
     SetSlotConnectionsCoreMutation,
 };
 use crate::core::node::{CoreProviderIndex, CoreSlotIndex};
-use crate::flow::dom::Dom;
+use crate::flow::dom::FlowDom;
 use crate::flow::flow_node::{FlowNodeRef, FlowSlotIndex};
 use crate::flow::topological_order::TopologicalOrder;
 use std::collections::HashSet;
 
 pub struct FlowMutationStepResult {
     pub changed_slots: Vec<FlowSlotIndex>,
+    pub core_mutations: Vec<Box<dyn CoreMutation>>,
 }
 
 pub trait FlowMutationStep {
-    fn run(&self, dom: &mut Dom) -> FlowMutationStepResult;
+    fn run(&self, dom: &mut FlowDom) -> FlowMutationStepResult;
 }
 
 pub struct FlowMutation {
@@ -29,19 +30,19 @@ impl FlowMutation {
         }
     }
 
-    pub fn run(&mut self, dom: &mut Dom) -> CoreMutationSequence {
+    pub fn run(&mut self, dom: &mut FlowDom) -> CoreMutationSequence {
+        let mut direct_core_mutations: Vec<Box<dyn CoreMutation>> = Vec::new();
         for step in &mut self.steps {
             let result = step.run(dom);
             for changed_slot in &result.changed_slots {
                 self.changed_slots.insert(changed_slot.clone());
             }
+            direct_core_mutations.extend(result.core_mutations);
         }
-        self.create_core_mutations()
+        self.create_core_mutations(direct_core_mutations)
     }
 
-    fn create_core_mutations(&self) -> CoreMutationSequence {
-        let mut steps = Vec::<Box<dyn CoreMutation>>::new();
-        println!("changed_slots: {:?}", &self.changed_slots.len());
+    fn create_core_mutations(&self, mut steps: Vec<Box<dyn CoreMutation>>) -> CoreMutationSequence {
         for flow_slot_index in &self.changed_slots {
             let flow_slot = &flow_slot_index.node.borrow().slots[flow_slot_index.slot_index];
             let connection: Vec<_> = flow_slot

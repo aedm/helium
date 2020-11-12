@@ -6,6 +6,7 @@ pub enum SlotType {
     Float32,
 }
 
+#[derive(Clone, Copy)]
 pub enum CoreSlotDefault {
     _None,
     Float32(f32),
@@ -25,7 +26,7 @@ pub struct CoreSlot {
 }
 
 impl CoreSlot {
-    fn new(
+    pub fn new(
         name: &str,
         allow_multiple: bool,
         inner: Box<dyn CoreSlotInner>,
@@ -40,9 +41,9 @@ impl CoreSlot {
         }
     }
 
-    // pub fn set_default(&mut self, default: CoreSlotDefault) {
-    //     self.default = default;
-    // }
+    pub fn set_default(&mut self, default: &CoreSlotDefault) {
+        self.default = *default;
+    }
 
     pub fn get_single_provider(&self) -> Option<&ACell<CoreProvider>> {
         match self.connection.len() {
@@ -60,7 +61,7 @@ pub struct FloatCoreSlot {
 impl FloatCoreSlot {
     pub fn new(name: &str) -> FloatCoreSlot {
         let inner = Box::new(FloatCoreSlotInner {});
-        let default = CoreSlotDefault::Float32(10.0);
+        let default = CoreSlotDefault::Float32(0.0);
         FloatCoreSlot {
             slot: ACell::new(CoreSlot::new(name, false, inner, default)),
         }

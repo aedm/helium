@@ -1,14 +1,17 @@
+use crate::core::core_dom::CoreDom;
 use crate::core::node::NodeId;
-use crate::flow::flow_node::FlowNodeRef;
+use crate::flow::flow_node::{FlowNode, FlowNodeRef};
 use std::collections::HashMap;
 
-pub struct Dom {
+pub struct FlowDom {
     flow_nodes: HashMap<NodeId, FlowNodeRef>,
+    pub flow_root: FlowNodeRef,
 }
 
-impl Dom {
-    pub fn new() -> Dom {
-        Dom {
+impl FlowDom {
+    pub fn new(core_dom: &CoreDom) -> FlowDom {
+        FlowDom {
+            flow_root: FlowNode::from_core_node(&core_dom.core_root),
             flow_nodes: Default::default(),
         }
     }

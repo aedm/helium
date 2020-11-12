@@ -1,10 +1,12 @@
 use crate::core::acell::ACell;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum CoreProviderValue {
     _None,
     Float32(f32),
 }
+
+impl Eq for CoreProviderValue {}
 
 pub struct CoreProvider {
     pub name: String,
