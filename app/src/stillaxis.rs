@@ -68,6 +68,7 @@ mod tests {
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
     use crate::stillaxis::Stillaxis;
+    use crate::flow::flow_node::FlowNode;
 
     fn get_incoming(stillaxis: &mut Stillaxis) -> Box<CoreMessage> {
         stillaxis
@@ -104,9 +105,15 @@ mod tests {
             CreateNodeFlowMutation::new(&ff1),
             CreateNodeFlowMutation::new(&ff2),
             CreateNodeFlowMutation::new(&fsum),
-            SetSlotConnectionsFlowMutation::new_single(&fsum, 0, &ff1, 0),
-            SetSlotConnectionsFlowMutation::new_single(&fsum, 1, &ff2, 0),
-            SetSlotConnectionsFlowMutation::new_single(&stillaxis.get_root(), 0, &fsum, 0),
+            SetSlotConnectionsFlowMutation::new_single(
+                FlowNode::get_slot_by_name(&fsum, "A"), &ff1, 0),
+            SetSlotConnectionsFlowMutation::new_single(
+                FlowNode::get_slot_by_name(&fsum, "B"), &ff2, 0),
+            SetSlotConnectionsFlowMutation::new_single(
+                FlowNode::get_slot_by_name(&stillaxis.get_root(), "all_nodes"), &fsum, 0),
+            // SetSlotConnectionsFlowMutation::new_single(&fsum, 0, &ff1, 0),
+            // SetSlotConnectionsFlowMutation::new_single(&fsum, 1, &ff2, 0),
+            // SetSlotConnectionsFlowMutation::new_single(&stillaxis.get_root(), 0, &fsum, 0),
         ]);
 
         // thread::sleep(Duration::from_millis(100));

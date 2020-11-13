@@ -20,12 +20,14 @@ pub struct FlowNode {
 pub type FlowNodeRef = RCell<FlowNode>;
 
 pub struct FlowSlot {
-    pub connections: Vec<FlowSlotIndex>,
+    pub name: String,
+    pub connections: Vec<FlowProviderIndex>,
 }
 
 impl FlowSlot {
-    fn from_core_slot(_core_slot: &CoreSlot) -> FlowSlot {
+    fn from_core_slot(core_slot: &CoreSlot) -> FlowSlot {
         FlowSlot {
+            name: core_slot.name.clone(),
             // TODO
             connections: Vec::new(),
         }
@@ -77,6 +79,14 @@ impl FlowNode {
             slots,
             providers,
         })
+    }
+
+    pub fn get_slot_by_name(node: &FlowNodeRef, name: &str) -> FlowSlotIndex {
+        let index = node.borrow().slots.iter().position(|x| x.name == name).unwrap();
+        FlowSlotIndex {
+            node: node.clone(),
+            slot_index: index,
+        }
     }
 }
 

@@ -91,8 +91,6 @@ impl CoreDom {
             })
             .unwrap();
 
-        core_root.borrow_mut().seal(join_handle.thread().id());
-
         CoreDom {
             core_root,
             join_handle: Some(join_handle),

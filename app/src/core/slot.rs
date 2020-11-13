@@ -18,7 +18,7 @@ pub trait CoreSlotInner {
 }
 
 pub struct CoreSlot {
-    _name: String,
+    pub name: String,
     pub connection: Vec<ACell<CoreProvider>>,
     _allow_multiple: bool,
     pub inner: Box<dyn CoreSlotInner>,
@@ -33,7 +33,7 @@ impl CoreSlot {
         default: CoreSlotDefault,
     ) -> CoreSlot {
         CoreSlot {
-            _name: name.to_string(),
+            name: name.to_string(),
             connection: vec![],
             _allow_multiple: allow_multiple,
             inner,
