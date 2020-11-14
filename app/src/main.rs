@@ -14,6 +14,8 @@ mod core;
 mod flow;
 mod nodes;
 mod stillaxis;
+mod slots;
+mod providers;
 
 fn main() {
     thread::sleep(Duration::from_millis(1000));

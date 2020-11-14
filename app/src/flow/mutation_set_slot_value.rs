@@ -12,14 +12,11 @@ pub struct SetSlotValueFlowMutation {
 impl SetSlotValueFlowMutation {
     pub fn new(
         slot_node: &FlowNodeRef,
-        slot_index: usize,
+        slot_name: &str,
         value: CoreSlotDefault,
     ) -> Box<SetSlotValueFlowMutation> {
         Box::new(SetSlotValueFlowMutation {
-            node_slot: FlowSlotIndex {
-                node: slot_node.clone(),
-                slot_index,
-            },
+            node_slot: FlowSlotIndex::new(slot_node, slot_name),
             value,
         })
     }

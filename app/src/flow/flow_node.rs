@@ -35,12 +35,14 @@ impl FlowSlot {
 }
 
 pub struct FlowProvider {
+    pub name: String,
     pub connections: Vec<FlowSlotIndex>,
 }
 
 impl FlowProvider {
-    fn from_core_provider(_core_provider: &CoreProvider) -> FlowProvider {
+    fn from_core_provider(core_provider: &CoreProvider) -> FlowProvider {
         FlowProvider {
+            name: core_provider.name.clone(),
             // TODO
             connections: Vec::new(),
         }
@@ -80,18 +82,40 @@ impl FlowNode {
             providers,
         })
     }
-
-    pub fn get_slot_by_name(node: &FlowNodeRef, name: &str) -> FlowSlotIndex {
-        let index = node.borrow().slots.iter().position(|x| x.name == name).unwrap();
-        FlowSlotIndex {
-            node: node.clone(),
-            slot_index: index,
-        }
-    }
 }
 
 impl Debug for FlowNode {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.write_str(&format!("{}", self.id))
+    }
+}
+
+impl Drop for FlowNode {
+    fn drop(&mut self) {
+        println!("Flow node drop: {}, core refcount: {}", self.id, self.core_node.refc());
+    }
+}
+
+impl FlowSlotIndex {
+    pub fn new(node: &FlowNodeRef, name: &str) -> FlowSlotIndex {
+        if let Some(index) = node.borrow().slots.iter().position(|x| x.name == name) {
+            return FlowSlotIndex {
+                node: node.clone(),
+                slot_index: index,
+            }
+        }
+        panic!("Slot not found: '{}'", name);
+    }
+}
+
+impl FlowProviderIndex {
+    pub fn new(node: &FlowNodeRef, name: &str) -> FlowProviderIndex {
+        if let Some(index) = node.borrow().providers.iter().position(|x| x.name == name) {
+            return FlowProviderIndex {
+                node: node.clone(),
+                provider_index: index,
+            }
+        }
+        panic!("Provider not found: '{}'", name);
     }
 }

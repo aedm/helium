@@ -1,8 +1,10 @@
 use crate::core::acell::ACell;
 use crate::core::node::NodeInner;
-use crate::core::provider::{CoreProvider, FloatCoreProvider};
-use crate::core::slot::{CoreSlot, FloatCoreSlot};
+use crate::core::provider::{CoreProvider};
+use crate::core::slot::{CoreSlot};
 use std::any::{Any, TypeId};
+use crate::slots::float_slot::FloatCoreSlot;
+use crate::providers::float_provider::FloatCoreProvider;
 
 pub struct SumNode {
     pub a: FloatCoreSlot,
@@ -13,9 +15,9 @@ pub struct SumNode {
 impl NodeInner for SumNode {
     fn new() -> SumNode {
         SumNode {
-            a: FloatCoreSlot::new("A"),
-            b: FloatCoreSlot::new("B"),
-            sum: FloatCoreProvider::new("Sum"),
+            a: FloatCoreSlot::new("a"),
+            b: FloatCoreSlot::new("b"),
+            sum: FloatCoreProvider::new("sum"),
         }
     }
 

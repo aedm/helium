@@ -9,17 +9,13 @@ pub struct SetSlotConnectionsFlowMutation {
 }
 
 impl SetSlotConnectionsFlowMutation {
-    pub fn new_single(
-        slot: FlowSlotIndex,
-        provider_node: &FlowNodeRef,
-        provider_index: usize,
+    pub fn new(
+        node_slot: FlowSlotIndex,
+        connections: Vec<FlowProviderIndex>,
     ) -> Box<SetSlotConnectionsFlowMutation> {
         Box::new(SetSlotConnectionsFlowMutation {
-            node_slot: slot,
-            connections: vec![FlowProviderIndex {
-                node: provider_node.clone(),
-                provider_index
-            }],
+            node_slot,
+            connections,
         })
     }
 }

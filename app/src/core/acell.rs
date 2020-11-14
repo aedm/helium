@@ -33,6 +33,10 @@ impl<T> ACell<T> {
         }
     }
 
+    pub fn refc(&self) -> usize {
+        Arc::strong_count(&self.reference)
+    }
+
     // pub fn downgrade(&self) -> AWeak<T> {
     //     AWeak {
     //         _reference: Arc::downgrade(&self.reference),
