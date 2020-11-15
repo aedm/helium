@@ -8,13 +8,11 @@ pub mod slot;
 
 #[cfg(test)]
 mod module_tests {
-    use crate::core::core_mutation::{
-        CoreMutationSequence, SetNodeDependencyListCoreMutation, SetSlotConnectionsCoreMutation,
-    };
     use crate::core::node::{CoreNode, CoreProviderIndex, CoreSlotIndex};
     use crate::core::provider::CoreProviderValue;
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
+    use crate::core::core_mutation::CoreMutationSequence;
 
     #[test]
     fn generates_simple_sum_graph() {
@@ -22,7 +20,7 @@ mod module_tests {
         let f2 = CoreNode::new::<FloatNode>();
         let sum = CoreNode::new::<SumNode>();
 
-        let conn_1 = Box::new(SetSlotConnectionsCoreMutation {
+        let conn_1 = Box::new( SetSlotConnectionsCoreMutation {
             slot: CoreSlotIndex {
                 node: sum.clone(),
                 slot_index: 0,

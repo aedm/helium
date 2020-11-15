@@ -47,24 +47,18 @@ fn main() {
     let fsum = stillaxis.new_node::<SumNode>();
     {
         let ff1 = stillaxis.new_node::<FloatNode>();
-        let ff2 = stillaxis.new_node::<FloatNode>();
         let _ff3 = stillaxis.new_node::<FloatNode>();
 
         let mut flow_mutation = FlowMutation::new(vec![
             CreateNodeFlowMutation::new(&ff1),
-            CreateNodeFlowMutation::new(&ff2),
             CreateNodeFlowMutation::new(&fsum),
-            SetSlotConnectionsFlowMutation::new(
-                FlowSlotIndex::new(&fsum, "a"),
-                vec![FlowProviderIndex::new(&ff1, "value")],
-            ),
-            SetSlotConnectionsFlowMutation::new(
-                FlowSlotIndex::new(&fsum, "b"),
-                vec![FlowProviderIndex::new(&ff2, "value")],
-            ),
             SetSlotConnectionsFlowMutation::new(
                 FlowSlotIndex::new(&stillaxis.get_root(), "all_nodes"),
                 vec![FlowProviderIndex::new(&fsum, "sum")],
+            ),
+            SetSlotConnectionsFlowMutation::new(
+                FlowSlotIndex::new(&fsum, "a"),
+                vec![FlowProviderIndex::new(&ff1, "value")],
             ),
             SetSlotValueFlowMutation::new(&ff1, "a", CoreSlotDefault::Float32(10.0)),
         ]);

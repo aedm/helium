@@ -9,6 +9,8 @@ pub type CoreNodeRef = ACell<CoreNode>;
 pub type NodeId = u64;
 
 pub struct CoreNode {
+    // pub type_name: &'static str,
+    // pub name: String,
     pub slots: Vec<ACell<CoreSlot>>,
     pub providers: Vec<ACell<CoreProvider>>,
     pub inner: Box<dyn NodeInner>,
