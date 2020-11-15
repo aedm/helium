@@ -1,5 +1,5 @@
 use crate::core::acell::ACell;
-use crate::core::provider::{CoreProvider, CoreProviderValue};
+use crate::core::provider::{CoreProvider};
 
 pub enum SlotType {
     _Custom,
