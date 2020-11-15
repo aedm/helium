@@ -10,6 +10,7 @@ use crate::flow::mutation_set_slot_value::SetSlotValueFlowMutation;
 use crate::nodes::float_node::FloatNode;
 use crate::nodes::sum_node::SumNode;
 use crate::stillaxis::Stillaxis;
+use std::borrow::Borrow;
 
 mod core;
 mod flow;
@@ -44,10 +45,14 @@ fn assert_value_response(stillaxis: &mut Stillaxis, value: &CoreProviderValue) {
 fn main() {
     let mut stillaxis = Stillaxis::new();
 
+    let mut _c1;
+    let csum;
     let fsum = stillaxis.new_node::<SumNode>();
     {
         let ff1 = stillaxis.new_node::<FloatNode>();
-        let _ff3 = stillaxis.new_node::<FloatNode>();
+
+        _c1 = Some(ff1.borrow().core_node.clone());
+        csum = fsum.borrow().core_node.clone();
 
         let mut flow_mutation = FlowMutation::new(vec![
             CreateNodeFlowMutation::new(&ff1),
@@ -56,37 +61,26 @@ fn main() {
                 FlowSlotIndex::new(&stillaxis.get_root(), "all_nodes"),
                 vec![FlowProviderIndex::new(&fsum, "sum")],
             ),
-            SetSlotConnectionsFlowMutation::new(
-                FlowSlotIndex::new(&fsum, "a"),
-                vec![FlowProviderIndex::new(&ff1, "value")],
-            ),
-            SetSlotValueFlowMutation::new(&ff1, "a", CoreSlotDefault::Float32(10.0)),
         ]);
 
-        // thread::sleep(Duration::from_millis(100));
         stillaxis.run_mutation(&mut flow_mutation);
         assert_mutation_response(&mut stillaxis);
+        assert!(_c1.as_ref().unwrap().refc() > 1);
+        assert!(csum.refc() > 1);
 
         stillaxis.send_value_request(&fsum, 0);
-        assert_value_response(&mut stillaxis, &CoreProviderValue::Float32(10.0));
+        assert_value_response(&mut stillaxis, &CoreProviderValue::Float32(0.0));
 
         let mut flow_mutation = FlowMutation::new(vec![
             SetSlotConnectionsFlowMutation::new(FlowSlotIndex::new(&fsum, "a"), vec![]),
             RemoveNodeFlowMutation::new(&ff1),
         ]);
-        // println!("0 {:?}", stillaxis.flow_dom.flow_nodes.iter().collect::<Vec<_>>());
         stillaxis.run_mutation(&mut flow_mutation);
     }
-    println!(
-        "1 {:?}",
-        stillaxis.flow_dom.flow_nodes.iter().collect::<Vec<_>>()
-    );
+    // TODO: last reference should be held by mutation object
+    // assert!(_c1.as_ref().unwrap().refc() > 1);
     assert_mutation_response(&mut stillaxis);
-    println!(
-        "2 {:?}",
-        stillaxis.flow_dom.flow_nodes.iter().collect::<Vec<_>>()
-    );
-
-    stillaxis.send_value_request(&fsum, 0);
-    assert_value_response(&mut stillaxis, &CoreProviderValue::Float32(0.0));
+    assert_eq!(_c1.as_ref().unwrap().refc(), 1);
+    assert!(csum.refc() > 1);
+    _c1 = None;
 }

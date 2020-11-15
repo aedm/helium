@@ -201,4 +201,6 @@ mod tests {
         stillaxis.send_value_request(&fsum, 0);
         assert_value_response(&mut stillaxis, &CoreProviderValue::Float32(0.0));
     }
+
+
 }

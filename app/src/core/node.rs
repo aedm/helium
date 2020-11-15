@@ -4,13 +4,15 @@ use crate::core::slot::CoreSlot;
 use std::any::{Any, TypeId};
 use std::thread;
 use std::thread::ThreadId;
+use std::fmt::{Debug, Formatter};
+use core::fmt;
 
-pub type CoreNodeRef = ACell<CoreNode>;
 pub type NodeId = u64;
+pub type CoreNodeRef = ACell<CoreNode>;
 
 pub struct CoreNode {
-    // pub type_name: &'static str,
-    // pub name: String,
+    pub id: NodeId,
+    pub name: String,
     pub slots: Vec<ACell<CoreSlot>>,
     pub providers: Vec<ACell<CoreProvider>>,
     pub inner: Box<dyn NodeInner>,
@@ -41,12 +43,15 @@ pub trait NodeInner {
     fn run(&mut self) {}
     fn type_id(&self) -> TypeId;
     fn as_any(&self) -> &dyn Any;
+    fn get_type_name(&self) -> &'static str;
 }
 
 impl CoreNode {
-    pub fn new<T: 'static + NodeInner>() -> CoreNodeRef {
+    pub fn new<T: 'static + NodeInner>(id: NodeId) -> CoreNodeRef {
         let inner = Box::new(T::new());
         let rf = ACell::new(CoreNode {
+            id,
+            name: format!("{}-{}", inner.get_type_name(), id),
             dependency_list: vec![],
             slots: inner.get_slots(),
             providers: inner.get_providers(),
@@ -80,10 +85,16 @@ impl CoreNode {
     }
 }
 
+impl Debug for CoreNode {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.write_str(&format!("'{}'({})", self.name, self.id))
+    }
+}
+
 impl Drop for CoreNode {
     fn drop(&mut self) {
         // Core node should never be deallocated on the render thread
         debug_assert!(self.check_render_thread(false));
-        println!("Core node drop");
+        println!("Core node drop: {:?}", self);
     }
 }

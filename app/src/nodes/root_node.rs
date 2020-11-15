@@ -26,4 +26,8 @@ impl NodeInner for CoreRootNode {
     fn as_any(&self) -> &dyn Any {
         self
     }
+
+    fn get_type_name(&self) -> &'static str {
+        "root"
+    }
 }
