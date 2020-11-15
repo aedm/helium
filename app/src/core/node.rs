@@ -82,5 +82,6 @@ impl Drop for CoreNode {
     fn drop(&mut self) {
         // Core node should never be deallocated on the render thread
         debug_assert!(self.check_render_thread(false));
+        println!("Core node drop");
     }
 }

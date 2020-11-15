@@ -61,8 +61,10 @@ mod tests {
     use crate::core::core_dom::CoreMessage;
     use crate::core::provider::CoreProviderValue;
     use crate::core::slot::CoreSlotDefault;
+    use crate::flow::flow_node::{FlowNode, FlowProviderIndex, FlowSlotIndex};
     use crate::flow::mutation::FlowMutation;
     use crate::flow::mutation_create_node::CreateNodeFlowMutation;
+    use crate::flow::mutation_remove_node::RemoveNodeFlowMutation;
     use crate::flow::mutation_set_connections::SetSlotConnectionsFlowMutation;
     use crate::flow::mutation_set_slot_value::SetSlotValueFlowMutation;
     use crate::nodes::float_node::FloatNode;
@@ -79,6 +81,11 @@ mod tests {
 
     fn assert_mutation_response(stillaxis: &mut Stillaxis) {
         let message = get_incoming(stillaxis);
+        if let CoreMessage::Mutate(x) = message.as_ref() {
+            for msg in &x.steps {
+                // msg;
+            }
+        }
         assert!(matches!(message.as_ref(), CoreMessage::Mutate { .. }));
     }
 
@@ -104,9 +111,18 @@ mod tests {
             CreateNodeFlowMutation::new(&ff1),
             CreateNodeFlowMutation::new(&ff2),
             CreateNodeFlowMutation::new(&fsum),
-            SetSlotConnectionsFlowMutation::new_single(&fsum, 0, &ff1, 0),
-            SetSlotConnectionsFlowMutation::new_single(&fsum, 1, &ff2, 0),
-            SetSlotConnectionsFlowMutation::new_single(&stillaxis.get_root(), 0, &fsum, 0),
+            SetSlotConnectionsFlowMutation::new(
+                FlowSlotIndex::new(&fsum, "a"),
+                vec![FlowProviderIndex::new(&ff1, "value")],
+            ),
+            SetSlotConnectionsFlowMutation::new(
+                FlowSlotIndex::new(&fsum, "b"),
+                vec![FlowProviderIndex::new(&ff2, "value")],
+            ),
+            SetSlotConnectionsFlowMutation::new(
+                FlowSlotIndex::new(&stillaxis.get_root(), "all_nodes"),
+                vec![FlowProviderIndex::new(&fsum, "sum")],
+            ),
         ]);
 
         // thread::sleep(Duration::from_millis(100));
@@ -118,7 +134,7 @@ mod tests {
 
         let mut flow_mutation = FlowMutation::new(vec![SetSlotValueFlowMutation::new(
             &ff1,
-            0,
+            "a",
             CoreSlotDefault::Float32(10.0),
         )]);
         // thread::sleep(Duration::from_millis(100));
@@ -127,5 +143,62 @@ mod tests {
 
         stillaxis.send_value_request(&fsum, 0);
         assert_value_response(&mut stillaxis, &CoreProviderValue::Float32(10.0));
+    }
+
+    #[test]
+    fn dont_drop_nodes_on_render_thread() {
+        let mut stillaxis = Stillaxis::new();
+
+        let fsum = stillaxis.new_node::<SumNode>();
+        {
+            let ff1 = stillaxis.new_node::<FloatNode>();
+            let ff2 = stillaxis.new_node::<FloatNode>();
+            let ff3 = stillaxis.new_node::<FloatNode>();
+
+            let mut flow_mutation = FlowMutation::new(vec![
+                CreateNodeFlowMutation::new(&ff1),
+                CreateNodeFlowMutation::new(&ff2),
+                CreateNodeFlowMutation::new(&fsum),
+                SetSlotConnectionsFlowMutation::new(
+                    FlowSlotIndex::new(&fsum, "a"),
+                    vec![FlowProviderIndex::new(&ff1, "value")],
+                ),
+                SetSlotConnectionsFlowMutation::new(
+                    FlowSlotIndex::new(&fsum, "b"),
+                    vec![FlowProviderIndex::new(&ff2, "value")],
+                ),
+                SetSlotConnectionsFlowMutation::new(
+                    FlowSlotIndex::new(&stillaxis.get_root(), "all_nodes"),
+                    vec![FlowProviderIndex::new(&fsum, "sum")],
+                ),
+                SetSlotValueFlowMutation::new(&ff1, "a", CoreSlotDefault::Float32(10.0)),
+            ]);
+
+            // thread::sleep(Duration::from_millis(100));
+            stillaxis.run_mutation(&mut flow_mutation);
+            assert_mutation_response(&mut stillaxis);
+
+            stillaxis.send_value_request(&fsum, 0);
+            assert_value_response(&mut stillaxis, &CoreProviderValue::Float32(10.0));
+
+            let mut flow_mutation = FlowMutation::new(vec![
+                SetSlotConnectionsFlowMutation::new(FlowSlotIndex::new(&fsum, "a"), vec![]),
+                RemoveNodeFlowMutation::new(&ff1),
+            ]);
+            // println!("0 {:?}", stillaxis.flow_dom.flow_nodes.iter().collect::<Vec<_>>());
+            stillaxis.run_mutation(&mut flow_mutation);
+        }
+        println!(
+            "1 {:?}",
+            stillaxis.flow_dom.flow_nodes.iter().collect::<Vec<_>>()
+        );
+        assert_mutation_response(&mut stillaxis);
+        println!(
+            "2 {:?}",
+            stillaxis.flow_dom.flow_nodes.iter().collect::<Vec<_>>()
+        );
+
+        stillaxis.send_value_request(&fsum, 0);
+        assert_value_response(&mut stillaxis, &CoreProviderValue::Float32(0.0));
     }
 }

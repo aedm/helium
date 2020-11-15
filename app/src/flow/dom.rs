@@ -4,7 +4,7 @@ use crate::flow::flow_node::{FlowNode, FlowNodeRef};
 use std::collections::HashMap;
 
 pub struct FlowDom {
-    flow_nodes: HashMap<NodeId, FlowNodeRef>,
+    pub flow_nodes: HashMap<NodeId, FlowNodeRef>,
     pub flow_root: FlowNodeRef,
 }
 
@@ -21,7 +21,7 @@ impl FlowDom {
             .insert(flow_node.borrow().id, flow_node.clone());
     }
 
-    // pub fn remove_flow_node(&mut self, node_id: NodeId) {
-    //     self.flow_nodes.remove(&node_id);
-    // }
+    pub fn remove_flow_node(&mut self, flow_node: &FlowNodeRef) {
+        self.flow_nodes.remove(&flow_node.borrow().id);
+    }
 }

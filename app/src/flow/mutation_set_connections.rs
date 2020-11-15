@@ -1,29 +1,21 @@
 use super::dom::FlowDom;
 use super::flow_node::FlowSlotIndex;
 use super::mutation::{FlowMutationStep, FlowMutationStepResult};
-use crate::flow::flow_node::FlowNodeRef;
+use crate::flow::flow_node::FlowProviderIndex;
 
 pub struct SetSlotConnectionsFlowMutation {
     pub node_slot: FlowSlotIndex,
-    pub connections: Vec<FlowSlotIndex>,
+    pub connections: Vec<FlowProviderIndex>,
 }
 
 impl SetSlotConnectionsFlowMutation {
-    pub fn new_single(
-        slot_node: &FlowNodeRef,
-        slot_index: usize,
-        provider_node: &FlowNodeRef,
-        provider_index: usize,
+    pub fn new(
+        node_slot: FlowSlotIndex,
+        connections: Vec<FlowProviderIndex>,
     ) -> Box<SetSlotConnectionsFlowMutation> {
         Box::new(SetSlotConnectionsFlowMutation {
-            node_slot: FlowSlotIndex {
-                node: slot_node.clone(),
-                slot_index,
-            },
-            connections: vec![FlowSlotIndex {
-                node: provider_node.clone(),
-                slot_index: provider_index,
-            }],
+            node_slot,
+            connections,
         })
     }
 }

@@ -50,7 +50,7 @@ impl FlowMutation {
                 .iter()
                 .map(|x| CoreProviderIndex {
                     node: x.node.borrow().core_node.clone(),
-                    provider_index: x.slot_index,
+                    provider_index: x.provider_index,
                 })
                 .collect();
             let item_count = connection.len();

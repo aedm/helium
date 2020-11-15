@@ -32,7 +32,7 @@ impl TopologicalOrder {
 #[cfg(test)]
 mod tests {
     use crate::core::node::CoreNode;
-    use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowSlotIndex};
+    use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowProviderIndex, FlowSlotIndex};
     use crate::flow::topological_order::TopologicalOrder;
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
@@ -43,9 +43,9 @@ mod tests {
         provider_node: &FlowNodeRef,
         provider_index: usize,
     ) {
-        slot_node.borrow_mut().slots[slot_index].connections = vec![FlowSlotIndex {
+        slot_node.borrow_mut().slots[slot_index].connections = vec![FlowProviderIndex {
             node: provider_node.clone(),
-            slot_index: provider_index,
+            provider_index,
         }];
     }
 

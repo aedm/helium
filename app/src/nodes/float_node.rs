@@ -1,7 +1,9 @@
 use crate::core::acell::ACell;
 use crate::core::node::NodeInner;
-use crate::core::provider::{CoreProvider, FloatCoreProvider};
-use crate::core::slot::{CoreSlot, FloatCoreSlot};
+use crate::core::provider::CoreProvider;
+use crate::core::slot::CoreSlot;
+use crate::providers::float_provider::FloatCoreProvider;
+use crate::slots::float_slot::FloatCoreSlot;
 use std::any::{Any, TypeId};
 
 pub struct FloatNode {
@@ -12,8 +14,8 @@ pub struct FloatNode {
 impl NodeInner for FloatNode {
     fn new() -> FloatNode {
         FloatNode {
-            a: FloatCoreSlot::new("A"),
-            out: FloatCoreProvider::new("Value"),
+            a: FloatCoreSlot::new("a"),
+            out: FloatCoreProvider::new("value"),
         }
     }
 

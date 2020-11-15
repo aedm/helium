@@ -47,6 +47,13 @@ impl CoreMutation for SetSlotConnectionsCoreMutation {
     }
 }
 
+impl Drop for SetSlotConnectionsCoreMutation {
+    fn drop(&mut self) {
+        println!("Drop for SetSlotConnectionsCoreMutation");
+        println!(" -- {:?}", self.swap_vector.iter().collect::<Vec<_>>())
+    }
+}
+
 pub struct SetNodeDependencyListCoreMutation {
     pub node: CoreNodeRef,
     pub dependency_list: Vec<CoreNodeRef>,
@@ -58,6 +65,12 @@ impl CoreMutation for SetNodeDependencyListCoreMutation {
             &mut self.node.borrow_mut().dependency_list,
             &mut self.dependency_list,
         );
+    }
+}
+
+impl Drop for SetNodeDependencyListCoreMutation {
+    fn drop(&mut self) {
+        println!("Drop for SetNodeDependencyListCoreMutation");
     }
 }
 
