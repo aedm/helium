@@ -39,4 +39,8 @@ impl NodeInner for FloatNode {
     fn as_any(&self) -> &dyn Any {
         self
     }
+
+    fn get_type_name(&self) -> &'static str {
+        "float"
+    }
 }

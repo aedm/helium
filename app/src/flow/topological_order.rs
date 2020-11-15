@@ -51,10 +51,10 @@ mod tests {
 
     #[test]
     fn generates_correct_topological_order() {
-        let float1 = CoreNode::new::<FloatNode>();
-        let float2 = CoreNode::new::<FloatNode>();
-        let sum1 = CoreNode::new::<SumNode>();
-        let sum2 = CoreNode::new::<SumNode>();
+        let float1 = CoreNode::new::<FloatNode>(1);
+        let float2 = CoreNode::new::<FloatNode>(2);
+        let sum1 = CoreNode::new::<SumNode>(3);
+        let sum2 = CoreNode::new::<SumNode>(4);
 
         let core_nodes = vec![&float1, &float2, &sum1, &sum2];
         let flow_nodes: Vec<_> = core_nodes

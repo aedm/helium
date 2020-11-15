@@ -3,6 +3,7 @@ use crate::core::core_mutation::CoreMutationSequence;
 use crate::core::node::{CoreNode, CoreNodeRef, CoreProviderIndex, NodeInner};
 use crate::core::provider::CoreProviderValue;
 use crate::nodes::root_node::CoreRootNode;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
 use std::thread::{JoinHandle, ThreadId};
@@ -23,6 +24,7 @@ pub struct CoreDom {
     join_handle: Option<JoinHandle<()>>,
     pub sender_to_render_thread: Sender<Box<CoreMessage>>,
     pub receiver_from_render_thread: Receiver<Box<CoreMessage>>,
+    node_id_generator: AtomicU64,
 }
 
 pub struct RenderThread {
@@ -75,7 +77,7 @@ impl CoreDom {
     pub fn new() -> CoreDom {
         let (sender_to_render_thread, receiver_to_render_thread) = channel();
         let (sender_from_render_thread, receiver_from_render_thread) = channel();
-        let core_root = CoreNode::new::<CoreRootNode>();
+        let core_root = CoreNode::new::<CoreRootNode>(0);
 
         let mut render_thread = RenderThread {
             receiver_to_render_thread,
@@ -96,11 +98,13 @@ impl CoreDom {
             join_handle: Some(join_handle),
             sender_to_render_thread,
             receiver_from_render_thread,
+            node_id_generator: AtomicU64::new(1),
         }
     }
 
     pub fn new_node<T: 'static + NodeInner>(&self) -> CoreNodeRef {
-        let core_node = CoreNode::new::<T>();
+        let id = self.node_id_generator.fetch_add(1, Ordering::Relaxed);
+        let core_node = CoreNode::new::<T>(id);
         core_node.borrow_mut().seal(self.get_render_thread_id());
         core_node
     }

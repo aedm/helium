@@ -1,6 +1,5 @@
 use crate::core::core_mutation::{
-    CoreMutation, CoreMutationSequence, SetNodeDependencyListCoreMutation,
-    SetSlotConnectionsCoreMutation,
+    CoreMutation, CoreMutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
 };
 use crate::core::node::{CoreProviderIndex, CoreSlotIndex};
 use crate::flow::dom::FlowDom;
@@ -10,7 +9,7 @@ use std::collections::HashSet;
 
 pub struct FlowMutationStepResult {
     pub changed_slots: Vec<FlowSlotIndex>,
-    pub core_mutations: Vec<Box<dyn CoreMutation>>,
+    pub core_mutations: Vec<CoreMutation>,
 }
 
 pub trait FlowMutationStep {
@@ -31,7 +30,7 @@ impl FlowMutation {
     }
 
     pub fn run(&mut self, dom: &mut FlowDom) -> CoreMutationSequence {
-        let mut direct_core_mutations: Vec<Box<dyn CoreMutation>> = Vec::new();
+        let mut direct_core_mutations: Vec<CoreMutation> = Vec::new();
         for step in &mut self.steps {
             let result = step.run(dom);
             for changed_slot in &result.changed_slots {
@@ -42,7 +41,7 @@ impl FlowMutation {
         self.create_core_mutations(direct_core_mutations)
     }
 
-    fn create_core_mutations(&self, mut steps: Vec<Box<dyn CoreMutation>>) -> CoreMutationSequence {
+    fn create_core_mutations(&self, mut steps: Vec<CoreMutation>) -> CoreMutationSequence {
         for flow_slot_index in &self.changed_slots {
             let flow_slot = &flow_slot_index.node.borrow().slots[flow_slot_index.slot_index];
             let connection: Vec<_> = flow_slot
@@ -54,15 +53,15 @@ impl FlowMutation {
                 })
                 .collect();
             let item_count = connection.len();
-            let core_mutation = SetSlotConnectionsCoreMutation {
+            let core_mutation = CoreMutation::SetSlotConnections(SetSlotConnectionsParams {
                 slot: CoreSlotIndex {
                     node: flow_slot_index.node.borrow().core_node.clone(),
                     slot_index: flow_slot_index.slot_index,
                 },
                 connection,
                 swap_vector: Vec::with_capacity(item_count),
-            };
-            steps.push(Box::new(core_mutation));
+            });
+            steps.push(core_mutation);
         }
         let mut set: HashSet<FlowNodeRef> = HashSet::new();
         for flow_slot_index in &self.changed_slots {
@@ -76,11 +75,11 @@ impl FlowMutation {
                 .iter()
                 .map(|x| x.borrow().core_node.clone())
                 .collect();
-            let core_mutation = SetNodeDependencyListCoreMutation {
+            let core_mutation = CoreMutation::SetNodeDependencyList(SetNodeDependencyListParams {
                 node: flow_node.borrow().core_node.clone(),
                 dependency_list,
-            };
-            steps.push(Box::new(core_mutation));
+            });
+            steps.push(core_mutation);
         }
         CoreMutationSequence::new(steps)
     }

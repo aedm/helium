@@ -4,16 +4,45 @@ use crate::core::provider::CoreProvider;
 use crate::core::slot::CoreSlotDefault;
 use std::mem;
 
-pub trait CoreMutation {
-    fn run(&mut self);
+pub struct CoreMutationSequence {
+    pub steps: Vec<CoreMutation>,
 }
 
-pub struct CoreMutationSequence {
-    pub steps: Vec<Box<dyn CoreMutation>>,
+pub enum CoreMutation {
+    SetSlotConnections(SetSlotConnectionsParams),
+    SetNodeDependencyList(SetNodeDependencyListParams),
+    SetSlotDefaultValue(SetSlotDefaultValueParams),
+}
+
+pub struct SetSlotConnectionsParams {
+    pub slot: CoreSlotIndex,
+    pub connection: Vec<CoreProviderIndex>,
+    pub swap_vector: Vec<ACell<CoreProvider>>,
+}
+
+pub struct SetNodeDependencyListParams {
+    pub node: CoreNodeRef,
+    pub dependency_list: Vec<CoreNodeRef>,
+}
+
+pub struct SetSlotDefaultValueParams {
+    pub node: CoreNodeRef,
+    pub slot_index: usize,
+    pub value: CoreSlotDefault,
+}
+
+impl CoreMutation {
+    fn run(&mut self) {
+        match self {
+            CoreMutation::SetSlotConnections(x) => x.run(),
+            CoreMutation::SetNodeDependencyList(x) => x.run(),
+            CoreMutation::SetSlotDefaultValue(x) => x.run(),
+        }
+    }
 }
 
 impl CoreMutationSequence {
-    pub fn new(steps: Vec<Box<dyn CoreMutation>>) -> CoreMutationSequence {
+    pub fn new(steps: Vec<CoreMutation>) -> CoreMutationSequence {
         CoreMutationSequence { steps }
     }
 
@@ -24,13 +53,7 @@ impl CoreMutationSequence {
     }
 }
 
-pub struct SetSlotConnectionsCoreMutation {
-    pub slot: CoreSlotIndex,
-    pub connection: Vec<CoreProviderIndex>,
-    pub swap_vector: Vec<ACell<CoreProvider>>,
-}
-
-impl CoreMutation for SetSlotConnectionsCoreMutation {
+impl SetSlotConnectionsParams {
     fn run(&mut self) {
         debug_assert_eq!(self.swap_vector.len(), 0);
         debug_assert_eq!(self.swap_vector.capacity(), self.connection.len());
@@ -47,19 +70,7 @@ impl CoreMutation for SetSlotConnectionsCoreMutation {
     }
 }
 
-impl Drop for SetSlotConnectionsCoreMutation {
-    fn drop(&mut self) {
-        println!("Drop for SetSlotConnectionsCoreMutation");
-        println!(" -- {:?}", self.swap_vector.iter().collect::<Vec<_>>())
-    }
-}
-
-pub struct SetNodeDependencyListCoreMutation {
-    pub node: CoreNodeRef,
-    pub dependency_list: Vec<CoreNodeRef>,
-}
-
-impl CoreMutation for SetNodeDependencyListCoreMutation {
+impl SetNodeDependencyListParams {
     fn run(&mut self) {
         mem::swap(
             &mut self.node.borrow_mut().dependency_list,
@@ -68,19 +79,7 @@ impl CoreMutation for SetNodeDependencyListCoreMutation {
     }
 }
 
-impl Drop for SetNodeDependencyListCoreMutation {
-    fn drop(&mut self) {
-        println!("Drop for SetNodeDependencyListCoreMutation");
-    }
-}
-
-pub struct SetSlotDefaultValueCoreMutation {
-    pub node: CoreNodeRef,
-    pub slot_index: usize,
-    pub value: CoreSlotDefault,
-}
-
-impl CoreMutation for SetSlotDefaultValueCoreMutation {
+impl SetSlotDefaultValueParams {
     fn run(&mut self) {
         let node = self.node.borrow_mut();
         let mut slot = node.slots[self.slot_index].borrow_mut();

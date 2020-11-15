@@ -41,4 +41,8 @@ impl NodeInner for SumNode {
     fn as_any(&self) -> &dyn Any {
         self
     }
+
+    fn get_type_name(&self) -> &'static str {
+        "sum_floats"
+    }
 }

@@ -9,7 +9,7 @@ pub mod slot;
 #[cfg(test)]
 mod module_tests {
     use crate::core::core_mutation::{
-        CoreMutationSequence, SetNodeDependencyListCoreMutation, SetSlotConnectionsCoreMutation,
+        CoreMutation, CoreMutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
     };
     use crate::core::node::{CoreNode, CoreProviderIndex, CoreSlotIndex};
     use crate::core::provider::CoreProviderValue;
@@ -18,11 +18,11 @@ mod module_tests {
 
     #[test]
     fn generates_simple_sum_graph() {
-        let f1 = CoreNode::new::<FloatNode>();
-        let f2 = CoreNode::new::<FloatNode>();
-        let sum = CoreNode::new::<SumNode>();
+        let f1 = CoreNode::new::<FloatNode>(1);
+        let f2 = CoreNode::new::<FloatNode>(2);
+        let sum = CoreNode::new::<SumNode>(3);
 
-        let conn_1 = Box::new(SetSlotConnectionsCoreMutation {
+        let conn_1 = CoreMutation::SetSlotConnections(SetSlotConnectionsParams {
             slot: CoreSlotIndex {
                 node: sum.clone(),
                 slot_index: 0,
@@ -33,7 +33,7 @@ mod module_tests {
             }],
             swap_vector: Vec::with_capacity(1),
         });
-        let conn_2 = Box::new(SetSlotConnectionsCoreMutation {
+        let conn_2 = CoreMutation::SetSlotConnections(SetSlotConnectionsParams {
             slot: CoreSlotIndex {
                 node: sum.clone(),
                 slot_index: 1,
@@ -44,7 +44,7 @@ mod module_tests {
             }],
             swap_vector: Vec::with_capacity(1),
         });
-        let dep = Box::new(SetNodeDependencyListCoreMutation {
+        let dep = CoreMutation::SetNodeDependencyList(SetNodeDependencyListParams {
             node: sum.clone(),
             dependency_list: vec![f1.clone(), f2.clone()],
         });

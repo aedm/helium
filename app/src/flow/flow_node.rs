@@ -5,12 +5,10 @@ use crate::core::slot::CoreSlot;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
-use std::sync::atomic::{AtomicU64, Ordering};
-
-static NODE_ID_GENERATOR: AtomicU64 = AtomicU64::new(1);
 
 pub struct FlowNode {
     pub id: NodeId,
+    pub name: String,
     pub key: String,
     pub core_node: CoreNodeRef,
     pub slots: Vec<FlowSlot>,
@@ -75,7 +73,8 @@ impl FlowNode {
             .map(|x| FlowProvider::from_core_provider(&x.borrow()))
             .collect();
         RCell::new(FlowNode {
-            id: NODE_ID_GENERATOR.fetch_add(1, Ordering::Relaxed),
+            id: core_node.id,
+            name: core_node.name.clone(),
             key: "".into(),
             core_node: core_node_ref.clone(),
             slots,
@@ -86,15 +85,15 @@ impl FlowNode {
 
 impl Debug for FlowNode {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        f.write_str(&format!("{}", self.id))
+        f.write_str(&format!("'{}'({})", self.name, self.id))
     }
 }
 
 impl Drop for FlowNode {
     fn drop(&mut self) {
         println!(
-            "Flow node drop: {}, core refcount: {}",
-            self.id,
+            "Flow node drop: {:?}, core refcount: {}",
+            self,
             self.core_node.refc()
         );
     }
@@ -108,18 +107,19 @@ impl FlowSlotIndex {
                 slot_index: index,
             };
         }
-        panic!("Slot not found: '{}'", name);
+        panic!("Slot not found: '{}', node {:?}", name, node);
     }
 }
 
 impl FlowProviderIndex {
-    pub fn new(node: &FlowNodeRef, name: &str) -> FlowProviderIndex {
-        if let Some(index) = node.borrow().providers.iter().position(|x| x.name == name) {
+    pub fn new(node_ref: &FlowNodeRef, name: &str) -> FlowProviderIndex {
+        let node = node_ref.borrow();
+        if let Some(index) = node.providers.iter().position(|x| x.name == name) {
             return FlowProviderIndex {
-                node: node.clone(),
+                node: node_ref.clone(),
                 provider_index: index,
             };
         }
-        panic!("Provider not found: '{}'", name);
+        panic!("Provider not found: '{}', node {:?}", name, node);
     }
 }
