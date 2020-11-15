@@ -8,7 +8,9 @@ pub mod slot;
 
 #[cfg(test)]
 mod module_tests {
-    use crate::core::core_mutation::{CoreMutationSequence, CoreMutation, SetSlotConnectionsParams, SetNodeDependencyListParams};
+    use crate::core::core_mutation::{
+        CoreMutation, CoreMutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
+    };
     use crate::core::node::{CoreNode, CoreProviderIndex, CoreSlotIndex};
     use crate::core::provider::CoreProviderValue;
     use crate::nodes::float_node::FloatNode;
