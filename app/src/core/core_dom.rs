@@ -3,12 +3,12 @@ use crate::core::core_mutation::CoreMutationSequence;
 use crate::core::node::{CoreNode, CoreNodeRef, CoreProviderIndex, NodeInner};
 use crate::core::provider::CoreProviderValue;
 use crate::nodes::root_node::CoreRootNode;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
 use std::thread::{JoinHandle, ThreadId};
 use std::time::Duration;
 use strum_macros::IntoStaticStr;
-use std::sync::atomic::{AtomicU64, Ordering};
 
 #[derive(IntoStaticStr)]
 pub enum CoreMessage {
@@ -98,7 +98,7 @@ impl CoreDom {
             join_handle: Some(join_handle),
             sender_to_render_thread,
             receiver_from_render_thread,
-            node_id_generator:  AtomicU64::new(1),
+            node_id_generator: AtomicU64::new(1),
         }
     }
 

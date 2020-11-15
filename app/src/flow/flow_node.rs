@@ -5,7 +5,6 @@ use crate::core::slot::CoreSlot;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
-use std::sync::atomic::{AtomicU64, Ordering};
 
 pub struct FlowNode {
     pub id: NodeId,

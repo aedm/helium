@@ -53,7 +53,6 @@ impl CoreMutationSequence {
     }
 }
 
-
 impl SetSlotConnectionsParams {
     fn run(&mut self) {
         debug_assert_eq!(self.swap_vector.len(), 0);
@@ -71,7 +70,6 @@ impl SetSlotConnectionsParams {
     }
 }
 
-
 impl SetNodeDependencyListParams {
     fn run(&mut self) {
         mem::swap(
@@ -80,7 +78,6 @@ impl SetNodeDependencyListParams {
         );
     }
 }
-
 
 impl SetSlotDefaultValueParams {
     fn run(&mut self) {

@@ -1,7 +1,7 @@
 use crate::core::core_dom::CoreDom;
+use crate::core::node::NodeId;
 use crate::flow::flow_node::{FlowNode, FlowNodeRef};
 use std::collections::HashMap;
-use crate::core::node::NodeId;
 
 pub struct FlowDom {
     pub flow_nodes: HashMap<NodeId, FlowNodeRef>,

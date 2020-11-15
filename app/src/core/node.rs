@@ -1,11 +1,11 @@
 use crate::core::acell::ACell;
 use crate::core::provider::CoreProvider;
 use crate::core::slot::CoreSlot;
+use core::fmt;
 use std::any::{Any, TypeId};
+use std::fmt::{Debug, Formatter};
 use std::thread;
 use std::thread::ThreadId;
-use std::fmt::{Debug, Formatter};
-use core::fmt;
 
 pub type NodeId = u64;
 pub type CoreNodeRef = ACell<CoreNode>;

@@ -1,8 +1,8 @@
+use crate::core::core_mutation::{CoreMutation, SetSlotDefaultValueParams};
 use crate::core::slot::CoreSlotDefault;
 use crate::flow::dom::FlowDom;
 use crate::flow::flow_node::{FlowNodeRef, FlowSlotIndex};
 use crate::flow::mutation::{FlowMutationStep, FlowMutationStepResult};
-use crate::core::core_mutation::{SetSlotDefaultValueParams, CoreMutation};
 
 pub struct SetSlotValueFlowMutation {
     pub node_slot: FlowSlotIndex,
@@ -10,7 +10,7 @@ pub struct SetSlotValueFlowMutation {
 }
 
 impl SetSlotValueFlowMutation {
-    pub fn new(
+    pub fn _new(
         slot_node: &FlowNodeRef,
         slot_name: &str,
         value: CoreSlotDefault,

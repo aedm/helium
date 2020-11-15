@@ -1,9 +1,11 @@
+use crate::core::core_mutation::{
+    CoreMutation, CoreMutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
+};
 use crate::core::node::{CoreProviderIndex, CoreSlotIndex};
 use crate::flow::dom::FlowDom;
 use crate::flow::flow_node::{FlowNodeRef, FlowSlotIndex};
 use crate::flow::topological_order::TopologicalOrder;
 use std::collections::HashSet;
-use crate::core::core_mutation::{CoreMutationSequence, CoreMutation, SetSlotConnectionsParams, SetNodeDependencyListParams};
 
 pub struct FlowMutationStepResult {
     pub changed_slots: Vec<FlowSlotIndex>,
