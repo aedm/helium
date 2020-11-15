@@ -74,7 +74,6 @@ impl Drop for SetNodeDependencyListCoreMutation {
     }
 }
 
-
 pub struct SetSlotDefaultValueCoreMutation {
     pub node: CoreNodeRef,
     pub slot_index: usize,

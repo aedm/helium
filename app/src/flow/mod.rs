@@ -2,10 +2,10 @@ pub mod dom;
 pub mod flow_node;
 pub mod mutation;
 pub mod mutation_create_node;
+pub mod mutation_remove_node;
 pub mod mutation_set_connections;
 pub mod mutation_set_slot_value;
 pub mod topological_order;
-pub mod mutation_remove_node;
 
 #[cfg(test)]
 mod module_tests {

@@ -1,7 +1,7 @@
 use super::dom::FlowDom;
 use super::flow_node::FlowSlotIndex;
 use super::mutation::{FlowMutationStep, FlowMutationStepResult};
-use crate::flow::flow_node::{FlowProviderIndex};
+use crate::flow::flow_node::FlowProviderIndex;
 
 pub struct SetSlotConnectionsFlowMutation {
     pub node_slot: FlowSlotIndex,

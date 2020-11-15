@@ -92,7 +92,11 @@ impl Debug for FlowNode {
 
 impl Drop for FlowNode {
     fn drop(&mut self) {
-        println!("Flow node drop: {}, core refcount: {}", self.id, self.core_node.refc());
+        println!(
+            "Flow node drop: {}, core refcount: {}",
+            self.id,
+            self.core_node.refc()
+        );
     }
 }
 
@@ -102,7 +106,7 @@ impl FlowSlotIndex {
             return FlowSlotIndex {
                 node: node.clone(),
                 slot_index: index,
-            }
+            };
         }
         panic!("Slot not found: '{}'", name);
     }
@@ -114,7 +118,7 @@ impl FlowProviderIndex {
             return FlowProviderIndex {
                 node: node.clone(),
                 provider_index: index,
-            }
+            };
         }
         panic!("Provider not found: '{}'", name);
     }

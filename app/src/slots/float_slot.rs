@@ -1,6 +1,6 @@
 use crate::core::acell::ACell;
+use crate::core::provider::{CoreProvider, CoreProviderValue};
 use crate::core::slot::{CoreSlot, CoreSlotDefault, CoreSlotInner, SlotType};
-use crate::core::provider::{CoreProviderValue, CoreProvider};
 
 pub struct FloatCoreSlot {
     pub slot: ACell<CoreSlot>,
