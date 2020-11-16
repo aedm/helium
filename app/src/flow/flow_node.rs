@@ -53,7 +53,7 @@ pub struct FlowSlotIndex {
     pub slot_index: usize,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Hash, PartialEq, Eq)]
 pub struct FlowProviderIndex {
     pub node: FlowNodeRef,
     pub provider_index: usize,
