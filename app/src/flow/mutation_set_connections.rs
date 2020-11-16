@@ -30,12 +30,16 @@ impl FlowMutationStep for SetSlotConnectionsFlowMutation {
 
         let providers_to_remove = HashSet::from_iter(slot.connections.iter());
         let providers_to_add = HashSet::from_iter(self.connections.iter());
-        let intersection: HashSet<_> = providers_to_remove.intersection(&providers_to_add)
-            .map(|x| *x).collect();
+        let intersection: HashSet<_> = providers_to_remove
+            .intersection(&providers_to_add)
+            .map(|x| *x)
+            .collect();
 
-        providers_to_remove.difference(&intersection)
+        providers_to_remove
+            .difference(&intersection)
             .for_each(|x| _dom.remove_slot_from_provider(*x, &self.node_slot));
-        providers_to_add.difference(&intersection)
+        providers_to_add
+            .difference(&intersection)
             .for_each(|x| _dom.add_slot_to_provider(*x, &self.node_slot));
 
         // TODO: Use mem::swap here?
