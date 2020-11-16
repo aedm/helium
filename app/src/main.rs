@@ -58,6 +58,10 @@ fn main() {
                 FlowSlotIndex::new(&stillaxis.get_root(), "all_nodes"),
                 vec![FlowProviderIndex::new(&fsum, "sum")],
             ),
+            SetSlotConnectionsFlowMutation::new(
+                FlowSlotIndex::new(&fsum, "a"),
+                vec![FlowProviderIndex::new(&ff1, "value")],
+            ),
         ]);
 
         stillaxis.run_mutation(&mut flow_mutation);
@@ -75,7 +79,7 @@ fn main() {
         stillaxis.run_mutation(&mut flow_mutation);
     }
     // TODO: last reference should be held by mutation object
-    // assert!(_c1.as_ref().unwrap().refc() > 1);
+    assert!(_c1.as_ref().unwrap().refc() > 1);
     assert_mutation_response(&mut stillaxis);
     assert_eq!(_c1.as_ref().unwrap().refc(), 1);
     assert!(csum.refc() > 1);
