@@ -33,6 +33,10 @@ impl CoreNode for SumNode {
         &self.inner
     }
 
+    fn get_inner_mut(&mut self) -> &mut CoreNodeInner {
+        &mut self.inner
+    }
+
     fn run(self: &mut Self) {
         let result = self.a.get() + self.b.get();
         self.sum.set(result);

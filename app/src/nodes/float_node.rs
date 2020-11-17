@@ -30,6 +30,10 @@ impl CoreNode for FloatNode {
         &self.inner
     }
 
+    fn get_inner_mut(&mut self) -> &mut CoreNodeInner {
+        &mut self.inner
+    }
+
     fn run(self: &mut Self) {
         self.out.set(self.a.get());
     }

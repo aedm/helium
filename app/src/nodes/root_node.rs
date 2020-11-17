@@ -25,8 +25,12 @@ impl CoreNode for CoreRootNode {
         &self.inner
     }
 
+    fn get_inner_mut(&mut self) -> &mut CoreNodeInner {
+        &mut self.inner
+    }
+
     fn run(&mut self) {
-        unimplemented!()
+        // unimplemented!()
     }
 }
 

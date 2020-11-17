@@ -1,6 +1,6 @@
 use crate::core::core_dom::CoreMessage::Stop;
 use crate::core::core_mutation::CoreMutationSequence;
-use crate::core::node::{CoreNode, CoreNodeRef, CoreProviderIndex};
+use crate::core::node::{CoreNode, CoreProviderIndex};
 use crate::core::provider::CoreProviderValue;
 use crate::nodes::root_node::CoreRootNode;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -9,6 +9,8 @@ use std::thread;
 use std::thread::{JoinHandle, ThreadId};
 use std::time::Duration;
 use strum_macros::IntoStaticStr;
+use crate::core::node_ref::CoreNodeRef;
+use std::ops::Deref;
 
 #[derive(IntoStaticStr)]
 pub enum CoreMessage {
@@ -53,7 +55,7 @@ impl RenderThread {
                         return;
                     }
                     CoreMessage::GetProviderValue(request) => {
-                        self.core_root.borrow_mut().run_deps();
+                        RenderThread::run_node_deps(&mut self.core_root);
                         Self::handle_provider_value_request(request);
                     }
                 }
@@ -61,15 +63,23 @@ impl RenderThread {
                 let _ = self.sender_from_render_thread.send(x);
             }
             self.frame_count += 1;
-            self.core_root.borrow_mut().run_deps();
+            RenderThread::run_node_deps(&mut self.core_root);
             thread::sleep(Duration::from_millis(1));
         }
     }
 
     fn handle_provider_value_request(request: &mut ProviderValueRequest) {
         let node = request.provider.node.borrow_mut();
-        let provider = node.providers[request.provider.provider_index].borrow();
+        let provider = node.get_inner().providers[request.provider.provider_index].borrow();
         request.response_value = Some(provider.provider_value);
+    }
+
+    fn run_node_deps(node_ref: &mut CoreNodeRef) {
+        let mut node = node_ref.borrow_mut();
+        for dep in &node.get_inner().dependency_list {
+            dep.borrow_mut().run();
+        }
+        node.run();
     }
 }
 
@@ -77,7 +87,7 @@ impl CoreDom {
     pub fn new() -> CoreDom {
         let (sender_to_render_thread, receiver_to_render_thread) = channel();
         let (sender_from_render_thread, receiver_from_render_thread) = channel();
-        let core_root = CoreNode::new::<CoreRootNode>(0);
+        let core_root = CoreNodeRef::new(Box::new(CoreRootNode::new(0)));
 
         let mut render_thread = RenderThread {
             receiver_to_render_thread,
@@ -104,8 +114,8 @@ impl CoreDom {
 
     pub fn new_node<T: 'static + CoreNode>(&self) -> CoreNodeRef {
         let id = self.node_id_generator.fetch_add(1, Ordering::Relaxed);
-        let core_node = T::new(id);
-        core_node.seal(self.get_render_thread_id());
+        let core_node = CoreNodeRef::new(Box::new(T::new(id)));
+        core_node.borrow_mut().get_inner_mut().seal(self.get_render_thread_id());
         core_node
     }
 

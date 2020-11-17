@@ -12,7 +12,7 @@ pub struct ACell<T: ?Sized> {
 //     _reference: sync::Weak<RefCell<T>>,
 // }
 
-impl<T: ?Sized> ACell<dyn T> {
+impl<T> ACell<T> {
     pub fn new(t: T) -> ACell<T> {
         ACell {
             reference: Arc::new(RefCell::new(t)),

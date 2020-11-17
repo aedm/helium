@@ -6,9 +6,9 @@ use std::any::{Any, TypeId};
 use std::fmt::{Debug, Formatter};
 use std::thread;
 use std::thread::ThreadId;
+use crate::core::node_ref::CoreNodeRef;
 
 pub type NodeId = u64;
-pub type CoreNodeRef = ACell<dyn CoreNode>;
 
 pub struct CoreNodeInner {
     pub id: NodeId,
@@ -36,6 +36,8 @@ pub trait CoreNode: Debug {
         Self: std::marker::Sized;
 
     fn get_inner(&self) -> &CoreNodeInner;
+    fn get_inner_mut(&mut self) -> &mut CoreNodeInner;
+
     fn run(&mut self);
 
     fn get_type_name(&self) -> &'static str {
@@ -72,10 +74,10 @@ impl CoreNodeInner {
         }
     }
 
-    fn run(&mut self) {
-        debug_assert!(self.check_render_thread(true));
-        self.inner.run();
-    }
+    // fn run(&mut self) {
+    //     debug_assert!(self.check_render_thread(true));
+    //     self.inner.run();
+    // }
 
     // pub fn run_deps(&mut self) {
     //     for dep in &self.dependency_list {
@@ -93,10 +95,6 @@ impl CoreNodeInner {
             Some(thread_id) => (thread_id == thread::current().id()) == is_render_thread,
             None => true,
         }
-    }
-
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        self.get_inner().fmt(f)
     }
 }
 
