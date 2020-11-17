@@ -1,6 +1,6 @@
 use crate::core::core_dom::CoreMessage::Stop;
 use crate::core::core_mutation::CoreMutationSequence;
-use crate::core::node::{CoreNode, CoreNodeRef, CoreProviderIndex, NodeInner};
+use crate::core::node::{CoreNode, CoreNodeRef, CoreProviderIndex};
 use crate::core::provider::CoreProviderValue;
 use crate::nodes::root_node::CoreRootNode;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -102,10 +102,10 @@ impl CoreDom {
         }
     }
 
-    pub fn new_node<T: 'static + NodeInner>(&self) -> CoreNodeRef {
+    pub fn new_node<T: 'static + CoreNode>(&self) -> CoreNodeRef {
         let id = self.node_id_generator.fetch_add(1, Ordering::Relaxed);
-        let core_node = CoreNode::new::<T>(id);
-        core_node.borrow_mut().seal(self.get_render_thread_id());
+        let core_node = T::new(id);
+        core_node.seal(self.get_render_thread_id());
         core_node
     }
 

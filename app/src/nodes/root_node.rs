@@ -1,33 +1,37 @@
 use crate::core::acell::ACell;
-use crate::core::node::NodeInner;
+use crate::core::node::{CoreNode, CoreNodeInner, NodeId};
 use crate::core::slot::CoreSlot;
 use crate::slots::float_slot::FloatCoreSlot;
 use std::any::{Any, TypeId};
+use std::fmt;
 
 pub struct CoreRootNode {
+    inner: CoreNodeInner,
     pub slot: FloatCoreSlot,
 }
 
-impl NodeInner for CoreRootNode {
-    fn new() -> CoreRootNode {
+impl CoreNode for CoreRootNode {
+    fn new(id: NodeId) -> CoreRootNode {
+        let slot = FloatCoreSlot::new("all_nodes");
+        let slots = vec![slot.slot.clone()];
+        let providers = vec![];
         CoreRootNode {
-            slot: FloatCoreSlot::new("all_nodes"),
+            inner: CoreNodeInner::new(id, "root", slots, providers),
+            slot,
         }
     }
 
-    fn get_slots(self: &Self) -> Vec<ACell<CoreSlot>> {
-        vec![self.slot.slot.clone()]
+    fn get_inner(&self) -> &CoreNodeInner {
+        &self.inner
     }
 
-    fn type_id(&self) -> TypeId {
-        TypeId::of::<CoreRootNode>()
+    fn run(&mut self) {
+        unimplemented!()
     }
+}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn get_type_name(&self) -> &'static str {
-        "root"
+impl fmt::Debug for CoreRootNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.inner.fmt(f)
     }
 }

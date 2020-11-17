@@ -1,48 +1,46 @@
 use crate::core::acell::ACell;
-use crate::core::node::NodeInner;
 use crate::core::provider::CoreProvider;
 use crate::core::slot::CoreSlot;
 use crate::providers::float_provider::FloatCoreProvider;
 use crate::slots::float_slot::FloatCoreSlot;
 use std::any::{Any, TypeId};
+use crate::core::node::{CoreNodeInner, NodeId, CoreNode};
+use std::fmt;
 
 pub struct SumNode {
+    inner: CoreNodeInner,
     pub a: FloatCoreSlot,
     pub b: FloatCoreSlot,
     pub sum: FloatCoreProvider,
 }
 
-impl NodeInner for SumNode {
-    fn new() -> SumNode {
+impl CoreNode for SumNode {
+    fn new(id: NodeId) -> SumNode {
+        let a = FloatCoreSlot::new("a");
+        let b = FloatCoreSlot::new("b");
+        let sum = FloatCoreProvider::new("sum");
+        let slots = vec![a.slot.clone(), b.slot.clone()];
+        let providers = vec![sum.provider.clone()];
         SumNode {
-            a: FloatCoreSlot::new("a"),
-            b: FloatCoreSlot::new("b"),
-            sum: FloatCoreProvider::new("sum"),
+            inner: CoreNodeInner::new(id, "sum_floats", slots, providers),
+            a,
+            b,
+            sum,
         }
     }
 
-    fn get_slots(self: &Self) -> Vec<ACell<CoreSlot>> {
-        vec![self.a.slot.clone(), self.b.slot.clone()]
-    }
-
-    fn get_providers(self: &Self) -> Vec<ACell<CoreProvider>> {
-        vec![self.sum.provider.clone()]
+    fn get_inner(&self) -> &CoreNodeInner {
+        &self.inner
     }
 
     fn run(self: &mut Self) {
         let result = self.a.get() + self.b.get();
         self.sum.set(result);
     }
+}
 
-    fn type_id(&self) -> TypeId {
-        TypeId::of::<SumNode>()
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn get_type_name(&self) -> &'static str {
-        "sum_floats"
+impl fmt::Debug for SumNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.inner.fmt(f)
     }
 }

@@ -8,16 +8,16 @@ use std::thread;
 use std::thread::ThreadId;
 
 pub type NodeId = u64;
-pub type CoreNodeRef = ACell<CoreNode>;
+pub type CoreNodeRef = ACell<dyn CoreNode>;
 
-pub struct CoreNode {
+pub struct CoreNodeInner {
     pub id: NodeId,
     pub name: String,
     pub slots: Vec<ACell<CoreSlot>>,
     pub providers: Vec<ACell<CoreProvider>>,
-    pub inner: Box<dyn NodeInner>,
     pub dependency_list: Vec<CoreNodeRef>,
     render_thread_id: Option<ThreadId>,
+    type_name: &'static str,
 }
 
 pub struct CoreProviderIndex {
@@ -30,48 +30,59 @@ pub struct CoreSlotIndex {
     pub slot_index: usize,
 }
 
-pub trait NodeInner {
-    fn new() -> Self
+pub trait CoreNode: Debug {
+    fn new(id: NodeId) -> Self
     where
         Self: std::marker::Sized;
-    fn get_slots(&self) -> Vec<ACell<CoreSlot>> {
-        vec![]
+
+    fn get_inner(&self) -> &CoreNodeInner;
+    fn run(&mut self);
+
+    fn get_type_name(&self) -> &'static str {
+        self.get_inner().type_name
     }
-    fn get_providers(&self) -> Vec<ACell<CoreProvider>> {
-        vec![]
+
+    fn get_slots(&self) -> &Vec<ACell<CoreSlot>> {
+        &self.get_inner().slots
     }
-    fn run(&mut self) {}
-    fn type_id(&self) -> TypeId;
-    fn as_any(&self) -> &dyn Any;
-    fn get_type_name(&self) -> &'static str;
+
+    fn get_providers(&self) -> &Vec<ACell<CoreProvider>> {
+        &self.get_inner().providers
+    }
+
+    fn get_id(&self) -> NodeId {
+        self.get_inner().id
+    }
+
+    fn get_name(&self) -> &str {
+        &self.get_inner().name
+    }
 }
 
-impl CoreNode {
-    pub fn new<T: 'static + NodeInner>(id: NodeId) -> CoreNodeRef {
-        let inner = Box::new(T::new());
-        let rf = ACell::new(CoreNode {
+impl CoreNodeInner {
+    pub fn new(id: NodeId, type_name:&'static str, slots: Vec<ACell<CoreSlot>>, providers: Vec<ACell<CoreProvider>>) -> CoreNodeInner {
+        CoreNodeInner {
             id,
-            name: format!("{}-{}", inner.get_type_name(), id),
+            name: format!("{}-{}", type_name, id),
             dependency_list: vec![],
-            slots: inner.get_slots(),
-            providers: inner.get_providers(),
-            inner,
+            slots,
+            providers,
             render_thread_id: None,
-        });
-        rf
+            type_name
+        }
     }
 
-    pub fn run(&mut self) {
+    fn run(&mut self) {
         debug_assert!(self.check_render_thread(true));
         self.inner.run();
     }
 
-    pub fn run_deps(&mut self) {
-        for dep in &self.dependency_list {
-            dep.borrow_mut().run();
-        }
-        self.run();
-    }
+    // pub fn run_deps(&mut self) {
+    //     for dep in &self.dependency_list {
+    //         dep.borrow_mut().run();
+    //     }
+    //     self.run();
+    // }
 
     pub fn seal(&mut self, render_thread_id: ThreadId) {
         self.render_thread_id = Some(render_thread_id);
@@ -83,15 +94,25 @@ impl CoreNode {
             None => true,
         }
     }
+
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        self.get_inner().fmt(f)
+    }
 }
 
-impl Debug for CoreNode {
+impl Debug for CoreNodeInner {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.write_str(&format!("'{}'({})", self.name, self.id))
     }
 }
 
-impl Drop for CoreNode {
+// impl<T: CoreNode> Debug for T {
+//     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+//         self.get_inner().fmt(f)
+//     }
+// }
+
+impl Drop for CoreNodeInner {
     fn drop(&mut self) {
         // Core node should never be deallocated on the render thread
         debug_assert!(self.check_render_thread(false));

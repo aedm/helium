@@ -1,6 +1,6 @@
 use crate::core::core_dom::CoreMessage::{GetProviderValue, Mutate};
 use crate::core::core_dom::{CoreDom, ProviderValueRequest};
-use crate::core::node::{CoreProviderIndex, NodeInner};
+use crate::core::node::{CoreProviderIndex, CoreNode};
 use crate::flow::dom::FlowDom;
 use crate::flow::flow_node::{FlowNode, FlowNodeRef};
 use crate::flow::mutation::FlowMutation;
@@ -18,7 +18,7 @@ impl Stillaxis {
         Stillaxis { core_dom, flow_dom }
     }
 
-    pub fn new_node<T: 'static + NodeInner>(&self) -> FlowNodeRef {
+    pub fn new_node<T: 'static + CoreNode>(&self) -> FlowNodeRef {
         let core_node = self.core_dom.new_node::<T>();
         FlowNode::from_core_node(&core_node)
     }
