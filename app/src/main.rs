@@ -33,7 +33,7 @@ fn assert_value_response(stillaxis: &mut Stillaxis, value: &CoreProviderValue) {
     let message = get_incoming(stillaxis);
     match message.as_ref() {
         CoreMessage::GetProviderValue(value_request) => {
-            assert_eq!(value_request.response_value.unwrap(), *value);
+            assert_eq!(&value_request.response_value.unwrap(), *value);
         }
         _ => panic!(),
     }
