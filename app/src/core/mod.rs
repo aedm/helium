@@ -1,6 +1,7 @@
 pub mod acell;
 pub mod core_dom;
 pub mod core_mutation;
+pub mod core_node_descriptor;
 pub mod node;
 pub mod node_ref;
 pub mod provider;
@@ -58,7 +59,7 @@ mod module_tests {
 
         RenderThread::run_node_deps(&sum);
         assert_eq!(
-            sum.borrow().get_inner().providers[0]
+            sum.borrow().descriptor().providers[0]
                 .borrow()
                 .provider_value,
             CoreProviderValue::Float32(0.0)

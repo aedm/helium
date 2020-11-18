@@ -1,5 +1,5 @@
 use crate::core::core_dom::CoreDom;
-use crate::core::node::NodeId;
+use crate::core::core_node_descriptor::NodeId;
 use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowProviderIndex, FlowSlotIndex};
 use std::collections::HashMap;
 

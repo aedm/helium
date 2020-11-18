@@ -1,11 +1,11 @@
-use crate::core::node::{CoreNode, CoreNodeInner, NodeId};
-
+use crate::core::node::CoreNode;
 use crate::slots::float_slot::FloatCoreSlot;
 
+use crate::core::core_node_descriptor::{CoreNodeDescriptor, NodeId};
 use std::fmt;
 
 pub struct CoreRootNode {
-    inner: CoreNodeInner,
+    inner: CoreNodeDescriptor,
     pub slot: FloatCoreSlot,
 }
 
@@ -15,16 +15,16 @@ impl CoreNode for CoreRootNode {
         let slots = vec![slot.slot.clone()];
         let providers = vec![];
         CoreRootNode {
-            inner: CoreNodeInner::new(id, "root", slots, providers),
+            inner: CoreNodeDescriptor::new(id, "root", slots, providers),
             slot,
         }
     }
 
-    fn get_inner(&self) -> &CoreNodeInner {
+    fn descriptor(&self) -> &CoreNodeDescriptor {
         &self.inner
     }
 
-    fn get_inner_mut(&mut self) -> &mut CoreNodeInner {
+    fn descriptor_mut(&mut self) -> &mut CoreNodeDescriptor {
         &mut self.inner
     }
 

@@ -1,12 +1,11 @@
-use crate::core::node::{CoreNode, CoreNodeInner, NodeId};
-
+use crate::core::core_node_descriptor::{CoreNodeDescriptor, NodeId};
+use crate::core::node::CoreNode;
 use crate::providers::float_provider::FloatCoreProvider;
 use crate::slots::float_slot::FloatCoreSlot;
-
 use std::fmt;
 
 pub struct SumNode {
-    inner: CoreNodeInner,
+    inner: CoreNodeDescriptor,
     pub a: FloatCoreSlot,
     pub b: FloatCoreSlot,
     pub sum: FloatCoreProvider,
@@ -20,18 +19,18 @@ impl CoreNode for SumNode {
         let slots = vec![a.slot.clone(), b.slot.clone()];
         let providers = vec![sum.provider.clone()];
         SumNode {
-            inner: CoreNodeInner::new(id, "sum_floats", slots, providers),
+            inner: CoreNodeDescriptor::new(id, "sum_floats", slots, providers),
             a,
             b,
             sum,
         }
     }
 
-    fn get_inner(&self) -> &CoreNodeInner {
+    fn descriptor(&self) -> &CoreNodeDescriptor {
         &self.inner
     }
 
-    fn get_inner_mut(&mut self) -> &mut CoreNodeInner {
+    fn descriptor_mut(&mut self) -> &mut CoreNodeDescriptor {
         &mut self.inner
     }
 
