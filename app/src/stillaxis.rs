@@ -1,6 +1,6 @@
 use crate::core::core_dom::CoreMessage::{GetProviderValue, Mutate};
 use crate::core::core_dom::{CoreDom, ProviderValueRequest};
-use crate::core::node::{CoreProviderIndex, CoreNode};
+use crate::core::node::{CoreNode, CoreProviderIndex};
 use crate::flow::dom::FlowDom;
 use crate::flow::flow_node::{FlowNode, FlowNodeRef};
 use crate::flow::mutation::FlowMutation;

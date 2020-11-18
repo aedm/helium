@@ -1,9 +1,9 @@
 use crate::core::acell::ACell;
 use crate::core::node::{CoreProviderIndex, CoreSlotIndex};
+use crate::core::node_ref::CoreNodeRef;
 use crate::core::provider::CoreProvider;
 use crate::core::slot::CoreSlotDefault;
 use std::mem;
-use crate::core::node_ref::CoreNodeRef;
 
 pub struct CoreMutationSequence {
     pub steps: Vec<CoreMutation>,
@@ -63,7 +63,8 @@ impl SetSlotConnectionsParams {
         let mut slot = node.get_inner().slots[self.slot.slot_index].borrow_mut();
         mem::swap(&mut slot.connection, &mut self.swap_vector);
         for connection in &self.connection {
-            let provider = connection.node.borrow().get_inner().providers[connection.provider_index].clone();
+            let provider =
+                connection.node.borrow().get_inner().providers[connection.provider_index].clone();
             slot.connection.push(provider);
         }
 

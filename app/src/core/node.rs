@@ -1,4 +1,5 @@
 use crate::core::acell::ACell;
+use crate::core::node_ref::CoreNodeRef;
 use crate::core::provider::CoreProvider;
 use crate::core::slot::CoreSlot;
 use core::fmt;
@@ -6,7 +7,6 @@ use std::any::{Any, TypeId};
 use std::fmt::{Debug, Formatter};
 use std::thread;
 use std::thread::ThreadId;
-use crate::core::node_ref::CoreNodeRef;
 
 pub type NodeId = u64;
 
@@ -62,7 +62,12 @@ pub trait CoreNode: Debug {
 }
 
 impl CoreNodeInner {
-    pub fn new(id: NodeId, type_name:&'static str, slots: Vec<ACell<CoreSlot>>, providers: Vec<ACell<CoreProvider>>) -> CoreNodeInner {
+    pub fn new(
+        id: NodeId,
+        type_name: &'static str,
+        slots: Vec<ACell<CoreSlot>>,
+        providers: Vec<ACell<CoreProvider>>,
+    ) -> CoreNodeInner {
         CoreNodeInner {
             id,
             name: format!("{}-{}", type_name, id),
@@ -70,7 +75,7 @@ impl CoreNodeInner {
             slots,
             providers,
             render_thread_id: None,
-            type_name
+            type_name,
         }
     }
 

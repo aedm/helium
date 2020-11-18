@@ -1,11 +1,11 @@
-use crate::core::node::{NodeId};
+use crate::core::node::NodeId;
+use crate::core::node_ref::CoreNodeRef;
 use crate::core::provider::CoreProvider;
 use crate::core::rcell::RCell;
 use crate::core::slot::CoreSlot;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
-use crate::core::node_ref::CoreNodeRef;
 
 pub struct FlowNode {
     pub id: NodeId,

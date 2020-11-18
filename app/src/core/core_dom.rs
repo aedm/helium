@@ -1,16 +1,16 @@
 use crate::core::core_dom::CoreMessage::Stop;
 use crate::core::core_mutation::CoreMutationSequence;
 use crate::core::node::{CoreNode, CoreProviderIndex};
+use crate::core::node_ref::CoreNodeRef;
 use crate::core::provider::CoreProviderValue;
 use crate::nodes::root_node::CoreRootNode;
+use std::ops::Deref;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
 use std::thread::{JoinHandle, ThreadId};
 use std::time::Duration;
 use strum_macros::IntoStaticStr;
-use crate::core::node_ref::CoreNodeRef;
-use std::ops::Deref;
 
 #[derive(IntoStaticStr)]
 pub enum CoreMessage {
@@ -74,7 +74,7 @@ impl RenderThread {
         request.response_value = Some(provider.provider_value);
     }
 
-    fn run_node_deps(node_ref: &mut CoreNodeRef) {
+    pub fn run_node_deps(node_ref: &CoreNodeRef) {
         let mut node = node_ref.borrow_mut();
         for dep in &node.get_inner().dependency_list {
             dep.borrow_mut().run();
@@ -115,7 +115,10 @@ impl CoreDom {
     pub fn new_node<T: 'static + CoreNode>(&self) -> CoreNodeRef {
         let id = self.node_id_generator.fetch_add(1, Ordering::Relaxed);
         let core_node = CoreNodeRef::new(Box::new(T::new(id)));
-        core_node.borrow_mut().get_inner_mut().seal(self.get_render_thread_id());
+        core_node
+            .borrow_mut()
+            .get_inner_mut()
+            .seal(self.get_render_thread_id());
         core_node
     }
 

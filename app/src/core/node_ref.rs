@@ -1,10 +1,10 @@
+use crate::core::node::CoreNode;
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::hash::{Hash, Hasher};
-use std::sync::Arc;
-use crate::core::node::CoreNode;
 use std::ops::{Deref, DerefMut};
+use std::sync::Arc;
 
 pub struct CoreNodeRef {
     reference: Arc<RefCell<Box<dyn CoreNode>>>,
