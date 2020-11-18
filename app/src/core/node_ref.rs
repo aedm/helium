@@ -3,7 +3,6 @@ use std::cell::{Ref, RefCell, RefMut};
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::hash::{Hash, Hasher};
-use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
 
 pub struct CoreNodeRef {

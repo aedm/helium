@@ -4,7 +4,6 @@ use crate::core::node::{CoreNode, CoreProviderIndex};
 use crate::core::node_ref::CoreNodeRef;
 use crate::core::provider::CoreProviderValue;
 use crate::nodes::root_node::CoreRootNode;
-use std::ops::Deref;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;

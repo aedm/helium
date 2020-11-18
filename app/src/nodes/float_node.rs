@@ -1,4 +1,3 @@
-use crate::core::acell::ACell;
 use crate::core::node::{CoreNode, CoreNodeInner, NodeId};
 use crate::core::provider::CoreProvider;
 use crate::core::slot::CoreSlot;
