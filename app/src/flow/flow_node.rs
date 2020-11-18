@@ -1,4 +1,4 @@
-use crate::core::node::NodeId;
+use crate::core::core_node_descriptor::NodeId;
 use crate::core::node_ref::CoreNodeRef;
 use crate::core::provider::CoreProvider;
 use crate::core::rcell::RCell;
@@ -64,20 +64,20 @@ impl FlowNode {
     pub fn from_core_node(core_node_ref: &CoreNodeRef) -> FlowNodeRef {
         let core_node = core_node_ref.borrow_mut();
         let slots: Vec<_> = core_node
-            .get_inner()
+            .descriptor()
             .slots
             .iter()
             .map(|x| FlowSlot::from_core_slot(&x.borrow()))
             .collect();
         let providers: Vec<_> = core_node
-            .get_inner()
+            .descriptor()
             .providers
             .iter()
             .map(|x| FlowProvider::from_core_provider(&x.borrow()))
             .collect();
         RCell::new(FlowNode {
-            id: core_node.get_id(),
-            name: core_node.get_name().into(),
+            id: core_node.descriptor().id,
+            name: core_node.descriptor().name.clone(),
             key: "".into(),
             core_node: core_node_ref.clone(),
             slots,

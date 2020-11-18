@@ -38,7 +38,7 @@ impl CoreNodeRef {
 impl Debug for CoreNodeRef {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let x = self.borrow();
-        let y = x.get_inner().fmt(f);
+        let y = x.descriptor().fmt(f);
         write!(f, "ref->{:?}", y)
     }
 }

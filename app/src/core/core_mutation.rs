@@ -60,11 +60,11 @@ impl SetSlotConnectionsParams {
         debug_assert_eq!(self.swap_vector.capacity(), self.connection.len());
 
         let node = self.slot.node.borrow_mut();
-        let mut slot = node.get_inner().slots[self.slot.slot_index].borrow_mut();
+        let mut slot = node.descriptor().slots[self.slot.slot_index].borrow_mut();
         mem::swap(&mut slot.connection, &mut self.swap_vector);
         for connection in &self.connection {
             let provider =
-                connection.node.borrow().get_inner().providers[connection.provider_index].clone();
+                connection.node.borrow().descriptor().providers[connection.provider_index].clone();
             slot.connection.push(provider);
         }
 
@@ -75,7 +75,7 @@ impl SetSlotConnectionsParams {
 impl SetNodeDependencyListParams {
     fn run(&mut self) {
         mem::swap(
-            &mut self.node.borrow_mut().get_inner_mut().dependency_list,
+            &mut self.node.borrow_mut().descriptor_mut().dependency_list,
             &mut self.dependency_list,
         );
     }
@@ -84,7 +84,7 @@ impl SetNodeDependencyListParams {
 impl SetSlotDefaultValueParams {
     fn run(&mut self) {
         let node = self.node.borrow_mut();
-        let mut slot = node.get_inner().slots[self.slot_index].borrow_mut();
+        let mut slot = node.descriptor().slots[self.slot_index].borrow_mut();
         slot.set_default(&self.value);
     }
 }
