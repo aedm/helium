@@ -1,5 +1,6 @@
 use crate::core::acell::ACell;
-use crate::core::node::{CoreNodeRef, CoreProviderIndex, CoreSlotIndex};
+use crate::core::node::{CoreProviderIndex, CoreSlotIndex};
+use crate::core::node_ref::CoreNodeRef;
 use crate::core::provider::CoreProvider;
 use crate::core::slot::CoreSlotDefault;
 use std::mem;
@@ -59,10 +60,11 @@ impl SetSlotConnectionsParams {
         debug_assert_eq!(self.swap_vector.capacity(), self.connection.len());
 
         let node = self.slot.node.borrow_mut();
-        let mut slot = node.slots[self.slot.slot_index].borrow_mut();
+        let mut slot = node.get_inner().slots[self.slot.slot_index].borrow_mut();
         mem::swap(&mut slot.connection, &mut self.swap_vector);
         for connection in &self.connection {
-            let provider = connection.node.borrow().providers[connection.provider_index].clone();
+            let provider =
+                connection.node.borrow().get_inner().providers[connection.provider_index].clone();
             slot.connection.push(provider);
         }
 
@@ -73,7 +75,7 @@ impl SetSlotConnectionsParams {
 impl SetNodeDependencyListParams {
     fn run(&mut self) {
         mem::swap(
-            &mut self.node.borrow_mut().dependency_list,
+            &mut self.node.borrow_mut().get_inner_mut().dependency_list,
             &mut self.dependency_list,
         );
     }
@@ -82,7 +84,7 @@ impl SetNodeDependencyListParams {
 impl SetSlotDefaultValueParams {
     fn run(&mut self) {
         let node = self.node.borrow_mut();
-        let mut slot = node.slots[self.slot_index].borrow_mut();
+        let mut slot = node.get_inner().slots[self.slot_index].borrow_mut();
         slot.set_default(&self.value);
     }
 }

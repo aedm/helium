@@ -1,6 +1,6 @@
 use crate::core::core_dom::CoreMessage::{GetProviderValue, Mutate};
 use crate::core::core_dom::{CoreDom, ProviderValueRequest};
-use crate::core::node::{CoreProviderIndex, NodeInner};
+use crate::core::node::{CoreNode, CoreProviderIndex};
 use crate::flow::dom::FlowDom;
 use crate::flow::flow_node::{FlowNode, FlowNodeRef};
 use crate::flow::mutation::FlowMutation;
@@ -18,7 +18,7 @@ impl Stillaxis {
         Stillaxis { core_dom, flow_dom }
     }
 
-    pub fn new_node<T: 'static + NodeInner>(&self) -> FlowNodeRef {
+    pub fn new_node<T: 'static + CoreNode>(&self) -> FlowNodeRef {
         let core_node = self.core_dom.new_node::<T>();
         FlowNode::from_core_node(&core_node)
     }
@@ -61,7 +61,7 @@ mod tests {
     use crate::core::core_dom::CoreMessage;
     use crate::core::provider::CoreProviderValue;
     use crate::core::slot::CoreSlotDefault;
-    use crate::flow::flow_node::{FlowNode, FlowProviderIndex, FlowSlotIndex};
+    use crate::flow::flow_node::{FlowProviderIndex, FlowSlotIndex};
     use crate::flow::mutation::FlowMutation;
     use crate::flow::mutation_create_node::CreateNodeFlowMutation;
     use crate::flow::mutation_remove_node::RemoveNodeFlowMutation;
@@ -82,7 +82,7 @@ mod tests {
     fn assert_mutation_response(stillaxis: &mut Stillaxis) {
         let message = get_incoming(stillaxis);
         if let CoreMessage::Mutate(x) = message.as_ref() {
-            for msg in &x.steps {
+            for _msg in &x.steps {
                 // msg;
             }
         }

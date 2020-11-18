@@ -1,46 +1,43 @@
-use crate::core::acell::ACell;
-use crate::core::node::NodeInner;
-use crate::core::provider::CoreProvider;
-use crate::core::slot::CoreSlot;
+use crate::core::node::{CoreNode, CoreNodeInner, NodeId};
 use crate::providers::float_provider::FloatCoreProvider;
 use crate::slots::float_slot::FloatCoreSlot;
-use std::any::{Any, TypeId};
+
+use std::fmt;
 
 pub struct FloatNode {
+    inner: CoreNodeInner,
     pub a: FloatCoreSlot,
     pub out: FloatCoreProvider,
 }
 
-impl NodeInner for FloatNode {
-    fn new() -> FloatNode {
+impl CoreNode for FloatNode {
+    fn new(id: NodeId) -> FloatNode {
+        let a = FloatCoreSlot::new("a");
+        let out = FloatCoreProvider::new("value");
+        let slots = vec![a.slot.clone()];
+        let providers = vec![out.provider.clone()];
         FloatNode {
-            a: FloatCoreSlot::new("a"),
-            out: FloatCoreProvider::new("value"),
+            inner: CoreNodeInner::new(id, "float", slots, providers),
+            a,
+            out,
         }
     }
 
-    fn get_slots(self: &Self) -> Vec<ACell<CoreSlot>> {
-        vec![self.a.slot.clone()]
+    fn get_inner(&self) -> &CoreNodeInner {
+        &self.inner
     }
 
-    fn get_providers(self: &Self) -> Vec<ACell<CoreProvider>> {
-        vec![self.out.provider.clone()]
+    fn get_inner_mut(&mut self) -> &mut CoreNodeInner {
+        &mut self.inner
     }
 
     fn run(self: &mut Self) {
         self.out.set(self.a.get());
     }
+}
 
-    fn type_id(&self) -> TypeId {
-        println!("inner floatnode type: {:?}", TypeId::of::<FloatNode>());
-        TypeId::of::<FloatNode>()
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn get_type_name(&self) -> &'static str {
-        "float"
+impl fmt::Debug for FloatNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.inner.fmt(f)
     }
 }

@@ -2,25 +2,28 @@ pub mod acell;
 pub mod core_dom;
 pub mod core_mutation;
 pub mod node;
+pub mod node_ref;
 pub mod provider;
 pub mod rcell;
 pub mod slot;
 
 #[cfg(test)]
 mod module_tests {
+    use crate::core::core_dom::{CoreDom, RenderThread};
     use crate::core::core_mutation::{
         CoreMutation, CoreMutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
     };
-    use crate::core::node::{CoreNode, CoreProviderIndex, CoreSlotIndex};
+    use crate::core::node::{CoreProviderIndex, CoreSlotIndex};
     use crate::core::provider::CoreProviderValue;
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
 
     #[test]
     fn generates_simple_sum_graph() {
-        let f1 = CoreNode::new::<FloatNode>(1);
-        let f2 = CoreNode::new::<FloatNode>(2);
-        let sum = CoreNode::new::<SumNode>(3);
+        let dom = CoreDom::new();
+        let f1 = dom.new_node::<FloatNode>();
+        let f2 = dom.new_node::<FloatNode>();
+        let sum = dom.new_node::<SumNode>();
 
         let conn_1 = CoreMutation::SetSlotConnections(SetSlotConnectionsParams {
             slot: CoreSlotIndex {
@@ -53,9 +56,11 @@ mod module_tests {
         };
         seq.run();
 
-        sum.borrow_mut().run_deps();
+        RenderThread::run_node_deps(&sum);
         assert_eq!(
-            sum.borrow().providers[0].borrow().provider_value,
+            sum.borrow().get_inner().providers[0]
+                .borrow()
+                .provider_value,
             CoreProviderValue::Float32(0.0)
         );
 
