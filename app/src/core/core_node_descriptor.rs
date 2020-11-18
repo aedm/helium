@@ -1,6 +1,6 @@
-use crate::core::acell::ACell;
 use crate::core::node_ref::CoreNodeRef;
 use crate::core::provider::CoreProvider;
+use crate::core::rcell::RCell;
 use crate::core::slot::CoreSlot;
 use std::thread::ThreadId;
 use std::{fmt, thread};
@@ -10,8 +10,8 @@ pub type NodeId = u64;
 pub struct CoreNodeDescriptor {
     pub id: NodeId,
     pub name: String,
-    pub slots: Vec<ACell<CoreSlot>>,
-    pub providers: Vec<ACell<CoreProvider>>,
+    pub slots: Vec<RCell<CoreSlot>>,
+    pub providers: Vec<RCell<CoreProvider>>,
     pub dependency_list: Vec<CoreNodeRef>,
     render_thread_id: Option<ThreadId>,
     type_name: &'static str,
@@ -21,8 +21,8 @@ impl CoreNodeDescriptor {
     pub fn new(
         id: NodeId,
         type_name: &'static str,
-        slots: Vec<ACell<CoreSlot>>,
-        providers: Vec<ACell<CoreProvider>>,
+        slots: Vec<RCell<CoreSlot>>,
+        providers: Vec<RCell<CoreProvider>>,
     ) -> CoreNodeDescriptor {
         CoreNodeDescriptor {
             id,

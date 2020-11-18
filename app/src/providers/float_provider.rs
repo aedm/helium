@@ -1,14 +1,14 @@
-use crate::core::acell::ACell;
 use crate::core::provider::{CoreProvider, CoreProviderValue};
+use crate::core::rcell::RCell;
 
 pub struct FloatCoreProvider {
-    pub provider: ACell<CoreProvider>,
+    pub provider: RCell<CoreProvider>,
 }
 
 impl FloatCoreProvider {
     pub fn new(name: &str) -> FloatCoreProvider {
         FloatCoreProvider {
-            provider: ACell::new(CoreProvider::new(name, CoreProviderValue::Float32(0.0))),
+            provider: RCell::new(CoreProvider::new(name, CoreProviderValue::Float32(0.0))),
         }
     }
 
