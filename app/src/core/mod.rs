@@ -23,7 +23,7 @@ mod module_tests {
         let dom = CoreDom::new();
         let f1 = dom.new_node::<FloatNode>();
         let f2 = dom.new_node::<FloatNode>();
-        let mut sum = dom.new_node::<SumNode>();
+        let sum = dom.new_node::<SumNode>();
 
         let conn_1 = CoreMutation::SetSlotConnections(SetSlotConnectionsParams {
             slot: CoreSlotIndex {

@@ -1,9 +1,7 @@
 use crate::core::node::{CoreNode, CoreNodeInner, NodeId};
-use crate::core::provider::CoreProvider;
-use crate::core::slot::CoreSlot;
 use crate::providers::float_provider::FloatCoreProvider;
 use crate::slots::float_slot::FloatCoreSlot;
-use std::any::{Any, TypeId};
+
 use std::fmt;
 
 pub struct FloatNode {
