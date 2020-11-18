@@ -13,7 +13,7 @@ mod module_tests {
     use crate::core::core_mutation::{
         CoreMutation, CoreMutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
     };
-    use crate::core::node::{CoreNode, CoreProviderIndex, CoreSlotIndex};
+    use crate::core::node::{CoreProviderIndex, CoreSlotIndex};
     use crate::core::provider::CoreProviderValue;
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
