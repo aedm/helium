@@ -1,9 +1,9 @@
-use crate::core::acell::ACell;
 use crate::core::provider::{CoreProvider, CoreProviderValue};
+use crate::core::rcell::RCell;
 use crate::core::slot::{CoreSlot, CoreSlotDefault, CoreSlotInner, SlotType};
 
 pub struct FloatCoreSlot {
-    pub slot: ACell<CoreSlot>,
+    pub slot: RCell<CoreSlot>,
 }
 
 impl FloatCoreSlot {
@@ -11,7 +11,7 @@ impl FloatCoreSlot {
         let inner = Box::new(FloatCoreSlotInner {});
         let default = CoreSlotDefault::Float32(0.0);
         FloatCoreSlot {
-            slot: ACell::new(CoreSlot::new(name, false, inner, default)),
+            slot: RCell::new(CoreSlot::new(name, false, inner, default)),
         }
     }
 

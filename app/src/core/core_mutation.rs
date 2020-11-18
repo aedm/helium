@@ -1,7 +1,7 @@
-use crate::core::acell::ACell;
 use crate::core::node::{CoreProviderIndex, CoreSlotIndex};
 use crate::core::node_ref::CoreNodeRef;
 use crate::core::provider::CoreProvider;
+use crate::core::rcell::RCell;
 use crate::core::slot::CoreSlotDefault;
 use std::mem;
 
@@ -18,7 +18,7 @@ pub enum CoreMutation {
 pub struct SetSlotConnectionsParams {
     pub slot: CoreSlotIndex,
     pub connection: Vec<CoreProviderIndex>,
-    pub swap_vector: Vec<ACell<CoreProvider>>,
+    pub swap_vector: Vec<RCell<CoreProvider>>,
 }
 
 pub struct SetNodeDependencyListParams {

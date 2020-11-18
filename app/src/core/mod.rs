@@ -1,4 +1,3 @@
-pub mod acell;
 pub mod core_dom;
 pub mod core_mutation;
 pub mod core_node_descriptor;

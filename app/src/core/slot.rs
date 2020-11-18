@@ -1,5 +1,5 @@
-use crate::core::acell::ACell;
 use crate::core::provider::CoreProvider;
+use crate::core::rcell::RCell;
 
 pub enum SlotType {
     _Custom,
@@ -19,7 +19,7 @@ pub trait CoreSlotInner {
 
 pub struct CoreSlot {
     pub name: String,
-    pub connection: Vec<ACell<CoreProvider>>,
+    pub connection: Vec<RCell<CoreProvider>>,
     _allow_multiple: bool,
     pub inner: Box<dyn CoreSlotInner>,
     pub default: CoreSlotDefault,
@@ -45,7 +45,7 @@ impl CoreSlot {
         self.default = *default;
     }
 
-    pub fn get_single_provider(&self) -> Option<&ACell<CoreProvider>> {
+    pub fn get_single_provider(&self) -> Option<&RCell<CoreProvider>> {
         match self.connection.len() {
             0 => None,
             1 => Some(&self.connection[0]),
