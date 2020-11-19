@@ -1,14 +1,15 @@
 use crate::core::provider::CoreProvider;
 use crate::core::rcell::RCell;
 
+#[derive(Debug)]
 pub enum SlotType {
-    _Custom,
     Float32,
+    Node,
 }
 
 #[derive(Clone, Copy)]
 pub enum CoreSlotDefault {
-    _None,
+    None,
     Float32(f32),
 }
 

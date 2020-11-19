@@ -32,7 +32,7 @@ mod module_tests {
             },
             connection: vec![CoreProviderIndex {
                 node: f1.clone(),
-                provider_index: 0,
+                provider_index: 1,
             }],
             swap_vector: Vec::with_capacity(1),
         });
@@ -43,7 +43,7 @@ mod module_tests {
             },
             connection: vec![CoreProviderIndex {
                 node: f2.clone(),
-                provider_index: 0,
+                provider_index: 1,
             }],
             swap_vector: Vec::with_capacity(1),
         });
@@ -58,7 +58,7 @@ mod module_tests {
 
         RenderThread::run_node_deps(&sum);
         assert_eq!(
-            sum.borrow().descriptor().providers[0]
+            sum.borrow().descriptor().providers[1]
                 .borrow()
                 .provider_value,
             CoreProviderValue::Float32(0.0)

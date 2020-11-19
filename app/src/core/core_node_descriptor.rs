@@ -2,6 +2,7 @@ use crate::core::node_ref::CoreNodeRef;
 use crate::core::provider::CoreProvider;
 use crate::core::rcell::RCell;
 use crate::core::slot::CoreSlot;
+use crate::providers::node_provider::NodeCoreProvider;
 use std::thread::ThreadId;
 use std::{fmt, thread};
 
@@ -15,6 +16,7 @@ pub struct CoreNodeDescriptor {
     pub dependency_list: Vec<CoreNodeRef>,
     render_thread_id: Option<ThreadId>,
     type_name: &'static str,
+    node_provider: NodeCoreProvider,
 }
 
 impl CoreNodeDescriptor {
@@ -22,10 +24,14 @@ impl CoreNodeDescriptor {
         id: NodeId,
         type_name: &'static str,
         slots: Vec<RCell<CoreSlot>>,
-        providers: Vec<RCell<CoreProvider>>,
+        mut providers: Vec<RCell<CoreProvider>>,
     ) -> CoreNodeDescriptor {
+        // Always add NodeProvider as #0 provider
+        let node_provider = NodeCoreProvider::new("node");
+        providers.insert(0, node_provider.provider.clone());
         CoreNodeDescriptor {
             id,
+            node_provider,
             name: format!("{}-{}", type_name, id),
             dependency_list: vec![],
             slots,
@@ -35,7 +41,8 @@ impl CoreNodeDescriptor {
         }
     }
 
-    pub fn seal(&mut self, render_thread_id: ThreadId) {
+    pub fn seal(&mut self, render_thread_id: ThreadId, owner: &CoreNodeRef) {
+        self.node_provider.set(owner);
         self.render_thread_id = Some(render_thread_id);
     }
 

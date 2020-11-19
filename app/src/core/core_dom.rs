@@ -70,7 +70,7 @@ impl RenderThread {
     fn handle_provider_value_request(request: &mut ProviderValueRequest) {
         let node = request.provider.node.borrow_mut();
         let provider = node.descriptor().providers[request.provider.provider_index].borrow();
-        request.response_value = Some(provider.provider_value);
+        request.response_value = Some(provider.provider_value.clone());
     }
 
     pub fn run_node_deps(node_ref: &CoreNodeRef) {
@@ -117,7 +117,7 @@ impl CoreDom {
         core_node
             .borrow_mut()
             .descriptor_mut()
-            .seal(self.get_render_thread_id());
+            .seal(self.get_render_thread_id(), &core_node);
         core_node
     }
 

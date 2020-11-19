@@ -63,8 +63,18 @@ impl SetSlotConnectionsParams {
         let mut slot = node.descriptor().slots[self.slot.slot_index].borrow_mut();
         mem::swap(&mut slot.connection, &mut self.swap_vector);
         for connection in &self.connection {
-            let provider =
-                connection.node.borrow().descriptor().providers[connection.provider_index].clone();
+            let provider_node = connection.node.borrow();
+            let provider = provider_node.descriptor().providers[connection.provider_index].clone();
+            if !slot.inner.can_connect(&provider.borrow()) {
+                panic!(
+                    "'{}:{}({:?})' slot can't connect to '{}:{}' provider.",
+                    node.descriptor().name,
+                    slot.name,
+                    slot.inner.get_type(),
+                    provider_node.descriptor().name,
+                    provider.borrow().name
+                );
+            }
             slot.connection.push(provider);
         }
 
