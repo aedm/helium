@@ -1,4 +1,4 @@
-use crate::core::node_ref::{CoreNodeWeak};
+use crate::core::node_ref::CoreNodeWeak;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum CoreProviderValue {

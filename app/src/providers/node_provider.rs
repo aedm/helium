@@ -1,6 +1,6 @@
+use crate::core::node_ref::{CoreNodeRef, CoreNodeWeak};
 use crate::core::provider::{CoreProvider, CoreProviderValue};
 use crate::core::rcell::RCell;
-use crate::core::node_ref::{CoreNodeRef, CoreNodeWeak};
 
 pub struct NodeCoreProvider {
     pub provider: RCell<CoreProvider>,
@@ -9,7 +9,10 @@ pub struct NodeCoreProvider {
 impl NodeCoreProvider {
     pub fn new(name: &str) -> NodeCoreProvider {
         NodeCoreProvider {
-            provider: RCell::new(CoreProvider::new(name, CoreProviderValue::Node(CoreNodeWeak::new()))),
+            provider: RCell::new(CoreProvider::new(
+                name,
+                CoreProviderValue::Node(CoreNodeWeak::new()),
+            )),
         }
     }
 

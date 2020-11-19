@@ -2,9 +2,9 @@ use crate::core::node_ref::CoreNodeRef;
 use crate::core::provider::CoreProvider;
 use crate::core::rcell::RCell;
 use crate::core::slot::CoreSlot;
+use crate::providers::node_provider::NodeCoreProvider;
 use std::thread::ThreadId;
 use std::{fmt, thread};
-use crate::providers::node_provider::NodeCoreProvider;
 
 pub type NodeId = u64;
 
@@ -41,7 +41,8 @@ impl CoreNodeDescriptor {
         }
     }
 
-    pub fn seal(&mut self, render_thread_id: ThreadId) {
+    pub fn seal(&mut self, render_thread_id: ThreadId, owner: &CoreNodeRef) {
+        self.node_provider.set(owner);
         self.render_thread_id = Some(render_thread_id);
     }
 

@@ -88,11 +88,9 @@ unsafe impl Send for CoreNodeRef {}
 impl Debug for CoreNodeWeak {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         if let Some(node) = self.upgrade() {
-            let x = node.borrow();
-            let y = x.descriptor().fmt(f);
-            write!(f, "weak->{:?}", y)
-        }
-        else {
+            let _ = write!(f, "weak->");
+            node.borrow().descriptor().fmt(f)
+        } else {
             write!(f, "weak->nothing")
         }
     }
