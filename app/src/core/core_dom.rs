@@ -42,7 +42,7 @@ pub struct ProviderValueRequest {
 
 impl RenderThread {
     fn start(&mut self) {
-        println!("R: start");
+        println!("Render thread: start");
         loop {
             while let Ok(mut x) = self.receiver_to_render_thread.try_recv() {
                 match x.as_mut() {

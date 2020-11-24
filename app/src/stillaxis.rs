@@ -4,10 +4,13 @@ use crate::core::node::{CoreNode, CoreProviderIndex};
 use crate::flow::dom::FlowDom;
 use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowProviderIndex};
 use crate::flow::mutation::FlowMutation;
+use crate::render::vulkan::{VulkanContext, VulkanWindow};
 
 pub struct Stillaxis {
     pub core_dom: CoreDom,
     pub flow_dom: FlowDom,
+    pub vulkan_context: Option<VulkanContext>,
+    pub vulkan_windows: Vec<VulkanWindow>,
 }
 
 impl Stillaxis {
@@ -15,7 +18,22 @@ impl Stillaxis {
         let core_dom = CoreDom::new();
         let flow_dom = FlowDom::new(&core_dom);
 
-        Stillaxis { core_dom, flow_dom }
+        Stillaxis {
+            core_dom,
+            flow_dom,
+            vulkan_context: None,
+            vulkan_windows: vec![],
+        }
+    }
+
+    pub fn initialize_vulkan_context(&mut self) {
+        self.vulkan_context = Some(VulkanContext::new());
+    }
+
+    pub fn create_vulkan_window(&mut self) -> VulkanWindow {
+        let window = VulkanWindow::new(&self.vulkan_context.as_ref().unwrap());
+        self.vulkan_windows.push(window.clone());
+        window
     }
 
     pub fn new_node<T: 'static + CoreNode>(&self) -> FlowNodeRef {

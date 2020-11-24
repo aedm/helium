@@ -8,6 +8,8 @@ use crate::flow::mutation_set_connections::SetSlotConnectionsFlowMutation;
 use crate::nodes::float_node::FloatNode;
 use crate::nodes::sum_node::SumNode;
 use crate::stillaxis::Stillaxis;
+use std::thread;
+use std::time::Duration;
 
 mod core;
 mod flow;
@@ -15,6 +17,7 @@ mod nodes;
 mod providers;
 mod slots;
 mod stillaxis;
+mod render;
 
 fn get_incoming(stillaxis: &mut Stillaxis) -> Box<CoreMessage> {
     stillaxis
@@ -39,11 +42,9 @@ fn assert_value_response(stillaxis: &mut Stillaxis, value: &CoreProviderValue) {
     }
 }
 
-fn main() {
-    let mut stillaxis = Stillaxis::new();
-
-    let mut _c1;
+fn perform_test(stillaxis: &mut Stillaxis) {
     let csum;
+    let mut _c1;
     let fsum = stillaxis.new_node::<SumNode>();
     {
         let ff1 = stillaxis.new_node::<FloatNode>();
@@ -65,12 +66,12 @@ fn main() {
         ]);
 
         stillaxis.run_mutation(&mut flow_mutation);
-        assert_mutation_response(&mut stillaxis);
+        assert_mutation_response(stillaxis);
         assert!(_c1.as_ref().unwrap().refc() > 1);
         assert!(csum.refc() > 1);
 
         stillaxis.send_value_request(&FlowProviderIndex::new(&fsum, "sum"));
-        assert_value_response(&mut stillaxis, &CoreProviderValue::Float32(0.0));
+        assert_value_response(stillaxis, &CoreProviderValue::Float32(0.0));
 
         let mut flow_mutation = FlowMutation::new(vec![
             SetSlotConnectionsFlowMutation::new(FlowSlotIndex::new(&fsum, "a"), vec![]),
@@ -80,8 +81,18 @@ fn main() {
     }
     // TODO: last reference should be held by mutation object
     assert!(_c1.as_ref().unwrap().refc() > 1);
-    assert_mutation_response(&mut stillaxis);
+    assert_mutation_response(stillaxis);
     assert_eq!(_c1.as_ref().unwrap().refc(), 1);
     assert!(csum.refc() > 1);
     _c1 = None;
+}
+
+fn main() {
+    let mut stillaxis = Stillaxis::new();
+    stillaxis.initialize_vulkan_context();
+    let window = stillaxis.create_vulkan_window();
+
+    perform_test(&mut stillaxis);
+
+    // thread::sleep(Duration::from_millis(500));
 }
