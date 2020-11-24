@@ -115,3 +115,9 @@ impl VulkanWindow {
         }
     }
 }
+
+impl Drop for VulkanWindow {
+    fn drop(&mut self) {
+        println!("Vulkan Window drop");
+    }
+}

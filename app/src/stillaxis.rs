@@ -10,7 +10,7 @@ pub struct Stillaxis {
     pub core_dom: CoreDom,
     pub flow_dom: FlowDom,
     pub vulkan_context: Option<VulkanContext>,
-    pub vulkan_windows: Vec<VulkanWindow>,
+    // pub vulkan_windows: Vec<VulkanWindow>,
 }
 
 impl Stillaxis {
@@ -22,7 +22,7 @@ impl Stillaxis {
             core_dom,
             flow_dom,
             vulkan_context: None,
-            vulkan_windows: vec![],
+            // vulkan_windows: vec![],
         }
     }
 
@@ -32,7 +32,7 @@ impl Stillaxis {
 
     pub fn create_vulkan_window(&mut self) -> VulkanWindow {
         let window = VulkanWindow::new(&self.vulkan_context.as_ref().unwrap());
-        self.vulkan_windows.push(window.clone());
+        // self.vulkan_windows.push(window.clone());
         window
     }
 

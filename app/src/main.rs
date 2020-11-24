@@ -87,12 +87,15 @@ fn perform_test(stillaxis: &mut Stillaxis) {
     _c1 = None;
 }
 
-fn main() {
-    let mut stillaxis = Stillaxis::new();
+fn main_window(stillaxis: &mut Stillaxis) {
     stillaxis.initialize_vulkan_context();
     let window = stillaxis.create_vulkan_window();
+    thread::sleep(Duration::from_millis(2000));
+}
 
+fn main() {
+    let mut stillaxis = Stillaxis::new();
+    main_window(&mut stillaxis);
+    thread::sleep(Duration::from_millis(2000));
     perform_test(&mut stillaxis);
-
-    // thread::sleep(Duration::from_millis(500));
 }
