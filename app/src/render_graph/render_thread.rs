@@ -1,5 +1,5 @@
 use crate::render_graph::render_thread::MessageToRenderThread::Stop;
-use crate::render_graph::graph_mutation::GraphMutationSequence;
+use crate::render_graph::mutation::MutationSequence;
 use crate::render_graph::node::{Node, NodeProviderRef};
 use crate::render_graph::node_ref::NodeRef;
 use crate::render_graph::provider::ProviderValue;
@@ -13,7 +13,7 @@ use strum_macros::IntoStaticStr;
 
 #[derive(IntoStaticStr)]
 pub enum MessageToRenderThread {
-    Mutate(GraphMutationSequence),
+    Mutate(MutationSequence),
     Stop,
     GetProviderValue(ProviderValueRequest),
 }
@@ -21,7 +21,7 @@ pub enum MessageToRenderThread {
 unsafe impl Send for MessageToRenderThread {}
 
 pub struct RenderGraph {
-    pub core_root: NodeRef,
+    pub root_node: NodeRef,
     join_handle: Option<JoinHandle<()>>,
     pub sender_to_render_thread: Sender<Box<MessageToRenderThread>>,
     pub receiver_from_render_thread: Receiver<Box<MessageToRenderThread>>,
@@ -29,7 +29,7 @@ pub struct RenderGraph {
 }
 
 pub struct RenderThread {
-    core_root: NodeRef,
+    root_node: NodeRef,
     receiver_to_render_thread: Receiver<Box<MessageToRenderThread>>,
     sender_from_render_thread: Sender<Box<MessageToRenderThread>>,
     frame_count: u64,
@@ -54,7 +54,7 @@ impl RenderThread {
                         return;
                     }
                     MessageToRenderThread::GetProviderValue(request) => {
-                        RenderThread::run_node_deps(&mut self.core_root);
+                        RenderThread::run_node_deps(&mut self.root_node);
                         Self::handle_provider_value_request(request);
                     }
                 }
@@ -62,7 +62,7 @@ impl RenderThread {
                 let _ = self.sender_from_render_thread.send(x);
             }
             self.frame_count += 1;
-            RenderThread::run_node_deps(&mut self.core_root);
+            RenderThread::run_node_deps(&mut self.root_node);
             thread::sleep(Duration::from_millis(1));
         }
     }
@@ -86,12 +86,12 @@ impl RenderGraph {
     pub fn new() -> RenderGraph {
         let (sender_to_render_thread, receiver_to_render_thread) = channel();
         let (sender_from_render_thread, receiver_from_render_thread) = channel();
-        let core_root = NodeRef::new(Box::new(CoreRootNode::new(0)));
+        let root_node = NodeRef::new(Box::new(CoreRootNode::new(0)));
 
         let mut render_thread = RenderThread {
             receiver_to_render_thread,
             sender_from_render_thread,
-            core_root: core_root.clone(),
+            root_node: root_node.clone(),
             frame_count: 0,
         };
 
@@ -103,7 +103,7 @@ impl RenderGraph {
             .unwrap();
 
         RenderGraph {
-            core_root,
+            root_node,
             join_handle: Some(join_handle),
             sender_to_render_thread,
             receiver_from_render_thread,

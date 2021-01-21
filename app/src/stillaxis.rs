@@ -2,8 +2,8 @@ use crate::render_graph::render_thread::MessageToRenderThread::{GetProviderValue
 use crate::render_graph::render_thread::{RenderGraph, ProviderValueRequest};
 use crate::render_graph::node::{Node, NodeProviderRef};
 use crate::dom::dom::Dom;
-use crate::dom::dom_element::{DomElement, DomElementRef, DomProviderRef};
-use crate::dom::mutation::DomMutation;
+use crate::dom::element::{Element, DomElementRef, DomProviderRef};
+use crate::dom::transaction::Transaction;
 
 pub struct Stillaxis {
     pub render_graph: RenderGraph,
@@ -20,11 +20,11 @@ impl Stillaxis {
 
     pub fn new_node<T: 'static + Node>(&self) -> DomElementRef {
         let core_node = self.render_graph.new_node::<T>();
-        DomElement::from_node(&core_node)
+        Element::from_node(&core_node)
     }
 
-    pub fn run_mutation(&mut self, flow_mutation: &mut DomMutation) {
-        let core_mutation = flow_mutation.run(&mut self.dom);
+    pub fn run_mutation(&mut self, transaction: &mut Transaction) {
+        let core_mutation = transaction.run(&mut self.dom);
         let _ = self
             .render_graph
             .sender_to_render_thread
@@ -32,13 +32,13 @@ impl Stillaxis {
     }
 
     pub fn get_root(&self) -> DomElementRef {
-        self.dom.flow_root.clone()
+        self.dom.root_element.clone()
     }
 
     pub fn send_value_request(&mut self, provider_ref: &DomProviderRef) {
         let request: ProviderValueRequest = ProviderValueRequest {
             provider: NodeProviderRef {
-                node: provider_ref.node.borrow().core_node.clone(),
+                node: provider_ref.element.borrow().core_node.clone(),
                 provider_index: provider_ref.provider_index,
             },
             response_value: None,
@@ -61,12 +61,12 @@ mod tests {
     use crate::render_graph::render_thread::MessageToRenderThread;
     use crate::render_graph::provider::ProviderValue;
     use crate::render_graph::slot::SlotDefault;
-    use crate::dom::dom_element::{DomProviderRef, DomSlotRef};
-    use crate::dom::mutation::DomMutation;
-    use crate::dom::mutation_create_node::CreateNodeDomMutation;
-    use crate::dom::mutation_remove_node::RemoveNodeDomMutation;
-    use crate::dom::mutation_set_connections::SetSlotConnectionsDomMutation;
-    use crate::dom::mutation_set_slot_value::SetSlotValueDomMutation;
+    use crate::dom::element::{DomProviderRef, DomSlotRef};
+    use crate::dom::transaction::Transaction;
+    use crate::dom::transaction_add_element::TransactionAddElement;
+    use crate::dom::transaction_remove_element::TransactionRemoveElement;
+    use crate::dom::transaction_set_slot_connections::TransactionSetSlotConnections;
+    use crate::dom::transaction_set_slot_value::TransactionSetSlotValue;
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
     use crate::stillaxis::Stillaxis;
@@ -102,19 +102,19 @@ mod tests {
         let ff2 = stillaxis.new_node::<FloatNode>();
         let fsum = stillaxis.new_node::<SumNode>();
 
-        let mut flow_mutation = DomMutation::new(vec![
-            CreateNodeDomMutation::new(&ff1),
-            CreateNodeDomMutation::new(&ff2),
-            CreateNodeDomMutation::new(&fsum),
-            SetSlotConnectionsDomMutation::new(
+        let mut flow_mutation = Transaction::new(vec![
+            TransactionAddElement::new(&ff1),
+            TransactionAddElement::new(&ff2),
+            TransactionAddElement::new(&fsum),
+            TransactionSetSlotConnections::new(
                 DomSlotRef::new(&fsum, "a"),
                 vec![DomProviderRef::new(&ff1, "value")],
             ),
-            SetSlotConnectionsDomMutation::new(
+            TransactionSetSlotConnections::new(
                 DomSlotRef::new(&fsum, "b"),
                 vec![DomProviderRef::new(&ff2, "value")],
             ),
-            SetSlotConnectionsDomMutation::new(
+            TransactionSetSlotConnections::new(
                 DomSlotRef::new(&stillaxis.get_root(), "all_nodes"),
                 vec![DomProviderRef::new(&fsum, "node")],
             ),
@@ -127,7 +127,7 @@ mod tests {
         stillaxis.send_value_request(&DomProviderRef::new(&fsum, "sum"));
         assert_value_response(&mut stillaxis, &ProviderValue::Float32(0.0));
 
-        let mut flow_mutation = DomMutation::new(vec![SetSlotValueDomMutation::_new(
+        let mut flow_mutation = Transaction::new(vec![TransactionSetSlotValue::new(
             &ff1,
             "a",
             SlotDefault::Float32(10.0),
@@ -153,14 +153,14 @@ mod tests {
             _c1 = Some(ff1.borrow().core_node.clone());
             csum = fsum.borrow().core_node.clone();
 
-            let mut flow_mutation = DomMutation::new(vec![
-                CreateNodeDomMutation::new(&ff1),
-                CreateNodeDomMutation::new(&fsum),
-                SetSlotConnectionsDomMutation::new(
+            let mut flow_mutation = Transaction::new(vec![
+                TransactionAddElement::new(&ff1),
+                TransactionAddElement::new(&fsum),
+                TransactionSetSlotConnections::new(
                     DomSlotRef::new(&stillaxis.get_root(), "all_nodes"),
                     vec![DomProviderRef::new(&fsum, "node")],
                 ),
-                SetSlotConnectionsDomMutation::new(
+                TransactionSetSlotConnections::new(
                     DomSlotRef::new(&fsum, "a"),
                     vec![DomProviderRef::new(&ff1, "value")],
                 ),
@@ -174,9 +174,9 @@ mod tests {
             stillaxis.send_value_request(&DomProviderRef::new(&fsum, "sum"));
             assert_value_response(&mut stillaxis, &ProviderValue::Float32(0.0));
 
-            let mut flow_mutation = DomMutation::new(vec![
-                SetSlotConnectionsDomMutation::new(DomSlotRef::new(&fsum, "a"), vec![]),
-                RemoveNodeDomMutation::new(&ff1),
+            let mut flow_mutation = Transaction::new(vec![
+                TransactionSetSlotConnections::new(DomSlotRef::new(&fsum, "a"), vec![]),
+                TransactionRemoveElement::new(&ff1),
             ]);
             stillaxis.run_mutation(&mut flow_mutation);
         }

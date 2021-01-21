@@ -1,4 +1,4 @@
-use crate::dom::dom_element::DomElementRef;
+use crate::dom::element::DomElementRef;
 use std::collections::HashSet;
 
 pub struct TopologicalOrder {
@@ -22,7 +22,7 @@ impl TopologicalOrder {
         }
         for slot in &node_ref.borrow().slots {
             for provider_ref in &slot.connections {
-                self.visit(&provider_ref.node);
+                self.visit(&provider_ref.element);
             }
         }
         self.order.push(node_ref.clone());
@@ -33,7 +33,7 @@ impl TopologicalOrder {
 mod tests {
     use crate::render_graph::node::Node;
     use crate::render_graph::node_ref::NodeRef;
-    use crate::dom::dom_element::{DomElement, DomElementRef, DomProviderRef};
+    use crate::dom::element::{Element, DomElementRef, DomProviderRef};
     use crate::dom::topological_order::TopologicalOrder;
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
@@ -45,7 +45,7 @@ mod tests {
         provider_index: usize,
     ) {
         slot_node.borrow_mut().slots[slot_index].connections = vec![DomProviderRef {
-            node: provider_node.clone(),
+            element: provider_node.clone(),
             provider_index,
         }];
     }
@@ -60,7 +60,7 @@ mod tests {
         let core_nodes = vec![&float1, &float2, &sum1, &sum2];
         let flow_nodes: Vec<_> = core_nodes
             .iter()
-            .map(|x| DomElement::from_node(*x))
+            .map(|x| Element::from_node(*x))
             .collect();
 
         connect(&flow_nodes[2], 0, &flow_nodes[0], 0);

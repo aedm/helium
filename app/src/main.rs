@@ -1,10 +1,10 @@
 use crate::render_graph::render_thread::MessageToRenderThread;
 use crate::render_graph::provider::ProviderValue;
-use crate::dom::dom_element::{DomProviderRef, DomSlotRef};
-use crate::dom::mutation::DomMutation;
-use crate::dom::mutation_create_node::CreateNodeDomMutation;
-use crate::dom::mutation_remove_node::RemoveNodeDomMutation;
-use crate::dom::mutation_set_connections::SetSlotConnectionsDomMutation;
+use crate::dom::element::{DomProviderRef, DomSlotRef};
+use crate::dom::transaction::Transaction;
+use crate::dom::transaction_add_element::TransactionAddElement;
+use crate::dom::transaction_remove_element::TransactionRemoveElement;
+use crate::dom::transaction_set_slot_connections::TransactionSetSlotConnections;
 use crate::nodes::float_node::FloatNode;
 use crate::nodes::sum_node::SumNode;
 use crate::stillaxis::Stillaxis;
@@ -51,20 +51,20 @@ fn main() {
         _c1 = Some(ff1.borrow().core_node.clone());
         csum = fsum.borrow().core_node.clone();
 
-        let mut flow_mutation = DomMutation::new(vec![
-            CreateNodeDomMutation::new(&ff1),
-            CreateNodeDomMutation::new(&fsum),
-            SetSlotConnectionsDomMutation::new(
+        let mut transaction = Transaction::new(vec![
+            Transaction::add_element(&ff1),
+            Transaction::add_element(&fsum),
+            Transaction::set_slot_connections(
                 DomSlotRef::new(&stillaxis.get_root(), "all_nodes"),
                 vec![DomProviderRef::new(&fsum, "node")],
             ),
-            SetSlotConnectionsDomMutation::new(
+            Transaction::set_slot_connections(
                 DomSlotRef::new(&fsum, "a"),
                 vec![DomProviderRef::new(&ff1, "value")],
             ),
         ]);
 
-        stillaxis.run_mutation(&mut flow_mutation);
+        stillaxis.run_mutation(&mut transaction);
         assert_mutation_response(&mut stillaxis);
         assert!(_c1.as_ref().unwrap().refc() > 1);
         assert!(csum.refc() > 1);
@@ -72,9 +72,9 @@ fn main() {
         stillaxis.send_value_request(&DomProviderRef::new(&fsum, "sum"));
         assert_value_response(&mut stillaxis, &ProviderValue::Float32(0.0));
 
-        let mut flow_mutation = DomMutation::new(vec![
-            SetSlotConnectionsDomMutation::new(DomSlotRef::new(&fsum, "a"), vec![]),
-            RemoveNodeDomMutation::new(&ff1),
+        let mut flow_mutation = Transaction::new(vec![
+            TransactionSetSlotConnections::new(DomSlotRef::new(&fsum, "a"), vec![]),
+            TransactionRemoveElement::new(&ff1),
         ]);
         stillaxis.run_mutation(&mut flow_mutation);
     }

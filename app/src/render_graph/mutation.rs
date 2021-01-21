@@ -5,11 +5,11 @@ use crate::render_graph::rcell::RCell;
 use crate::render_graph::slot::SlotDefault;
 use std::mem;
 
-pub struct GraphMutationSequence {
-    pub steps: Vec<GraphMutation>,
+pub struct MutationSequence {
+    pub steps: Vec<Mutation>,
 }
 
-pub enum GraphMutation {
+pub enum Mutation {
     SetSlotConnections(SetSlotConnectionsParams),
     SetNodeDependencyList(SetNodeDependencyListParams),
     SetSlotDefaultValue(SetSlotDefaultValueParams),
@@ -32,19 +32,19 @@ pub struct SetSlotDefaultValueParams {
     pub value: SlotDefault,
 }
 
-impl GraphMutation {
+impl Mutation {
     fn run(&mut self) {
         match self {
-            GraphMutation::SetSlotConnections(x) => x.run(),
-            GraphMutation::SetNodeDependencyList(x) => x.run(),
-            GraphMutation::SetSlotDefaultValue(x) => x.run(),
+            Mutation::SetSlotConnections(x) => x.run(),
+            Mutation::SetNodeDependencyList(x) => x.run(),
+            Mutation::SetSlotDefaultValue(x) => x.run(),
         }
     }
 }
 
-impl GraphMutationSequence {
-    pub fn new(steps: Vec<GraphMutation>) -> GraphMutationSequence {
-        GraphMutationSequence { steps }
+impl MutationSequence {
+    pub fn new(steps: Vec<Mutation>) -> MutationSequence {
+        MutationSequence { steps }
     }
 
     pub fn run(&mut self) {

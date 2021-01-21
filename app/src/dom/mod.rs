@@ -1,10 +1,10 @@
 pub mod dom;
-pub mod dom_element;
-pub mod mutation;
-pub mod mutation_create_node;
-pub mod mutation_remove_node;
-pub mod mutation_set_connections;
-pub mod mutation_set_slot_value;
+pub mod element;
+pub mod transaction;
+pub mod transaction_add_element;
+pub mod transaction_remove_element;
+pub mod transaction_set_slot_connections;
+pub mod transaction_set_slot_value;
 pub mod topological_order;
 
 #[cfg(test)]

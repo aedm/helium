@@ -1,5 +1,5 @@
 pub mod render_thread;
-pub mod graph_mutation;
+pub mod mutation;
 pub mod node_descriptor;
 pub mod node;
 pub mod node_ref;
@@ -10,8 +10,8 @@ pub mod slot;
 #[cfg(test)]
 mod module_tests {
     use crate::render_graph::render_thread::{RenderGraph, RenderThread};
-    use crate::render_graph::graph_mutation::{
-        GraphMutation, GraphMutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
+    use crate::render_graph::mutation::{
+        Mutation, MutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
     };
     use crate::render_graph::node::{NodeProviderRef, NodeSlotRef};
     use crate::render_graph::provider::ProviderValue;
@@ -25,7 +25,7 @@ mod module_tests {
         let f2 = dom.new_node::<FloatNode>();
         let sum = dom.new_node::<SumNode>();
 
-        let conn_1 = GraphMutation::SetSlotConnections(SetSlotConnectionsParams {
+        let conn_1 = Mutation::SetSlotConnections(SetSlotConnectionsParams {
             slot: NodeSlotRef {
                 node: sum.clone(),
                 slot_index: 0,
@@ -36,7 +36,7 @@ mod module_tests {
             }],
             swap_vector: Vec::with_capacity(1),
         });
-        let conn_2 = GraphMutation::SetSlotConnections(SetSlotConnectionsParams {
+        let conn_2 = Mutation::SetSlotConnections(SetSlotConnectionsParams {
             slot: NodeSlotRef {
                 node: sum.clone(),
                 slot_index: 1,
@@ -47,11 +47,11 @@ mod module_tests {
             }],
             swap_vector: Vec::with_capacity(1),
         });
-        let dep = GraphMutation::SetNodeDependencyList(SetNodeDependencyListParams {
+        let dep = Mutation::SetNodeDependencyList(SetNodeDependencyListParams {
             node: sum.clone(),
             dependency_list: vec![f1.clone(), f2.clone()],
         });
-        let mut seq = GraphMutationSequence {
+        let mut seq = MutationSequence {
             steps: vec![conn_1, conn_2, dep],
         };
         seq.run();

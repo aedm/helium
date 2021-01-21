@@ -7,7 +7,7 @@ use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
 
-pub struct DomElement {
+pub struct Element {
     pub id: NodeId,
     pub name: String,
     pub key: String,
@@ -16,7 +16,7 @@ pub struct DomElement {
     pub providers: Vec<DomProvider>,
 }
 
-pub type DomElementRef = RCell<DomElement>;
+pub type DomElementRef = RCell<Element>;
 
 pub struct DomSlot {
     pub name: String,
@@ -27,7 +27,7 @@ impl DomSlot {
     fn from_core_slot(core_slot: &Slot) -> DomSlot {
         DomSlot {
             name: core_slot.name.clone(),
-            // TODO
+            // TODO: initialize connections
             connections: Vec::new(),
         }
     }
@@ -42,7 +42,7 @@ impl DomProvider {
     fn from_core_provider(core_provider: &Provider) -> DomProvider {
         DomProvider {
             name: core_provider.name.clone(),
-            // TODO
+            // TODO: initialize connections
             connections: Vec::new(),
         }
     }
@@ -50,17 +50,17 @@ impl DomProvider {
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct DomSlotRef {
-    pub node: DomElementRef,
+    pub element: DomElementRef,
     pub slot_index: usize,
 }
 
 #[derive(Clone, Hash, PartialEq, Eq)]
 pub struct DomProviderRef {
-    pub node: DomElementRef,
+    pub element: DomElementRef,
     pub provider_index: usize,
 }
 
-impl DomElement {
+impl Element {
     pub fn from_node(core_node_ref: &NodeRef) -> DomElementRef {
         let core_node = core_node_ref.borrow_mut();
         let slots: Vec<_> = core_node
@@ -75,7 +75,7 @@ impl DomElement {
             .iter()
             .map(|x| DomProvider::from_core_provider(&x.borrow()))
             .collect();
-        RCell::new(DomElement {
+        RCell::new(Element {
             id: core_node.descriptor().id,
             name: core_node.descriptor().name.clone(),
             key: "".into(),
@@ -86,13 +86,13 @@ impl DomElement {
     }
 }
 
-impl Debug for DomElement {
+impl Debug for Element {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.write_str(&format!("'{}'({})", self.name, self.id))
     }
 }
 
-impl Drop for DomElement {
+impl Drop for Element {
     fn drop(&mut self) {
         println!(
             "Flow node drop: {:?}, render_graph refcount: {}",
@@ -106,7 +106,7 @@ impl DomSlotRef {
     pub fn new(node: &DomElementRef, name: &str) -> DomSlotRef {
         if let Some(index) = node.borrow().slots.iter().position(|x| x.name == name) {
             return DomSlotRef {
-                node: node.clone(),
+                element: node.clone(),
                 slot_index: index,
             };
         }
@@ -119,7 +119,7 @@ impl DomProviderRef {
         let node = node_ref.borrow();
         if let Some(index) = node.providers.iter().position(|x| x.name == name) {
             return DomProviderRef {
-                node: node_ref.clone(),
+                element: node_ref.clone(),
                 provider_index: index,
             };
         }
