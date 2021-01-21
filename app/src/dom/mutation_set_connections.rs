@@ -1,30 +1,30 @@
-use super::dom::FlowDom;
-use super::flow_node::FlowSlotIndex;
-use super::mutation::{FlowMutationStep, FlowMutationStepResult};
-use crate::flow::flow_node::FlowProviderIndex;
+use super::dom::Dom;
+use super::dom_element::DomSlotRef;
+use super::mutation::{DomMutationStep, DomMutationStepResult};
+use crate::dom::dom_element::DomProviderRef;
 use std::collections::HashSet;
 use std::iter::FromIterator;
 
-pub struct SetSlotConnectionsFlowMutation {
-    pub node_slot: FlowSlotIndex,
-    pub connections: Vec<FlowProviderIndex>,
+pub struct SetSlotConnectionsDomMutation {
+    pub node_slot: DomSlotRef,
+    pub connections: Vec<DomProviderRef>,
 }
 
-impl SetSlotConnectionsFlowMutation {
+impl SetSlotConnectionsDomMutation {
     pub fn new(
-        node_slot: FlowSlotIndex,
-        connections: Vec<FlowProviderIndex>,
-    ) -> Box<SetSlotConnectionsFlowMutation> {
-        Box::new(SetSlotConnectionsFlowMutation {
+        node_slot: DomSlotRef,
+        connections: Vec<DomProviderRef>,
+    ) -> Box<SetSlotConnectionsDomMutation> {
+        Box::new(SetSlotConnectionsDomMutation {
             node_slot,
             connections,
         })
     }
 }
 
-impl FlowMutationStep for SetSlotConnectionsFlowMutation {
-    fn run(&self, _dom: &mut FlowDom) -> FlowMutationStepResult {
-        // Change flow DOM
+impl DomMutationStep for SetSlotConnectionsDomMutation {
+    fn run(&self, _dom: &mut Dom) -> DomMutationStepResult {
+        // Change dom DOM
         let mut node = self.node_slot.node.borrow_mut();
         let slot = &mut node.slots[self.node_slot.slot_index];
 
@@ -45,8 +45,8 @@ impl FlowMutationStep for SetSlotConnectionsFlowMutation {
         // TODO: Use mem::swap here?
         slot.connections = self.connections.to_vec();
 
-        // Generate core mutation
-        FlowMutationStepResult {
+        // Generate render_graph mutation
+        DomMutationStepResult {
             changed_slots: vec![self.node_slot.clone()],
             core_mutations: vec![],
         }

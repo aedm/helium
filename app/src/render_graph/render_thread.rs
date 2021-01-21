@@ -1,8 +1,8 @@
-use crate::core::core_dom::CoreMessage::Stop;
-use crate::core::core_mutation::CoreMutationSequence;
-use crate::core::node::{CoreNode, CoreProviderIndex};
-use crate::core::node_ref::CoreNodeRef;
-use crate::core::provider::CoreProviderValue;
+use crate::render_graph::render_thread::MessageToRenderThread::Stop;
+use crate::render_graph::graph_mutation::GraphMutationSequence;
+use crate::render_graph::node::{Node, NodeProviderRef};
+use crate::render_graph::node_ref::NodeRef;
+use crate::render_graph::provider::ProviderValue;
 use crate::nodes::root_node::CoreRootNode;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::mpsc::{channel, Receiver, Sender};
@@ -12,32 +12,32 @@ use std::time::Duration;
 use strum_macros::IntoStaticStr;
 
 #[derive(IntoStaticStr)]
-pub enum CoreMessage {
-    Mutate(CoreMutationSequence),
+pub enum MessageToRenderThread {
+    Mutate(GraphMutationSequence),
     Stop,
     GetProviderValue(ProviderValueRequest),
 }
 
-unsafe impl Send for CoreMessage {}
+unsafe impl Send for MessageToRenderThread {}
 
-pub struct CoreDom {
-    pub core_root: CoreNodeRef,
+pub struct RenderGraph {
+    pub core_root: NodeRef,
     join_handle: Option<JoinHandle<()>>,
-    pub sender_to_render_thread: Sender<Box<CoreMessage>>,
-    pub receiver_from_render_thread: Receiver<Box<CoreMessage>>,
+    pub sender_to_render_thread: Sender<Box<MessageToRenderThread>>,
+    pub receiver_from_render_thread: Receiver<Box<MessageToRenderThread>>,
     node_id_generator: AtomicU64,
 }
 
 pub struct RenderThread {
-    core_root: CoreNodeRef,
-    receiver_to_render_thread: Receiver<Box<CoreMessage>>,
-    sender_from_render_thread: Sender<Box<CoreMessage>>,
+    core_root: NodeRef,
+    receiver_to_render_thread: Receiver<Box<MessageToRenderThread>>,
+    sender_from_render_thread: Sender<Box<MessageToRenderThread>>,
     frame_count: u64,
 }
 
 pub struct ProviderValueRequest {
-    pub provider: CoreProviderIndex,
-    pub response_value: Option<CoreProviderValue>,
+    pub provider: NodeProviderRef,
+    pub response_value: Option<ProviderValue>,
 }
 
 impl RenderThread {
@@ -46,14 +46,14 @@ impl RenderThread {
         loop {
             while let Ok(mut x) = self.receiver_to_render_thread.try_recv() {
                 match x.as_mut() {
-                    CoreMessage::Mutate(mutation) => {
+                    MessageToRenderThread::Mutate(mutation) => {
                         mutation.run();
                     }
-                    CoreMessage::Stop => {
+                    MessageToRenderThread::Stop => {
                         println!("R: stop. Total frame count: {}", self.frame_count);
                         return;
                     }
-                    CoreMessage::GetProviderValue(request) => {
+                    MessageToRenderThread::GetProviderValue(request) => {
                         RenderThread::run_node_deps(&mut self.core_root);
                         Self::handle_provider_value_request(request);
                     }
@@ -73,7 +73,7 @@ impl RenderThread {
         request.response_value = Some(provider.provider_value.clone());
     }
 
-    pub fn run_node_deps(node_ref: &CoreNodeRef) {
+    pub fn run_node_deps(node_ref: &NodeRef) {
         let mut node = node_ref.borrow_mut();
         for dep in &node.descriptor().dependency_list {
             dep.borrow_mut().run();
@@ -82,11 +82,11 @@ impl RenderThread {
     }
 }
 
-impl CoreDom {
-    pub fn new() -> CoreDom {
+impl RenderGraph {
+    pub fn new() -> RenderGraph {
         let (sender_to_render_thread, receiver_to_render_thread) = channel();
         let (sender_from_render_thread, receiver_from_render_thread) = channel();
-        let core_root = CoreNodeRef::new(Box::new(CoreRootNode::new(0)));
+        let core_root = NodeRef::new(Box::new(CoreRootNode::new(0)));
 
         let mut render_thread = RenderThread {
             receiver_to_render_thread,
@@ -96,13 +96,13 @@ impl CoreDom {
         };
 
         let join_handle = thread::Builder::new()
-            .name("render core".into())
+            .name("render render_graph".into())
             .spawn(move || {
                 render_thread.start();
             })
             .unwrap();
 
-        CoreDom {
+        RenderGraph {
             core_root,
             join_handle: Some(join_handle),
             sender_to_render_thread,
@@ -111,9 +111,9 @@ impl CoreDom {
         }
     }
 
-    pub fn new_node<T: 'static + CoreNode>(&self) -> CoreNodeRef {
+    pub fn new_node<T: 'static + Node>(&self) -> NodeRef {
         let id = self.node_id_generator.fetch_add(1, Ordering::Relaxed);
-        let core_node = CoreNodeRef::new(Box::new(T::new(id)));
+        let core_node = NodeRef::new(Box::new(T::new(id)));
         core_node
             .borrow_mut()
             .descriptor_mut()
@@ -136,7 +136,7 @@ impl CoreDom {
     }
 }
 
-impl Drop for CoreDom {
+impl Drop for RenderGraph {
     fn drop(&mut self) {
         dbg!("CoreDom.drop");
         self.stop();

@@ -1,30 +1,30 @@
-use crate::core::node::CoreNode;
+use crate::render_graph::node::Node;
 
-use crate::core::core_node_descriptor::{CoreNodeDescriptor, NodeId};
+use crate::render_graph::node_descriptor::{NodeDescriptor, NodeId};
 use crate::slots::node_slot::NodeCoreSlot;
 use std::fmt;
 
 pub struct CoreRootNode {
-    inner: CoreNodeDescriptor,
+    inner: NodeDescriptor,
     pub slot: NodeCoreSlot,
 }
 
-impl CoreNode for CoreRootNode {
+impl Node for CoreRootNode {
     fn new(id: NodeId) -> CoreRootNode {
         let slot = NodeCoreSlot::new("all_nodes");
         let slots = vec![slot.slot.clone()];
         let providers = vec![];
         CoreRootNode {
-            inner: CoreNodeDescriptor::new(id, "root", slots, providers),
+            inner: NodeDescriptor::new(id, "root", slots, providers),
             slot,
         }
     }
 
-    fn descriptor(&self) -> &CoreNodeDescriptor {
+    fn descriptor(&self) -> &NodeDescriptor {
         &self.inner
     }
 
-    fn descriptor_mut(&mut self) -> &mut CoreNodeDescriptor {
+    fn descriptor_mut(&mut self) -> &mut NodeDescriptor {
         &mut self.inner
     }
 

@@ -1,50 +1,50 @@
-use crate::core::node::{CoreProviderIndex, CoreSlotIndex};
-use crate::core::node_ref::CoreNodeRef;
-use crate::core::provider::CoreProvider;
-use crate::core::rcell::RCell;
-use crate::core::slot::CoreSlotDefault;
+use crate::render_graph::node::{NodeProviderRef, NodeSlotRef};
+use crate::render_graph::node_ref::NodeRef;
+use crate::render_graph::provider::Provider;
+use crate::render_graph::rcell::RCell;
+use crate::render_graph::slot::SlotDefault;
 use std::mem;
 
-pub struct CoreMutationSequence {
-    pub steps: Vec<CoreMutation>,
+pub struct GraphMutationSequence {
+    pub steps: Vec<GraphMutation>,
 }
 
-pub enum CoreMutation {
+pub enum GraphMutation {
     SetSlotConnections(SetSlotConnectionsParams),
     SetNodeDependencyList(SetNodeDependencyListParams),
     SetSlotDefaultValue(SetSlotDefaultValueParams),
 }
 
 pub struct SetSlotConnectionsParams {
-    pub slot: CoreSlotIndex,
-    pub connection: Vec<CoreProviderIndex>,
-    pub swap_vector: Vec<RCell<CoreProvider>>,
+    pub slot: NodeSlotRef,
+    pub connection: Vec<NodeProviderRef>,
+    pub swap_vector: Vec<RCell<Provider>>,
 }
 
 pub struct SetNodeDependencyListParams {
-    pub node: CoreNodeRef,
-    pub dependency_list: Vec<CoreNodeRef>,
+    pub node: NodeRef,
+    pub dependency_list: Vec<NodeRef>,
 }
 
 pub struct SetSlotDefaultValueParams {
-    pub node: CoreNodeRef,
+    pub node: NodeRef,
     pub slot_index: usize,
-    pub value: CoreSlotDefault,
+    pub value: SlotDefault,
 }
 
-impl CoreMutation {
+impl GraphMutation {
     fn run(&mut self) {
         match self {
-            CoreMutation::SetSlotConnections(x) => x.run(),
-            CoreMutation::SetNodeDependencyList(x) => x.run(),
-            CoreMutation::SetSlotDefaultValue(x) => x.run(),
+            GraphMutation::SetSlotConnections(x) => x.run(),
+            GraphMutation::SetNodeDependencyList(x) => x.run(),
+            GraphMutation::SetSlotDefaultValue(x) => x.run(),
         }
     }
 }
 
-impl CoreMutationSequence {
-    pub fn new(steps: Vec<CoreMutation>) -> CoreMutationSequence {
-        CoreMutationSequence { steps }
+impl GraphMutationSequence {
+    pub fn new(steps: Vec<GraphMutation>) -> GraphMutationSequence {
+        GraphMutationSequence { steps }
     }
 
     pub fn run(&mut self) {

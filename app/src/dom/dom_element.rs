@@ -1,31 +1,31 @@
-use crate::core::core_node_descriptor::NodeId;
-use crate::core::node_ref::CoreNodeRef;
-use crate::core::provider::CoreProvider;
-use crate::core::rcell::RCell;
-use crate::core::slot::CoreSlot;
+use crate::render_graph::node_descriptor::NodeId;
+use crate::render_graph::node_ref::NodeRef;
+use crate::render_graph::provider::Provider;
+use crate::render_graph::rcell::RCell;
+use crate::render_graph::slot::Slot;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
 
-pub struct FlowNode {
+pub struct DomElement {
     pub id: NodeId,
     pub name: String,
     pub key: String,
-    pub core_node: CoreNodeRef,
-    pub slots: Vec<FlowSlot>,
-    pub providers: Vec<FlowProvider>,
+    pub core_node: NodeRef,
+    pub slots: Vec<DomSlot>,
+    pub providers: Vec<DomProvider>,
 }
 
-pub type FlowNodeRef = RCell<FlowNode>;
+pub type DomElementRef = RCell<DomElement>;
 
-pub struct FlowSlot {
+pub struct DomSlot {
     pub name: String,
-    pub connections: Vec<FlowProviderIndex>,
+    pub connections: Vec<DomProviderRef>,
 }
 
-impl FlowSlot {
-    fn from_core_slot(core_slot: &CoreSlot) -> FlowSlot {
-        FlowSlot {
+impl DomSlot {
+    fn from_core_slot(core_slot: &Slot) -> DomSlot {
+        DomSlot {
             name: core_slot.name.clone(),
             // TODO
             connections: Vec::new(),
@@ -33,14 +33,14 @@ impl FlowSlot {
     }
 }
 
-pub struct FlowProvider {
+pub struct DomProvider {
     pub name: String,
-    pub connections: Vec<FlowSlotIndex>,
+    pub connections: Vec<DomSlotRef>,
 }
 
-impl FlowProvider {
-    fn from_core_provider(core_provider: &CoreProvider) -> FlowProvider {
-        FlowProvider {
+impl DomProvider {
+    fn from_core_provider(core_provider: &Provider) -> DomProvider {
+        DomProvider {
             name: core_provider.name.clone(),
             // TODO
             connections: Vec::new(),
@@ -49,33 +49,33 @@ impl FlowProvider {
 }
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
-pub struct FlowSlotIndex {
-    pub node: FlowNodeRef,
+pub struct DomSlotRef {
+    pub node: DomElementRef,
     pub slot_index: usize,
 }
 
 #[derive(Clone, Hash, PartialEq, Eq)]
-pub struct FlowProviderIndex {
-    pub node: FlowNodeRef,
+pub struct DomProviderRef {
+    pub node: DomElementRef,
     pub provider_index: usize,
 }
 
-impl FlowNode {
-    pub fn from_core_node(core_node_ref: &CoreNodeRef) -> FlowNodeRef {
+impl DomElement {
+    pub fn from_node(core_node_ref: &NodeRef) -> DomElementRef {
         let core_node = core_node_ref.borrow_mut();
         let slots: Vec<_> = core_node
             .descriptor()
             .slots
             .iter()
-            .map(|x| FlowSlot::from_core_slot(&x.borrow()))
+            .map(|x| DomSlot::from_core_slot(&x.borrow()))
             .collect();
         let providers: Vec<_> = core_node
             .descriptor()
             .providers
             .iter()
-            .map(|x| FlowProvider::from_core_provider(&x.borrow()))
+            .map(|x| DomProvider::from_core_provider(&x.borrow()))
             .collect();
-        RCell::new(FlowNode {
+        RCell::new(DomElement {
             id: core_node.descriptor().id,
             name: core_node.descriptor().name.clone(),
             key: "".into(),
@@ -86,26 +86,26 @@ impl FlowNode {
     }
 }
 
-impl Debug for FlowNode {
+impl Debug for DomElement {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.write_str(&format!("'{}'({})", self.name, self.id))
     }
 }
 
-impl Drop for FlowNode {
+impl Drop for DomElement {
     fn drop(&mut self) {
         println!(
-            "Flow node drop: {:?}, core refcount: {}",
+            "Flow node drop: {:?}, render_graph refcount: {}",
             self,
             self.core_node.refc()
         );
     }
 }
 
-impl FlowSlotIndex {
-    pub fn new(node: &FlowNodeRef, name: &str) -> FlowSlotIndex {
+impl DomSlotRef {
+    pub fn new(node: &DomElementRef, name: &str) -> DomSlotRef {
         if let Some(index) = node.borrow().slots.iter().position(|x| x.name == name) {
-            return FlowSlotIndex {
+            return DomSlotRef {
                 node: node.clone(),
                 slot_index: index,
             };
@@ -114,11 +114,11 @@ impl FlowSlotIndex {
     }
 }
 
-impl FlowProviderIndex {
-    pub fn new(node_ref: &FlowNodeRef, name: &str) -> FlowProviderIndex {
+impl DomProviderRef {
+    pub fn new(node_ref: &DomElementRef, name: &str) -> DomProviderRef {
         let node = node_ref.borrow();
         if let Some(index) = node.providers.iter().position(|x| x.name == name) {
-            return FlowProviderIndex {
+            return DomProviderRef {
                 node: node_ref.clone(),
                 provider_index: index,
             };

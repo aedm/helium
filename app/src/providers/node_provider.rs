@@ -1,22 +1,22 @@
-use crate::core::node_ref::{CoreNodeRef, CoreNodeWeak};
-use crate::core::provider::{CoreProvider, CoreProviderValue};
-use crate::core::rcell::RCell;
+use crate::render_graph::node_ref::{NodeRef, NodeWeak};
+use crate::render_graph::provider::{Provider, ProviderValue};
+use crate::render_graph::rcell::RCell;
 
 pub struct NodeCoreProvider {
-    pub provider: RCell<CoreProvider>,
+    pub provider: RCell<Provider>,
 }
 
 impl NodeCoreProvider {
     pub fn new(name: &str) -> NodeCoreProvider {
         NodeCoreProvider {
-            provider: RCell::new(CoreProvider::new(
+            provider: RCell::new(Provider::new(
                 name,
-                CoreProviderValue::Node(CoreNodeWeak::new()),
+                ProviderValue::Node(NodeWeak::new()),
             )),
         }
     }
 
-    pub fn set(self: &mut Self, node: &CoreNodeRef) {
-        self.provider.borrow_mut().provider_value = CoreProviderValue::Node(node.downgrade());
+    pub fn set(self: &mut Self, node: &NodeRef) {
+        self.provider.borrow_mut().provider_value = ProviderValue::Node(node.downgrade());
     }
 }

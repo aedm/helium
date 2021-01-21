@@ -1,24 +1,24 @@
-use crate::core::core_dom::CoreMessage;
-use crate::core::provider::CoreProviderValue;
-use crate::flow::flow_node::{FlowProviderIndex, FlowSlotIndex};
-use crate::flow::mutation::FlowMutation;
-use crate::flow::mutation_create_node::CreateNodeFlowMutation;
-use crate::flow::mutation_remove_node::RemoveNodeFlowMutation;
-use crate::flow::mutation_set_connections::SetSlotConnectionsFlowMutation;
+use crate::render_graph::render_thread::MessageToRenderThread;
+use crate::render_graph::provider::ProviderValue;
+use crate::dom::dom_element::{DomProviderRef, DomSlotRef};
+use crate::dom::mutation::DomMutation;
+use crate::dom::mutation_create_node::CreateNodeDomMutation;
+use crate::dom::mutation_remove_node::RemoveNodeDomMutation;
+use crate::dom::mutation_set_connections::SetSlotConnectionsDomMutation;
 use crate::nodes::float_node::FloatNode;
 use crate::nodes::sum_node::SumNode;
 use crate::stillaxis::Stillaxis;
 
-mod core;
-mod flow;
+mod render_graph;
+mod dom;
 mod nodes;
 mod providers;
 mod slots;
 mod stillaxis;
 
-fn get_incoming(stillaxis: &mut Stillaxis) -> Box<CoreMessage> {
+fn get_incoming(stillaxis: &mut Stillaxis) -> Box<MessageToRenderThread> {
     stillaxis
-        .core_dom
+        .render_graph
         .receiver_from_render_thread
         .recv()
         .unwrap()
@@ -26,13 +26,13 @@ fn get_incoming(stillaxis: &mut Stillaxis) -> Box<CoreMessage> {
 
 fn assert_mutation_response(stillaxis: &mut Stillaxis) {
     let message = get_incoming(stillaxis);
-    assert!(matches!(message.as_ref(), CoreMessage::Mutate { .. }));
+    assert!(matches!(message.as_ref(), MessageToRenderThread::Mutate { .. }));
 }
 
-fn assert_value_response(stillaxis: &mut Stillaxis, value: &CoreProviderValue) {
+fn assert_value_response(stillaxis: &mut Stillaxis, value: &ProviderValue) {
     let message = get_incoming(stillaxis);
     match message.as_ref() {
-        CoreMessage::GetProviderValue(value_request) => {
+        MessageToRenderThread::GetProviderValue(value_request) => {
             assert_eq!(value_request.response_value.as_ref().unwrap(), value);
         }
         _ => panic!(),
@@ -51,16 +51,16 @@ fn main() {
         _c1 = Some(ff1.borrow().core_node.clone());
         csum = fsum.borrow().core_node.clone();
 
-        let mut flow_mutation = FlowMutation::new(vec![
-            CreateNodeFlowMutation::new(&ff1),
-            CreateNodeFlowMutation::new(&fsum),
-            SetSlotConnectionsFlowMutation::new(
-                FlowSlotIndex::new(&stillaxis.get_root(), "all_nodes"),
-                vec![FlowProviderIndex::new(&fsum, "node")],
+        let mut flow_mutation = DomMutation::new(vec![
+            CreateNodeDomMutation::new(&ff1),
+            CreateNodeDomMutation::new(&fsum),
+            SetSlotConnectionsDomMutation::new(
+                DomSlotRef::new(&stillaxis.get_root(), "all_nodes"),
+                vec![DomProviderRef::new(&fsum, "node")],
             ),
-            SetSlotConnectionsFlowMutation::new(
-                FlowSlotIndex::new(&fsum, "a"),
-                vec![FlowProviderIndex::new(&ff1, "value")],
+            SetSlotConnectionsDomMutation::new(
+                DomSlotRef::new(&fsum, "a"),
+                vec![DomProviderRef::new(&ff1, "value")],
             ),
         ]);
 
@@ -69,12 +69,12 @@ fn main() {
         assert!(_c1.as_ref().unwrap().refc() > 1);
         assert!(csum.refc() > 1);
 
-        stillaxis.send_value_request(&FlowProviderIndex::new(&fsum, "sum"));
-        assert_value_response(&mut stillaxis, &CoreProviderValue::Float32(0.0));
+        stillaxis.send_value_request(&DomProviderRef::new(&fsum, "sum"));
+        assert_value_response(&mut stillaxis, &ProviderValue::Float32(0.0));
 
-        let mut flow_mutation = FlowMutation::new(vec![
-            SetSlotConnectionsFlowMutation::new(FlowSlotIndex::new(&fsum, "a"), vec![]),
-            RemoveNodeFlowMutation::new(&ff1),
+        let mut flow_mutation = DomMutation::new(vec![
+            SetSlotConnectionsDomMutation::new(DomSlotRef::new(&fsum, "a"), vec![]),
+            RemoveNodeDomMutation::new(&ff1),
         ]);
         stillaxis.run_mutation(&mut flow_mutation);
     }

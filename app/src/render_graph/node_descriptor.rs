@@ -1,36 +1,35 @@
-use crate::core::node_ref::CoreNodeRef;
-use crate::core::provider::CoreProvider;
-use crate::core::rcell::RCell;
-use crate::core::slot::CoreSlot;
+use crate::render_graph::node_ref::NodeRef;
+use crate::render_graph::provider::Provider;
+use crate::render_graph::rcell::RCell;
+use crate::render_graph::slot::Slot;
 use crate::providers::node_provider::NodeCoreProvider;
 use std::thread::ThreadId;
 use std::{fmt, thread};
-use crate::providers::node_provider::NodeCoreProvider;
 
 pub type NodeId = u64;
 
-pub struct CoreNodeDescriptor {
+pub struct NodeDescriptor {
     pub id: NodeId,
     pub name: String,
-    pub slots: Vec<RCell<CoreSlot>>,
-    pub providers: Vec<RCell<CoreProvider>>,
-    pub dependency_list: Vec<CoreNodeRef>,
+    pub slots: Vec<RCell<Slot>>,
+    pub providers: Vec<RCell<Provider>>,
+    pub dependency_list: Vec<NodeRef>,
     render_thread_id: Option<ThreadId>,
     type_name: &'static str,
     node_provider: NodeCoreProvider,
 }
 
-impl CoreNodeDescriptor {
+impl NodeDescriptor {
     pub fn new(
         id: NodeId,
         type_name: &'static str,
-        slots: Vec<RCell<CoreSlot>>,
-        mut providers: Vec<RCell<CoreProvider>>,
-    ) -> CoreNodeDescriptor {
+        slots: Vec<RCell<Slot>>,
+        mut providers: Vec<RCell<Provider>>,
+    ) -> NodeDescriptor {
         // Always add NodeProvider as #0 provider
         let node_provider = NodeCoreProvider::new("node");
         providers.insert(0, node_provider.provider.clone());
-        CoreNodeDescriptor {
+        NodeDescriptor {
             id,
             node_provider,
             name: format!("{}-{}", type_name, id),
@@ -42,7 +41,7 @@ impl CoreNodeDescriptor {
         }
     }
 
-    pub fn seal(&mut self, render_thread_id: ThreadId, owner: &CoreNodeRef) {
+    pub fn seal(&mut self, render_thread_id: ThreadId, owner: &NodeRef) {
         self.node_provider.set(owner);
         self.render_thread_id = Some(render_thread_id);
     }
@@ -55,7 +54,7 @@ impl CoreNodeDescriptor {
     }
 }
 
-impl fmt::Debug for CoreNodeDescriptor {
+impl fmt::Debug for NodeDescriptor {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&format!(
             "'{}'(type='{}',id={})",
@@ -64,7 +63,7 @@ impl fmt::Debug for CoreNodeDescriptor {
     }
 }
 
-impl Drop for CoreNodeDescriptor {
+impl Drop for NodeDescriptor {
     fn drop(&mut self) {
         // Core node should never be deallocated on the render thread
         debug_assert!(self.check_render_thread(false));
