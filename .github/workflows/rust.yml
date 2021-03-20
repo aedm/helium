@@ -16,17 +16,33 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build
+
+    - name: Build (stillaxis-core)
       run: |
-        cd ${GITHUB_WORKSPACE}/app
+        cd ${GITHUB_WORKSPACE}/rust/stillaxis-core
         cargo rustc -- -D warnings
 
-    - name: Run tests
+    - name: Build (stillaxis)
       run: |
-        cd ${GITHUB_WORKSPACE}/app
+        cd ${GITHUB_WORKSPACE}/rust/stillaxis
+        cargo rustc -- -D warnings
+
+    - name: Run tests (stillaxis-core)
+      run: |
+        cd ${GITHUB_WORKSPACE}/rust/stillaxis-core
         cargo test --verbose
 
-    - name: Format check
+    - name: Run tests (stillaxis)
       run: |
-        cd ${GITHUB_WORKSPACE}/app
+        cd ${GITHUB_WORKSPACE}/rust/stillaxis
+        cargo test --verbose
+
+    - name: Format check (stillaxis-core)
+      run: |
+        cd ${GITHUB_WORKSPACE}/rust/stillaxis-core
+        cargo fmt -- --check
+
+    - name: Format check (stillaxis)
+      run: |
+        cd ${GITHUB_WORKSPACE}/rust/stillaxis
         cargo fmt -- --check
