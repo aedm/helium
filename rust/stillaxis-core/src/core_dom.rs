@@ -1,15 +1,15 @@
+use crate::core_dom::CoreMessage::Stop;
+use crate::core_mutation::CoreMutationSequence;
+use crate::node::{CoreNode, CoreProviderIndex};
+use crate::node_ref::CoreNodeRef;
+use crate::nodes::root_node::CoreRootNode;
+use crate::provider::CoreProviderValue;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
 use std::thread::{JoinHandle, ThreadId};
 use std::time::Duration;
 use strum_macros::IntoStaticStr;
-use crate::nodes::root_node::CoreRootNode;
-use crate::core_mutation::CoreMutationSequence;
-use crate::node_ref::CoreNodeRef;
-use crate::node::{CoreProviderIndex, CoreNode};
-use crate::provider::CoreProviderValue;
-use crate::core_dom::CoreMessage::Stop;
 
 #[derive(IntoStaticStr)]
 pub enum CoreMessage {

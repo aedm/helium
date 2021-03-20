@@ -1,7 +1,7 @@
-use std::fmt;
-use crate::slots::node_slot::NodeCoreSlot;
 use crate::core_node_descriptor::{CoreNodeDescriptor, NodeId};
 use crate::node::CoreNode;
+use crate::slots::node_slot::NodeCoreSlot;
+use std::fmt;
 
 pub struct CoreRootNode {
     inner: CoreNodeDescriptor,

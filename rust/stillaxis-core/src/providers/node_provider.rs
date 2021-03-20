@@ -1,6 +1,6 @@
-use crate::rcell::RCell;
+use crate::node_ref::{CoreNodeRef, CoreNodeWeak};
 use crate::provider::{CoreProvider, CoreProviderValue};
-use crate::node_ref::{CoreNodeWeak, CoreNodeRef};
+use crate::rcell::RCell;
 
 pub struct NodeCoreProvider {
     pub provider: RCell<CoreProvider>,

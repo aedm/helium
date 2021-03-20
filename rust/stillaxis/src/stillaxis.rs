@@ -1,9 +1,9 @@
 use crate::flow::dom::FlowDom;
 use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowProviderIndex};
 use crate::flow::mutation::FlowMutation;
+use stillaxis_core::core_dom::CoreMessage::{GetProviderValue, Mutate};
 use stillaxis_core::core_dom::{CoreDom, ProviderValueRequest};
 use stillaxis_core::node::{CoreNode, CoreProviderIndex};
-use stillaxis_core::core_dom::CoreMessage::{Mutate, GetProviderValue};
 
 pub struct Stillaxis {
     pub core_dom: CoreDom,
@@ -66,10 +66,10 @@ mod tests {
     use crate::flow::mutation_set_slot_value::SetSlotValueFlowMutation;
     use crate::stillaxis::Stillaxis;
     use stillaxis_core::core_dom::CoreMessage;
-    use stillaxis_core::provider::CoreProviderValue;
-    use stillaxis_core::slot::CoreSlotDefault;
     use stillaxis_core::nodes::float_node::FloatNode;
     use stillaxis_core::nodes::sum_node::SumNode;
+    use stillaxis_core::provider::CoreProviderValue;
+    use stillaxis_core::slot::CoreSlotDefault;
 
     fn get_incoming(stillaxis: &mut Stillaxis) -> Box<CoreMessage> {
         stillaxis

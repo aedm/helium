@@ -5,9 +5,9 @@ use crate::flow::mutation_remove_node::RemoveNodeFlowMutation;
 use crate::flow::mutation_set_connections::SetSlotConnectionsFlowMutation;
 use crate::stillaxis::Stillaxis;
 use stillaxis_core::core_dom::CoreMessage;
-use stillaxis_core::provider::CoreProviderValue;
-use stillaxis_core::nodes::sum_node::SumNode;
 use stillaxis_core::nodes::float_node::FloatNode;
+use stillaxis_core::nodes::sum_node::SumNode;
+use stillaxis_core::provider::CoreProviderValue;
 
 mod flow;
 mod stillaxis;

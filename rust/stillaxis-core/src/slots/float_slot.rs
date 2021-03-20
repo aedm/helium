@@ -1,6 +1,6 @@
+use crate::provider::{CoreProvider, CoreProviderValue};
 use crate::rcell::RCell;
 use crate::slot::{CoreSlot, CoreSlotDefault, CoreSlotInner, SlotType};
-use crate::provider::{CoreProviderValue, CoreProvider};
 
 pub struct FloatCoreSlot {
     pub slot: RCell<CoreSlot>,

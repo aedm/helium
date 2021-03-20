@@ -2,7 +2,9 @@ use crate::flow::dom::FlowDom;
 use crate::flow::flow_node::{FlowNodeRef, FlowSlotIndex};
 use crate::flow::topological_order::TopologicalOrder;
 use std::collections::HashSet;
-use stillaxis_core::core_mutation::{CoreMutation, CoreMutationSequence, SetSlotConnectionsParams, SetNodeDependencyListParams};
+use stillaxis_core::core_mutation::{
+    CoreMutation, CoreMutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
+};
 use stillaxis_core::node::{CoreProviderIndex, CoreSlotIndex};
 
 pub struct FlowMutationStepResult {

@@ -1,8 +1,8 @@
-use std::fmt;
-use crate::providers::float_provider::FloatCoreProvider;
-use crate::slots::float_slot::FloatCoreSlot;
 use crate::core_node_descriptor::{CoreNodeDescriptor, NodeId};
 use crate::node::CoreNode;
+use crate::providers::float_provider::FloatCoreProvider;
+use crate::slots::float_slot::FloatCoreSlot;
+use std::fmt;
 
 pub struct SumNode {
     inner: CoreNodeDescriptor,

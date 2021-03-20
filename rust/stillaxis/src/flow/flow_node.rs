@@ -3,9 +3,9 @@ use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
 use stillaxis_core::core_node_descriptor::NodeId;
 use stillaxis_core::node_ref::CoreNodeRef;
+use stillaxis_core::provider::CoreProvider;
 use stillaxis_core::rcell::RCell;
 use stillaxis_core::slot::CoreSlot;
-use stillaxis_core::provider::CoreProvider;
 
 pub struct FlowNode {
     pub id: NodeId,

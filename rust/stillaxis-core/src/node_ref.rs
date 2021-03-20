@@ -1,9 +1,9 @@
+use crate::node::CoreNode;
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Weak};
-use crate::node::CoreNode;
 
 pub struct CoreNodeRef {
     reference: Arc<RefCell<Box<dyn CoreNode>>>,

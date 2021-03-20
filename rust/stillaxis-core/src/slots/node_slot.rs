@@ -1,7 +1,7 @@
-use crate::slot::{CoreSlot, CoreSlotDefault, SlotType, CoreSlotInner};
-use crate::rcell::RCell;
 use crate::node_ref::CoreNodeRef;
-use crate::provider::{CoreProviderValue, CoreProvider};
+use crate::provider::{CoreProvider, CoreProviderValue};
+use crate::rcell::RCell;
+use crate::slot::{CoreSlot, CoreSlotDefault, CoreSlotInner, SlotType};
 
 pub struct NodeCoreSlot {
     pub slot: RCell<CoreSlot>,

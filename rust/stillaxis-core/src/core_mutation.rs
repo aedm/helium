@@ -1,9 +1,9 @@
-use std::mem;
-use crate::node::{CoreSlotIndex, CoreProviderIndex};
-use crate::rcell::RCell;
-use crate::provider::CoreProvider;
+use crate::node::{CoreProviderIndex, CoreSlotIndex};
 use crate::node_ref::CoreNodeRef;
+use crate::provider::CoreProvider;
+use crate::rcell::RCell;
 use crate::slot::CoreSlotDefault;
+use std::mem;
 
 pub struct CoreMutationSequence {
     pub steps: Vec<CoreMutation>,

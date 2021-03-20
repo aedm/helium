@@ -33,10 +33,10 @@ impl TopologicalOrder {
 mod tests {
     use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowProviderIndex};
     use crate::flow::topological_order::TopologicalOrder;
+    use stillaxis_core::node::CoreNode;
     use stillaxis_core::node_ref::CoreNodeRef;
     use stillaxis_core::nodes::float_node::FloatNode;
     use stillaxis_core::nodes::sum_node::SumNode;
-    use stillaxis_core::node::CoreNode;
 
     fn connect(
         slot_node: &FlowNodeRef,

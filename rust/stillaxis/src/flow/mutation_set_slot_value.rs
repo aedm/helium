@@ -1,8 +1,8 @@
 use crate::flow::dom::FlowDom;
 use crate::flow::flow_node::{FlowNodeRef, FlowSlotIndex};
 use crate::flow::mutation::{FlowMutationStep, FlowMutationStepResult};
-use stillaxis_core::slot::CoreSlotDefault;
 use stillaxis_core::core_mutation::{CoreMutation, SetSlotDefaultValueParams};
+use stillaxis_core::slot::CoreSlotDefault;
 
 pub struct SetSlotValueFlowMutation {
     pub node_slot: FlowSlotIndex,

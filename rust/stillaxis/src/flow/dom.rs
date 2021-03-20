@@ -1,7 +1,7 @@
 use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowProviderIndex, FlowSlotIndex};
 use std::collections::HashMap;
-use stillaxis_core::core_node_descriptor::NodeId;
 use stillaxis_core::core_dom::CoreDom;
+use stillaxis_core::core_node_descriptor::NodeId;
 
 pub struct FlowDom {
     pub flow_nodes: HashMap<NodeId, FlowNodeRef>,

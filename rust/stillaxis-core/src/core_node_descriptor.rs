@@ -1,10 +1,10 @@
+use crate::node_ref::CoreNodeRef;
+use crate::provider::CoreProvider;
+use crate::providers::node_provider::NodeCoreProvider;
+use crate::rcell::RCell;
+use crate::slot::CoreSlot;
 use std::thread::ThreadId;
 use std::{fmt, thread};
-use crate::providers::node_provider::NodeCoreProvider;
-use crate::slot::CoreSlot;
-use crate::rcell::RCell;
-use crate::provider::CoreProvider;
-use crate::node_ref::CoreNodeRef;
 
 pub type NodeId = u64;
 

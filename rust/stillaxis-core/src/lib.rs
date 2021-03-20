@@ -3,20 +3,22 @@ pub mod core_mutation;
 pub mod core_node_descriptor;
 pub mod node;
 pub mod node_ref;
+pub mod nodes;
 pub mod provider;
+pub mod providers;
 pub mod rcell;
 pub mod slot;
-pub mod nodes;
-pub mod providers;
 pub mod slots;
 
 #[cfg(test)]
 mod module_tests {
+    use crate::core_dom::{CoreDom, RenderThread};
+    use crate::core_mutation::{
+        CoreMutation, CoreMutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
+    };
+    use crate::node::{CoreProviderIndex, CoreSlotIndex};
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
-    use crate::core_dom::{CoreDom, RenderThread};
-    use crate::core_mutation::{CoreMutation, SetSlotConnectionsParams, SetNodeDependencyListParams, CoreMutationSequence};
-    use crate::node::{CoreSlotIndex, CoreProviderIndex};
     use crate::provider::CoreProviderValue;
 
     #[test]

@@ -1,6 +1,6 @@
-use std::fmt::Debug;
+use crate::core_node_descriptor::{CoreNodeDescriptor, NodeId};
 use crate::node_ref::CoreNodeRef;
-use crate::core_node_descriptor::{NodeId, CoreNodeDescriptor};
+use std::fmt::Debug;
 
 pub struct CoreProviderIndex {
     pub node: CoreNodeRef,
