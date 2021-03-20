@@ -58,21 +58,18 @@ impl Drop for Stillaxis {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::core_dom::CoreMessage;
-    use crate::core::provider::CoreProviderValue;
-    use crate::core::slot::CoreSlotDefault;
     use crate::flow::flow_node::{FlowProviderIndex, FlowSlotIndex};
     use crate::flow::mutation::FlowMutation;
     use crate::flow::mutation_create_node::CreateNodeFlowMutation;
     use crate::flow::mutation_remove_node::RemoveNodeFlowMutation;
     use crate::flow::mutation_set_connections::SetSlotConnectionsFlowMutation;
     use crate::flow::mutation_set_slot_value::SetSlotValueFlowMutation;
-    use crate::nodes::float_node::FloatNode;
-    use crate::nodes::sum_node::SumNode;
     use crate::stillaxis::Stillaxis;
     use stillaxis_core::core_dom::CoreMessage;
     use stillaxis_core::provider::CoreProviderValue;
     use stillaxis_core::slot::CoreSlotDefault;
+    use stillaxis_core::nodes::float_node::FloatNode;
+    use stillaxis_core::nodes::sum_node::SumNode;
 
     fn get_incoming(stillaxis: &mut Stillaxis) -> Box<CoreMessage> {
         stillaxis

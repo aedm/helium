@@ -16,7 +16,7 @@
   </configuration>
   <configuration default="false" name="fix" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
     <option name="command" value="fix --allow-dirty" />
-    <option name="workingDirectory" value="file://$PROJECT_DIR$/app" />
+    <option name="workingDirectory" value="file://$PROJECT_DIR$/rust/stillaxis-core" />
     <option name="channel" value="DEFAULT" />
     <option name="requiredFeatures" value="true" />
     <option name="allFeatures" value="false" />

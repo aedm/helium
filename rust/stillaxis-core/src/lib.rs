@@ -12,14 +12,12 @@ pub mod slots;
 
 #[cfg(test)]
 mod module_tests {
-    use crate::core::core_dom::{CoreDom, RenderThread};
-    use crate::core::core_mutation::{
-        CoreMutation, CoreMutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
-    };
-    use crate::core::node::{CoreProviderIndex, CoreSlotIndex};
-    use crate::core::provider::CoreProviderValue;
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
+    use crate::core_dom::{CoreDom, RenderThread};
+    use crate::core_mutation::{CoreMutation, SetSlotConnectionsParams, SetNodeDependencyListParams, CoreMutationSequence};
+    use crate::node::{CoreSlotIndex, CoreProviderIndex};
+    use crate::provider::CoreProviderValue;
 
     #[test]
     fn generates_simple_sum_graph() {
