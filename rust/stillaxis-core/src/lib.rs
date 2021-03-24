@@ -1,4 +1,4 @@
-pub mod dom;
+pub mod render_graph;
 pub mod mutation;
 pub mod node_descriptor;
 pub mod node;
@@ -9,10 +9,11 @@ pub mod providers;
 pub mod rcell;
 pub mod slot;
 pub mod slots;
+mod render;
 
 #[cfg(test)]
 mod module_tests {
-    use crate::dom::{Dom, RenderThread};
+    use crate::render_graph::{RenderGraph, RenderThread};
     use crate::mutation::{
         Mutation, MutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
     };
@@ -23,7 +24,7 @@ mod module_tests {
 
     #[test]
     fn generates_simple_sum_graph() {
-        let dom = Dom::new();
+        let dom = RenderGraph::new();
         let f1 = dom.new_node::<FloatNode>();
         let f2 = dom.new_node::<FloatNode>();
         let sum = dom.new_node::<SumNode>();

@@ -4,7 +4,7 @@ use crate::slots::node_slot::NodeSlot;
 use std::fmt;
 
 pub struct RootNode {
-    inner: NodeDescriptor,
+    descriptor: NodeDescriptor,
     pub slot: NodeSlot,
 }
 
@@ -14,17 +14,17 @@ impl Node for RootNode {
         let slots = vec![slot.slot.clone()];
         let providers = vec![];
         RootNode {
-            inner: NodeDescriptor::new(id, "root", slots, providers),
+            descriptor: NodeDescriptor::new(id, "root", slots, providers),
             slot,
         }
     }
 
     fn descriptor(&self) -> &NodeDescriptor {
-        &self.inner
+        &self.descriptor
     }
 
     fn descriptor_mut(&mut self) -> &mut NodeDescriptor {
-        &mut self.inner
+        &mut self.descriptor
     }
 
     fn run(&mut self) {}
@@ -32,6 +32,6 @@ impl Node for RootNode {
 
 impl fmt::Debug for RootNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.inner.fmt(f)
+        self.descriptor.fmt(f)
     }
 }

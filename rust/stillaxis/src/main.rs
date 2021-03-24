@@ -4,7 +4,7 @@ use crate::flow::mutation_create_node::CreateNodeFlowMutation;
 use crate::flow::mutation_remove_node::RemoveNodeFlowMutation;
 use crate::flow::mutation_set_connections::SetSlotConnectionsFlowMutation;
 use crate::stillaxis::Stillaxis;
-use stillaxis_core::dom::Message;
+use stillaxis_core::render_graph::Message;
 use stillaxis_core::nodes::float_node::FloatNode;
 use stillaxis_core::nodes::sum_node::SumNode;
 use stillaxis_core::provider::ProviderValue;

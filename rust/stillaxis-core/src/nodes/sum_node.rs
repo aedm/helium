@@ -5,7 +5,7 @@ use crate::slots::float_slot::FloatSlot;
 use std::fmt;
 
 pub struct SumNode {
-    inner: NodeDescriptor,
+    descriptor: NodeDescriptor,
     pub a: FloatSlot,
     pub b: FloatSlot,
     pub sum: FloatProvider,
@@ -19,7 +19,7 @@ impl Node for SumNode {
         let slots = vec![a.slot.clone(), b.slot.clone()];
         let providers = vec![sum.provider.clone()];
         SumNode {
-            inner: NodeDescriptor::new(id, "sum_floats", slots, providers),
+            descriptor: NodeDescriptor::new(id, "sum_floats", slots, providers),
             a,
             b,
             sum,
@@ -27,11 +27,11 @@ impl Node for SumNode {
     }
 
     fn descriptor(&self) -> &NodeDescriptor {
-        &self.inner
+        &self.descriptor
     }
 
     fn descriptor_mut(&mut self) -> &mut NodeDescriptor {
-        &mut self.inner
+        &mut self.descriptor
     }
 
     fn run(self: &mut Self) {
@@ -42,6 +42,6 @@ impl Node for SumNode {
 
 impl fmt::Debug for SumNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.inner.fmt(f)
+        self.descriptor.fmt(f)
     }
 }

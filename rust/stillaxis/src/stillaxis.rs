@@ -1,18 +1,18 @@
 use crate::flow::dom::FlowDom;
 use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowProviderIndex};
 use crate::flow::mutation::FlowMutation;
-use stillaxis_core::dom::Message::{GetProviderValue, Mutate};
-use stillaxis_core::dom::{Dom, ProviderValueRequest};
+use stillaxis_core::render_graph::Message::{GetProviderValue, Mutate};
+use stillaxis_core::render_graph::{RenderGraph, ProviderValueRequest};
 use stillaxis_core::node::{Node, ProviderRef};
 
 pub struct Stillaxis {
-    pub core_dom: Dom,
+    pub core_dom: RenderGraph,
     pub flow_dom: FlowDom,
 }
 
 impl Stillaxis {
     pub fn new() -> Stillaxis {
-        let core_dom = Dom::new();
+        let core_dom = RenderGraph::new();
         let flow_dom = FlowDom::new(&core_dom);
 
         Stillaxis { core_dom, flow_dom }
@@ -65,7 +65,7 @@ mod tests {
     use crate::flow::mutation_set_connections::SetSlotConnectionsFlowMutation;
     use crate::flow::mutation_set_slot_value::SetSlotValueFlowMutation;
     use crate::stillaxis::Stillaxis;
-    use stillaxis_core::dom::Message;
+    use stillaxis_core::render_graph::Message;
     use stillaxis_core::nodes::float_node::FloatNode;
     use stillaxis_core::nodes::sum_node::SumNode;
     use stillaxis_core::provider::ProviderValue;

@@ -5,7 +5,7 @@ use crate::slots::float_slot::FloatSlot;
 use std::fmt;
 
 pub struct FloatNode {
-    inner: NodeDescriptor,
+    descriptor: NodeDescriptor,
     pub a: FloatSlot,
     pub out: FloatProvider,
 }
@@ -17,18 +17,18 @@ impl Node for FloatNode {
         let slots = vec![a.slot.clone()];
         let providers = vec![out.provider.clone()];
         FloatNode {
-            inner: NodeDescriptor::new(id, "float", slots, providers),
+            descriptor: NodeDescriptor::new(id, "float", slots, providers),
             a,
             out,
         }
     }
 
     fn descriptor(&self) -> &NodeDescriptor {
-        &self.inner
+        &self.descriptor
     }
 
     fn descriptor_mut(&mut self) -> &mut NodeDescriptor {
-        &mut self.inner
+        &mut self.descriptor
     }
 
     fn run(self: &mut Self) {
@@ -38,6 +38,6 @@ impl Node for FloatNode {
 
 impl fmt::Debug for FloatNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.inner.fmt(f)
+        self.descriptor.fmt(f)
     }
 }

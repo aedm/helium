@@ -1,6 +1,6 @@
 use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowProviderIndex, FlowSlotIndex};
 use std::collections::HashMap;
-use stillaxis_core::dom::Dom;
+use stillaxis_core::render_graph::RenderGraph;
 use stillaxis_core::node_descriptor::NodeId;
 
 pub struct FlowDom {
@@ -9,7 +9,7 @@ pub struct FlowDom {
 }
 
 impl FlowDom {
-    pub fn new(core_dom: &Dom) -> FlowDom {
+    pub fn new(core_dom: &RenderGraph) -> FlowDom {
         FlowDom {
             flow_root: FlowNode::from_core_node(&core_dom.root_node),
             flow_nodes: Default::default(),
