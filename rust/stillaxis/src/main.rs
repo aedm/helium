@@ -4,15 +4,15 @@ use crate::flow::mutation_create_node::CreateNodeFlowMutation;
 use crate::flow::mutation_remove_node::RemoveNodeFlowMutation;
 use crate::flow::mutation_set_connections::SetSlotConnectionsFlowMutation;
 use crate::stillaxis::Stillaxis;
-use stillaxis_core::core_dom::CoreMessage;
+use stillaxis_core::dom::Message;
 use stillaxis_core::nodes::float_node::FloatNode;
 use stillaxis_core::nodes::sum_node::SumNode;
-use stillaxis_core::provider::CoreProviderValue;
+use stillaxis_core::provider::ProviderValue;
 
 mod flow;
 mod stillaxis;
 
-fn get_incoming(stillaxis: &mut Stillaxis) -> Box<CoreMessage> {
+fn get_incoming(stillaxis: &mut Stillaxis) -> Box<Message> {
     stillaxis
         .core_dom
         .receiver_from_render_thread
@@ -22,13 +22,13 @@ fn get_incoming(stillaxis: &mut Stillaxis) -> Box<CoreMessage> {
 
 fn assert_mutation_response(stillaxis: &mut Stillaxis) {
     let message = get_incoming(stillaxis);
-    assert!(matches!(message.as_ref(), CoreMessage::Mutate { .. }));
+    assert!(matches!(message.as_ref(), Message::Mutate { .. }));
 }
 
-fn assert_value_response(stillaxis: &mut Stillaxis, value: &CoreProviderValue) {
+fn assert_value_response(stillaxis: &mut Stillaxis, value: &ProviderValue) {
     let message = get_incoming(stillaxis);
     match message.as_ref() {
-        CoreMessage::GetProviderValue(value_request) => {
+        Message::GetProviderValue(value_request) => {
             assert_eq!(value_request.response_value.as_ref().unwrap(), value);
         }
         _ => panic!(),
@@ -66,7 +66,7 @@ fn main() {
         assert!(csum.refc() > 1);
 
         stillaxis.send_value_request(&FlowProviderIndex::new(&fsum, "sum"));
-        assert_value_response(&mut stillaxis, &CoreProviderValue::Float32(0.0));
+        assert_value_response(&mut stillaxis, &ProviderValue::Float32(0.0));
 
         let mut flow_mutation = FlowMutation::new(vec![
             SetSlotConnectionsFlowMutation::new(FlowSlotIndex::new(&fsum, "a"), vec![]),

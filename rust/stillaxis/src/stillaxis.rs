@@ -1,24 +1,24 @@
 use crate::flow::dom::FlowDom;
 use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowProviderIndex};
 use crate::flow::mutation::FlowMutation;
-use stillaxis_core::core_dom::CoreMessage::{GetProviderValue, Mutate};
-use stillaxis_core::core_dom::{CoreDom, ProviderValueRequest};
-use stillaxis_core::node::{CoreNode, CoreProviderIndex};
+use stillaxis_core::dom::Message::{GetProviderValue, Mutate};
+use stillaxis_core::dom::{Dom, ProviderValueRequest};
+use stillaxis_core::node::{Node, ProviderRef};
 
 pub struct Stillaxis {
-    pub core_dom: CoreDom,
+    pub core_dom: Dom,
     pub flow_dom: FlowDom,
 }
 
 impl Stillaxis {
     pub fn new() -> Stillaxis {
-        let core_dom = CoreDom::new();
+        let core_dom = Dom::new();
         let flow_dom = FlowDom::new(&core_dom);
 
         Stillaxis { core_dom, flow_dom }
     }
 
-    pub fn new_node<T: 'static + CoreNode>(&self) -> FlowNodeRef {
+    pub fn new_node<T: 'static + Node>(&self) -> FlowNodeRef {
         let core_node = self.core_dom.new_node::<T>();
         FlowNode::from_core_node(&core_node)
     }
@@ -37,7 +37,7 @@ impl Stillaxis {
 
     pub fn send_value_request(&mut self, provider_ref: &FlowProviderIndex) {
         let request: ProviderValueRequest = ProviderValueRequest {
-            provider: CoreProviderIndex {
+            provider: ProviderRef {
                 node: provider_ref.node.borrow().core_node.clone(),
                 provider_index: provider_ref.provider_index,
             },
@@ -65,13 +65,13 @@ mod tests {
     use crate::flow::mutation_set_connections::SetSlotConnectionsFlowMutation;
     use crate::flow::mutation_set_slot_value::SetSlotValueFlowMutation;
     use crate::stillaxis::Stillaxis;
-    use stillaxis_core::core_dom::CoreMessage;
+    use stillaxis_core::dom::Message;
     use stillaxis_core::nodes::float_node::FloatNode;
     use stillaxis_core::nodes::sum_node::SumNode;
-    use stillaxis_core::provider::CoreProviderValue;
-    use stillaxis_core::slot::CoreSlotDefault;
+    use stillaxis_core::provider::ProviderValue;
+    use stillaxis_core::slot::SlotDefaultValue;
 
-    fn get_incoming(stillaxis: &mut Stillaxis) -> Box<CoreMessage> {
+    fn get_incoming(stillaxis: &mut Stillaxis) -> Box<Message> {
         stillaxis
             .core_dom
             .receiver_from_render_thread
@@ -81,13 +81,13 @@ mod tests {
 
     fn assert_mutation_response(stillaxis: &mut Stillaxis) {
         let message = get_incoming(stillaxis);
-        assert!(matches!(message.as_ref(), CoreMessage::Mutate { .. }));
+        assert!(matches!(message.as_ref(), Message::Mutate { .. }));
     }
 
-    fn assert_value_response(stillaxis: &mut Stillaxis, value: &CoreProviderValue) {
+    fn assert_value_response(stillaxis: &mut Stillaxis, value: &ProviderValue) {
         let message = get_incoming(stillaxis);
         match message.as_ref() {
-            CoreMessage::GetProviderValue(value_request) => {
+            Message::GetProviderValue(value_request) => {
                 assert_eq!(value_request.response_value.as_ref().unwrap(), value);
             }
             _ => panic!(),
@@ -125,19 +125,19 @@ mod tests {
         assert_mutation_response(&mut stillaxis);
 
         stillaxis.send_value_request(&FlowProviderIndex::new(&fsum, "sum"));
-        assert_value_response(&mut stillaxis, &CoreProviderValue::Float32(0.0));
+        assert_value_response(&mut stillaxis, &ProviderValue::Float32(0.0));
 
         let mut flow_mutation = FlowMutation::new(vec![SetSlotValueFlowMutation::_new(
             &ff1,
             "a",
-            CoreSlotDefault::Float32(10.0),
+            SlotDefaultValue::Float32(10.0),
         )]);
         // thread::sleep(Duration::from_millis(100));
         stillaxis.run_mutation(&mut flow_mutation);
         assert_mutation_response(&mut stillaxis);
 
         stillaxis.send_value_request(&FlowProviderIndex::new(&fsum, "sum"));
-        assert_value_response(&mut stillaxis, &CoreProviderValue::Float32(10.0));
+        assert_value_response(&mut stillaxis, &ProviderValue::Float32(10.0));
     }
 
     #[test]
@@ -172,7 +172,7 @@ mod tests {
             assert!(csum.refc() > 1);
 
             stillaxis.send_value_request(&FlowProviderIndex::new(&fsum, "sum"));
-            assert_value_response(&mut stillaxis, &CoreProviderValue::Float32(0.0));
+            assert_value_response(&mut stillaxis, &ProviderValue::Float32(0.0));
 
             let mut flow_mutation = FlowMutation::new(vec![
                 SetSlotConnectionsFlowMutation::new(FlowSlotIndex::new(&fsum, "a"), vec![]),

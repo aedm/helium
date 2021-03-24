@@ -1,4 +1,4 @@
-use crate::provider::CoreProvider;
+use crate::provider::Provider;
 use crate::rcell::RCell;
 
 #[derive(Debug)]
@@ -8,45 +8,45 @@ pub enum SlotType {
 }
 
 #[derive(Clone, Copy)]
-pub enum CoreSlotDefault {
+pub enum SlotDefaultValue {
     None,
     Float32(f32),
 }
 
-pub trait CoreSlotInner {
-    fn can_connect(self: &Self, provider: &CoreProvider) -> bool;
+pub trait SlotInner {
+    fn can_connect(self: &Self, provider: &Provider) -> bool;
     fn get_type(self: &Self) -> SlotType;
 }
 
-pub struct CoreSlot {
+pub struct Slot {
     pub name: String,
-    pub connection: Vec<RCell<CoreProvider>>,
+    pub connection: Vec<RCell<Provider>>,
     _allow_multiple: bool,
-    pub inner: Box<dyn CoreSlotInner>,
-    pub default: CoreSlotDefault,
+    pub inner: Box<dyn SlotInner>,
+    pub default_value: SlotDefaultValue,
 }
 
-impl CoreSlot {
+impl Slot {
     pub fn new(
         name: &str,
         allow_multiple: bool,
-        inner: Box<dyn CoreSlotInner>,
-        default: CoreSlotDefault,
-    ) -> CoreSlot {
-        CoreSlot {
+        inner: Box<dyn SlotInner>,
+        default_value: SlotDefaultValue,
+    ) -> Slot {
+        Slot {
             name: name.to_string(),
             connection: vec![],
             _allow_multiple: allow_multiple,
             inner,
-            default,
+            default_value,
         }
     }
 
-    pub fn set_default(&mut self, default: &CoreSlotDefault) {
-        self.default = *default;
+    pub fn set_default(&mut self, default: &SlotDefaultValue) {
+        self.default_value = *default;
     }
 
-    pub fn get_single_provider(&self) -> Option<&RCell<CoreProvider>> {
+    pub fn get_single_provider(&self) -> Option<&RCell<Provider>> {
         match self.connection.len() {
             0 => None,
             1 => Some(&self.connection[0]),

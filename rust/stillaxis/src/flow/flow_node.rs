@@ -1,17 +1,17 @@
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
-use stillaxis_core::core_node_descriptor::NodeId;
-use stillaxis_core::node_ref::CoreNodeRef;
-use stillaxis_core::provider::CoreProvider;
+use stillaxis_core::node_descriptor::NodeId;
+use stillaxis_core::node_ref::NodeRef;
+use stillaxis_core::provider::Provider;
 use stillaxis_core::rcell::RCell;
-use stillaxis_core::slot::CoreSlot;
+use stillaxis_core::slot::Slot;
 
 pub struct FlowNode {
     pub id: NodeId,
     pub name: String,
     pub key: String,
-    pub core_node: CoreNodeRef,
+    pub core_node: NodeRef,
     pub slots: Vec<FlowSlot>,
     pub providers: Vec<FlowProvider>,
 }
@@ -24,7 +24,7 @@ pub struct FlowSlot {
 }
 
 impl FlowSlot {
-    fn from_core_slot(core_slot: &CoreSlot) -> FlowSlot {
+    fn from_core_slot(core_slot: &Slot) -> FlowSlot {
         FlowSlot {
             name: core_slot.name.clone(),
             // TODO
@@ -39,7 +39,7 @@ pub struct FlowProvider {
 }
 
 impl FlowProvider {
-    fn from_core_provider(core_provider: &CoreProvider) -> FlowProvider {
+    fn from_core_provider(core_provider: &Provider) -> FlowProvider {
         FlowProvider {
             name: core_provider.name.clone(),
             // TODO
@@ -61,7 +61,7 @@ pub struct FlowProviderIndex {
 }
 
 impl FlowNode {
-    pub fn from_core_node(core_node_ref: &CoreNodeRef) -> FlowNodeRef {
+    pub fn from_core_node(core_node_ref: &NodeRef) -> FlowNodeRef {
         let core_node = core_node_ref.borrow_mut();
         let slots: Vec<_> = core_node
             .descriptor()

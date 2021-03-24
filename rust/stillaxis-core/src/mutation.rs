@@ -1,50 +1,50 @@
-use crate::node::{CoreProviderIndex, CoreSlotIndex};
-use crate::node_ref::CoreNodeRef;
-use crate::provider::CoreProvider;
+use crate::node::{ProviderRef, SlotRef};
+use crate::node_ref::NodeRef;
+use crate::provider::Provider;
 use crate::rcell::RCell;
-use crate::slot::CoreSlotDefault;
+use crate::slot::SlotDefaultValue;
 use std::mem;
 
-pub struct CoreMutationSequence {
-    pub steps: Vec<CoreMutation>,
+pub struct MutationSequence {
+    pub steps: Vec<Mutation>,
 }
 
-pub enum CoreMutation {
+pub enum Mutation {
     SetSlotConnections(SetSlotConnectionsParams),
     SetNodeDependencyList(SetNodeDependencyListParams),
     SetSlotDefaultValue(SetSlotDefaultValueParams),
 }
 
 pub struct SetSlotConnectionsParams {
-    pub slot: CoreSlotIndex,
-    pub connection: Vec<CoreProviderIndex>,
-    pub swap_vector: Vec<RCell<CoreProvider>>,
+    pub slot: SlotRef,
+    pub connection: Vec<ProviderRef>,
+    pub swap_vector: Vec<RCell<Provider>>,
 }
 
 pub struct SetNodeDependencyListParams {
-    pub node: CoreNodeRef,
-    pub dependency_list: Vec<CoreNodeRef>,
+    pub node: NodeRef,
+    pub dependency_list: Vec<NodeRef>,
 }
 
 pub struct SetSlotDefaultValueParams {
-    pub node: CoreNodeRef,
+    pub node: NodeRef,
     pub slot_index: usize,
-    pub value: CoreSlotDefault,
+    pub value: SlotDefaultValue,
 }
 
-impl CoreMutation {
+impl Mutation {
     fn run(&mut self) {
         match self {
-            CoreMutation::SetSlotConnections(x) => x.run(),
-            CoreMutation::SetNodeDependencyList(x) => x.run(),
-            CoreMutation::SetSlotDefaultValue(x) => x.run(),
+            Mutation::SetSlotConnections(x) => x.run(),
+            Mutation::SetNodeDependencyList(x) => x.run(),
+            Mutation::SetSlotDefaultValue(x) => x.run(),
         }
     }
 }
 
-impl CoreMutationSequence {
-    pub fn new(steps: Vec<CoreMutation>) -> CoreMutationSequence {
-        CoreMutationSequence { steps }
+impl MutationSequence {
+    pub fn new(steps: Vec<Mutation>) -> MutationSequence {
+        MutationSequence { steps }
     }
 
     pub fn run(&mut self) {

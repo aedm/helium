@@ -1,35 +1,35 @@
-use crate::node::CoreNode;
+use crate::node::Node;
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Weak};
 
-pub struct CoreNodeRef {
-    reference: Arc<RefCell<Box<dyn CoreNode>>>,
+pub struct NodeRef {
+    reference: Arc<RefCell<Box<dyn Node>>>,
 }
 
-pub struct CoreNodeWeak {
-    reference: Weak<RefCell<Box<dyn CoreNode>>>,
+pub struct NodeWeakRef {
+    reference: Weak<RefCell<Box<dyn Node>>>,
 }
 
-impl CoreNodeRef {
-    pub fn new(node: Box<dyn CoreNode>) -> CoreNodeRef {
-        CoreNodeRef {
+impl NodeRef {
+    pub fn new(node: Box<dyn Node>) -> NodeRef {
+        NodeRef {
             reference: Arc::new(RefCell::new(node)),
         }
     }
 
-    pub fn borrow(&self) -> Ref<'_, Box<dyn CoreNode>> {
+    pub fn borrow(&self) -> Ref<'_, Box<dyn Node>> {
         (*self.reference).borrow()
     }
 
-    pub fn borrow_mut(&self) -> RefMut<'_, Box<dyn CoreNode>> {
+    pub fn borrow_mut(&self) -> RefMut<'_, Box<dyn Node>> {
         (*self.reference).borrow_mut()
     }
 
-    pub fn clone(&self) -> CoreNodeRef {
-        CoreNodeRef {
+    pub fn clone(&self) -> NodeRef {
+        NodeRef {
             reference: self.reference.clone(),
         }
     }
@@ -38,30 +38,30 @@ impl CoreNodeRef {
         Arc::strong_count(&self.reference)
     }
 
-    pub fn downgrade(&self) -> CoreNodeWeak {
-        CoreNodeWeak {
+    pub fn downgrade(&self) -> NodeWeakRef {
+        NodeWeakRef {
             reference: Arc::downgrade(&self.reference),
         }
     }
 }
 
-impl CoreNodeWeak {
-    pub fn new() -> CoreNodeWeak {
-        CoreNodeWeak {
+impl NodeWeakRef {
+    pub fn new() -> NodeWeakRef {
+        NodeWeakRef {
             reference: Weak::new(),
         }
     }
 
-    pub fn upgrade(&self) -> Option<CoreNodeRef> {
+    pub fn upgrade(&self) -> Option<NodeRef> {
         if let Some(rf) = self.reference.upgrade() {
-            Some(CoreNodeRef { reference: rf })
+            Some(NodeRef { reference: rf })
         } else {
             None
         }
     }
 }
 
-impl Debug for CoreNodeRef {
+impl Debug for NodeRef {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let x = self.borrow();
         let y = x.descriptor().fmt(f);
@@ -69,23 +69,23 @@ impl Debug for CoreNodeRef {
     }
 }
 
-impl Hash for CoreNodeRef {
+impl Hash for NodeRef {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.reference.as_ptr().hash(state);
     }
 }
 
-impl PartialEq for CoreNodeRef {
+impl PartialEq for NodeRef {
     fn eq(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.reference, &other.reference)
     }
 }
 
-impl Eq for CoreNodeRef {}
+impl Eq for NodeRef {}
 
-unsafe impl Send for CoreNodeRef {}
+unsafe impl Send for NodeRef {}
 
-impl Debug for CoreNodeWeak {
+impl Debug for NodeWeakRef {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         if let Some(node) = self.upgrade() {
             let _ = write!(f, "weak->");
@@ -96,18 +96,18 @@ impl Debug for CoreNodeWeak {
     }
 }
 
-impl Clone for CoreNodeWeak {
+impl Clone for NodeWeakRef {
     fn clone(&self) -> Self {
-        CoreNodeWeak {
+        NodeWeakRef {
             reference: self.reference.clone(),
         }
     }
 }
 
-impl PartialEq for CoreNodeWeak {
+impl PartialEq for NodeWeakRef {
     fn eq(&self, other: &Self) -> bool {
         Weak::ptr_eq(&self.reference, &other.reference)
     }
 }
 
-impl Eq for CoreNodeWeak {}
+impl Eq for NodeWeakRef {}

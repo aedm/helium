@@ -33,8 +33,8 @@ impl TopologicalOrder {
 mod tests {
     use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowProviderIndex};
     use crate::flow::topological_order::TopologicalOrder;
-    use stillaxis_core::node::CoreNode;
-    use stillaxis_core::node_ref::CoreNodeRef;
+    use stillaxis_core::node::Node;
+    use stillaxis_core::node_ref::NodeRef;
     use stillaxis_core::nodes::float_node::FloatNode;
     use stillaxis_core::nodes::sum_node::SumNode;
 
@@ -52,10 +52,10 @@ mod tests {
 
     #[test]
     fn generates_correct_topological_order() {
-        let float1 = CoreNodeRef::new(Box::new(FloatNode::new(1)));
-        let float2 = CoreNodeRef::new(Box::new(FloatNode::new(2)));
-        let sum1 = CoreNodeRef::new(Box::new(SumNode::new(3)));
-        let sum2 = CoreNodeRef::new(Box::new(SumNode::new(4)));
+        let float1 = NodeRef::new(Box::new(FloatNode::new(1)));
+        let float2 = NodeRef::new(Box::new(FloatNode::new(2)));
+        let sum1 = NodeRef::new(Box::new(SumNode::new(3)));
+        let sum2 = NodeRef::new(Box::new(SumNode::new(4)));
 
         let core_nodes = vec![&float1, &float2, &sum1, &sum2];
         let flow_nodes: Vec<_> = core_nodes
