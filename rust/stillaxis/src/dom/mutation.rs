@@ -1,6 +1,6 @@
-use crate::flow::dom::FlowDom;
-use crate::flow::flow_node::{FlowNodeRef, FlowSlotIndex};
-use crate::flow::topological_order::TopologicalOrder;
+use crate::dom::document::Document;
+use crate::dom::flow_node::{ElementRef, ElementSlotRef};
+use crate::dom::topological_order::TopologicalOrder;
 use std::collections::HashSet;
 use stillaxis_core::mutation::{
     Mutation, MutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
@@ -8,17 +8,17 @@ use stillaxis_core::mutation::{
 use stillaxis_core::node::{ProviderRef, SlotRef};
 
 pub struct FlowMutationStepResult {
-    pub changed_slots: Vec<FlowSlotIndex>,
+    pub changed_slots: Vec<ElementSlotRef>,
     pub core_mutations: Vec<Mutation>,
 }
 
 pub trait FlowMutationStep {
-    fn run(&self, dom: &mut FlowDom) -> FlowMutationStepResult;
+    fn run(&self, dom: &mut Document) -> FlowMutationStepResult;
 }
 
 pub struct FlowMutation {
     pub steps: Vec<Box<dyn FlowMutationStep>>,
-    pub changed_slots: HashSet<FlowSlotIndex>,
+    pub changed_slots: HashSet<ElementSlotRef>,
 }
 
 impl FlowMutation {
@@ -29,7 +29,7 @@ impl FlowMutation {
         }
     }
 
-    pub fn run(&mut self, dom: &mut FlowDom) -> MutationSequence {
+    pub fn run(&mut self, dom: &mut Document) -> MutationSequence {
         let mut direct_core_mutations: Vec<Mutation> = Vec::new();
         for step in &mut self.steps {
             let result = step.run(dom);
@@ -63,7 +63,7 @@ impl FlowMutation {
             });
             steps.push(core_mutation);
         }
-        let mut set: HashSet<FlowNodeRef> = HashSet::new();
+        let mut set: HashSet<ElementRef> = HashSet::new();
         for flow_slot_index in &self.changed_slots {
             collect_affected_dependencies(&flow_slot_index.node, &mut set);
         }
@@ -86,7 +86,7 @@ impl FlowMutation {
 }
 
 // Adds all nodes that depend on @node to @set.
-fn collect_affected_dependencies(node: &FlowNodeRef, set: &mut HashSet<FlowNodeRef>) {
+fn collect_affected_dependencies(node: &ElementRef, set: &mut HashSet<ElementRef>) {
     if set.contains(node) {
         return;
     }

@@ -1,13 +1,13 @@
-use crate::flow::flow_node::FlowNodeRef;
+use crate::dom::flow_node::ElementRef;
 use std::collections::HashSet;
 
 pub struct TopologicalOrder {
-    visited: HashSet<FlowNodeRef>,
-    order: Vec<FlowNodeRef>,
+    visited: HashSet<ElementRef>,
+    order: Vec<ElementRef>,
 }
 
 impl TopologicalOrder {
-    pub fn generate(node_ref: &FlowNodeRef) -> Vec<FlowNodeRef> {
+    pub fn generate(node_ref: &ElementRef) -> Vec<ElementRef> {
         let mut order = TopologicalOrder {
             visited: HashSet::new(),
             order: Vec::new(),
@@ -16,7 +16,7 @@ impl TopologicalOrder {
         order.order
     }
 
-    fn visit(&mut self, node_ref: &FlowNodeRef) {
+    fn visit(&mut self, node_ref: &ElementRef) {
         if !self.visited.insert(node_ref.clone()) {
             return;
         }
@@ -31,20 +31,20 @@ impl TopologicalOrder {
 
 #[cfg(test)]
 mod tests {
-    use crate::flow::flow_node::{FlowNode, FlowNodeRef, FlowProviderIndex};
-    use crate::flow::topological_order::TopologicalOrder;
+    use crate::dom::flow_node::{Element, ElementRef, ElementProviderRef};
+    use crate::dom::topological_order::TopologicalOrder;
     use stillaxis_core::node::Node;
     use stillaxis_core::node_ref::NodeRef;
     use stillaxis_core::nodes::float_node::FloatNode;
     use stillaxis_core::nodes::sum_node::SumNode;
 
     fn connect(
-        slot_node: &FlowNodeRef,
+        slot_node: &ElementRef,
         slot_index: usize,
-        provider_node: &FlowNodeRef,
+        provider_node: &ElementRef,
         provider_index: usize,
     ) {
-        slot_node.borrow_mut().slots[slot_index].connections = vec![FlowProviderIndex {
+        slot_node.borrow_mut().slots[slot_index].connections = vec![ElementProviderRef {
             node: provider_node.clone(),
             provider_index,
         }];
@@ -60,7 +60,7 @@ mod tests {
         let core_nodes = vec![&float1, &float2, &sum1, &sum2];
         let flow_nodes: Vec<_> = core_nodes
             .iter()
-            .map(|x| FlowNode::from_core_node(*x))
+            .map(|x| Element::from_core_node(*x))
             .collect();
 
         connect(&flow_nodes[2], 0, &flow_nodes[0], 0);

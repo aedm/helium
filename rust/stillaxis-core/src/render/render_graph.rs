@@ -5,13 +5,13 @@ use std::thread::{JoinHandle, ThreadId};
 
 use strum_macros::IntoStaticStr;
 
-use crate::render_graph::Message::Stop;
 use crate::mutation::MutationSequence;
 use crate::node::{Node, ProviderRef};
 use crate::node_ref::NodeRef;
 use crate::nodes::root_node::RootNode;
 use crate::provider::ProviderValue;
 use crate::render::render_thread::RenderThread;
+use crate::render::render_graph::Message::Stop;
 
 #[derive(IntoStaticStr)]
 pub enum Message {

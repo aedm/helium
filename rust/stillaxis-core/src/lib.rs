@@ -1,4 +1,3 @@
-pub mod render_graph;
 pub mod mutation;
 pub mod node_descriptor;
 pub mod node;
@@ -9,7 +8,7 @@ pub mod providers;
 pub mod rcell;
 pub mod slot;
 pub mod slots;
-mod render;
+pub mod render;
 
 #[cfg(test)]
 mod module_tests {
@@ -21,6 +20,8 @@ mod module_tests {
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
     use crate::provider::ProviderValue;
+    use crate::render::render_graph::RenderGraph;
+    use crate::render::render_thread::RenderThread;
 
     #[test]
     fn generates_simple_sum_graph() {

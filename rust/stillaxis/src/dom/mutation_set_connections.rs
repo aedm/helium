@@ -1,19 +1,19 @@
-use super::dom::FlowDom;
-use super::flow_node::FlowSlotIndex;
+use super::document::Document;
+use super::flow_node::ElementSlotRef;
 use super::mutation::{FlowMutationStep, FlowMutationStepResult};
-use crate::flow::flow_node::FlowProviderIndex;
+use crate::dom::flow_node::ElementProviderRef;
 use std::collections::HashSet;
 use std::iter::FromIterator;
 
 pub struct SetSlotConnectionsFlowMutation {
-    pub node_slot: FlowSlotIndex,
-    pub connections: Vec<FlowProviderIndex>,
+    pub node_slot: ElementSlotRef,
+    pub connections: Vec<ElementProviderRef>,
 }
 
 impl SetSlotConnectionsFlowMutation {
     pub fn new(
-        node_slot: FlowSlotIndex,
-        connections: Vec<FlowProviderIndex>,
+        node_slot: ElementSlotRef,
+        connections: Vec<ElementProviderRef>,
     ) -> Box<SetSlotConnectionsFlowMutation> {
         Box::new(SetSlotConnectionsFlowMutation {
             node_slot,
@@ -23,8 +23,8 @@ impl SetSlotConnectionsFlowMutation {
 }
 
 impl FlowMutationStep for SetSlotConnectionsFlowMutation {
-    fn run(&self, _dom: &mut FlowDom) -> FlowMutationStepResult {
-        // Change flow DOM
+    fn run(&self, _dom: &mut Document) -> FlowMutationStepResult {
+        // Change dom DOM
         let mut node = self.node_slot.node.borrow_mut();
         let slot = &mut node.slots[self.node_slot.slot_index];
 
