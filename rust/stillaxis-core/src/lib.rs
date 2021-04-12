@@ -12,7 +12,6 @@ pub mod render;
 
 #[cfg(test)]
 mod module_tests {
-    use crate::render_graph::{RenderGraph, RenderThread};
     use crate::mutation::{
         Mutation, MutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
     };
