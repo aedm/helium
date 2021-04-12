@@ -1,21 +1,21 @@
-use crate::node_ref::CoreNodeWeak;
+use crate::node_ref::NodeWeakRef;
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum CoreProviderValue {
-    Node(CoreNodeWeak),
+pub enum ProviderValue {
+    Node(NodeWeakRef),
     Float32(f32),
 }
 
-impl Eq for CoreProviderValue {}
+impl Eq for ProviderValue {}
 
-pub struct CoreProvider {
+pub struct Provider {
     pub name: String,
-    pub provider_value: CoreProviderValue,
+    pub provider_value: ProviderValue,
 }
 
-impl CoreProvider {
-    pub fn new(name: &str, value: CoreProviderValue) -> CoreProvider {
-        CoreProvider {
+impl Provider {
+    pub fn new(name: &str, value: ProviderValue) -> Provider {
+        Provider {
             name: name.to_string(),
             provider_value: value,
         }

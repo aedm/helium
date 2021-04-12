@@ -1,60 +1,61 @@
-pub mod core_dom;
-pub mod core_mutation;
-pub mod core_node_descriptor;
+pub mod mutation;
 pub mod node;
+pub mod node_descriptor;
 pub mod node_ref;
 pub mod nodes;
 pub mod provider;
 pub mod providers;
 pub mod rcell;
+pub mod render;
 pub mod slot;
 pub mod slots;
 
 #[cfg(test)]
 mod module_tests {
-    use crate::core_dom::{CoreDom, RenderThread};
-    use crate::core_mutation::{
-        CoreMutation, CoreMutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
+    use crate::mutation::{
+        Mutation, MutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
     };
-    use crate::node::{CoreProviderIndex, CoreSlotIndex};
+    use crate::node::{ProviderRef, SlotRef};
     use crate::nodes::float_node::FloatNode;
     use crate::nodes::sum_node::SumNode;
-    use crate::provider::CoreProviderValue;
+    use crate::provider::ProviderValue;
+    use crate::render::render_graph::RenderGraph;
+    use crate::render::render_thread::RenderThread;
 
     #[test]
     fn generates_simple_sum_graph() {
-        let dom = CoreDom::new();
+        let dom = RenderGraph::new();
         let f1 = dom.new_node::<FloatNode>();
         let f2 = dom.new_node::<FloatNode>();
         let sum = dom.new_node::<SumNode>();
 
-        let conn_1 = CoreMutation::SetSlotConnections(SetSlotConnectionsParams {
-            slot: CoreSlotIndex {
+        let conn_1 = Mutation::SetSlotConnections(SetSlotConnectionsParams {
+            slot: SlotRef {
                 node: sum.clone(),
                 slot_index: 0,
             },
-            connection: vec![CoreProviderIndex {
+            connection: vec![ProviderRef {
                 node: f1.clone(),
                 provider_index: 1,
             }],
             swap_vector: Vec::with_capacity(1),
         });
-        let conn_2 = CoreMutation::SetSlotConnections(SetSlotConnectionsParams {
-            slot: CoreSlotIndex {
+        let conn_2 = Mutation::SetSlotConnections(SetSlotConnectionsParams {
+            slot: SlotRef {
                 node: sum.clone(),
                 slot_index: 1,
             },
-            connection: vec![CoreProviderIndex {
+            connection: vec![ProviderRef {
                 node: f2.clone(),
                 provider_index: 1,
             }],
             swap_vector: Vec::with_capacity(1),
         });
-        let dep = CoreMutation::SetNodeDependencyList(SetNodeDependencyListParams {
+        let dep = Mutation::SetNodeDependencyList(SetNodeDependencyListParams {
             node: sum.clone(),
             dependency_list: vec![f1.clone(), f2.clone()],
         });
-        let mut seq = CoreMutationSequence {
+        let mut seq = MutationSequence {
             steps: vec![conn_1, conn_2, dep],
         };
         seq.run();
@@ -64,7 +65,7 @@ mod module_tests {
             sum.borrow().descriptor().providers[1]
                 .borrow()
                 .provider_value,
-            CoreProviderValue::Float32(0.0)
+            ProviderValue::Float32(0.0)
         );
 
         // TODO: test non-zero values

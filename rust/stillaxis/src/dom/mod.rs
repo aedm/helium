@@ -1,4 +1,4 @@
-pub mod dom;
+pub mod document;
 pub mod flow_node;
 pub mod mutation;
 pub mod mutation_create_node;
@@ -9,11 +9,11 @@ pub mod topological_order;
 
 #[cfg(test)]
 mod module_tests {
-    // use crate::flow::dom::FlowDom;
-    // use crate::flow::flow_node::FlowNode;
-    // use crate::flow::mutation::FlowMutation;
-    // use crate::flow::mutation_create_node::CreateNodeFlowMutation;
-    // use crate::flow::mutation_set_connections::SetSlotConnectionsFlowMutation;
+    // use crate::dom::dom::FlowDom;
+    // use crate::dom::flow_node::FlowNode;
+    // use crate::dom::mutation::FlowMutation;
+    // use crate::dom::mutation_create_node::CreateNodeFlowMutation;
+    // use crate::dom::mutation_set_connections::SetSlotConnectionsFlowMutation;
     // use crate::nodes::float_node::FloatNode;
     // use crate::nodes::sum_node::SumNode;
 

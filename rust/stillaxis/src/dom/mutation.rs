@@ -1,24 +1,24 @@
-use crate::flow::dom::FlowDom;
-use crate::flow::flow_node::{FlowNodeRef, FlowSlotIndex};
-use crate::flow::topological_order::TopologicalOrder;
+use crate::dom::document::Document;
+use crate::dom::flow_node::{ElementRef, ElementSlotRef};
+use crate::dom::topological_order::TopologicalOrder;
 use std::collections::HashSet;
-use stillaxis_core::core_mutation::{
-    CoreMutation, CoreMutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
+use stillaxis_core::mutation::{
+    Mutation, MutationSequence, SetNodeDependencyListParams, SetSlotConnectionsParams,
 };
-use stillaxis_core::node::{CoreProviderIndex, CoreSlotIndex};
+use stillaxis_core::node::{ProviderRef, SlotRef};
 
 pub struct FlowMutationStepResult {
-    pub changed_slots: Vec<FlowSlotIndex>,
-    pub core_mutations: Vec<CoreMutation>,
+    pub changed_slots: Vec<ElementSlotRef>,
+    pub core_mutations: Vec<Mutation>,
 }
 
 pub trait FlowMutationStep {
-    fn run(&self, dom: &mut FlowDom) -> FlowMutationStepResult;
+    fn run(&self, dom: &mut Document) -> FlowMutationStepResult;
 }
 
 pub struct FlowMutation {
     pub steps: Vec<Box<dyn FlowMutationStep>>,
-    pub changed_slots: HashSet<FlowSlotIndex>,
+    pub changed_slots: HashSet<ElementSlotRef>,
 }
 
 impl FlowMutation {
@@ -29,8 +29,8 @@ impl FlowMutation {
         }
     }
 
-    pub fn run(&mut self, dom: &mut FlowDom) -> CoreMutationSequence {
-        let mut direct_core_mutations: Vec<CoreMutation> = Vec::new();
+    pub fn run(&mut self, dom: &mut Document) -> MutationSequence {
+        let mut direct_core_mutations: Vec<Mutation> = Vec::new();
         for step in &mut self.steps {
             let result = step.run(dom);
             for changed_slot in &result.changed_slots {
@@ -41,20 +41,20 @@ impl FlowMutation {
         self.create_core_mutations(direct_core_mutations)
     }
 
-    fn create_core_mutations(&self, mut steps: Vec<CoreMutation>) -> CoreMutationSequence {
+    fn create_core_mutations(&self, mut steps: Vec<Mutation>) -> MutationSequence {
         for flow_slot_index in &self.changed_slots {
             let flow_slot = &flow_slot_index.node.borrow().slots[flow_slot_index.slot_index];
             let connection: Vec<_> = flow_slot
                 .connections
                 .iter()
-                .map(|x| CoreProviderIndex {
+                .map(|x| ProviderRef {
                     node: x.node.borrow().core_node.clone(),
                     provider_index: x.provider_index,
                 })
                 .collect();
             let item_count = connection.len();
-            let core_mutation = CoreMutation::SetSlotConnections(SetSlotConnectionsParams {
-                slot: CoreSlotIndex {
+            let core_mutation = Mutation::SetSlotConnections(SetSlotConnectionsParams {
+                slot: SlotRef {
                     node: flow_slot_index.node.borrow().core_node.clone(),
                     slot_index: flow_slot_index.slot_index,
                 },
@@ -63,7 +63,7 @@ impl FlowMutation {
             });
             steps.push(core_mutation);
         }
-        let mut set: HashSet<FlowNodeRef> = HashSet::new();
+        let mut set: HashSet<ElementRef> = HashSet::new();
         for flow_slot_index in &self.changed_slots {
             collect_affected_dependencies(&flow_slot_index.node, &mut set);
         }
@@ -75,18 +75,18 @@ impl FlowMutation {
                 .iter()
                 .map(|x| x.borrow().core_node.clone())
                 .collect();
-            let core_mutation = CoreMutation::SetNodeDependencyList(SetNodeDependencyListParams {
+            let core_mutation = Mutation::SetNodeDependencyList(SetNodeDependencyListParams {
                 node: flow_node.borrow().core_node.clone(),
                 dependency_list,
             });
             steps.push(core_mutation);
         }
-        CoreMutationSequence::new(steps)
+        MutationSequence::new(steps)
     }
 }
 
 // Adds all nodes that depend on @node to @set.
-fn collect_affected_dependencies(node: &FlowNodeRef, set: &mut HashSet<FlowNodeRef>) {
+fn collect_affected_dependencies(node: &ElementRef, set: &mut HashSet<ElementRef>) {
     if set.contains(node) {
         return;
     }

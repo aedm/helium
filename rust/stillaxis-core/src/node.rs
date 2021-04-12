@@ -1,24 +1,24 @@
-use crate::core_node_descriptor::{CoreNodeDescriptor, NodeId};
-use crate::node_ref::CoreNodeRef;
+use crate::node_descriptor::{NodeDescriptor, NodeId};
+use crate::node_ref::NodeRef;
 use std::fmt::Debug;
 
-pub struct CoreProviderIndex {
-    pub node: CoreNodeRef,
+pub struct ProviderRef {
+    pub node: NodeRef,
     pub provider_index: usize,
 }
 
-pub struct CoreSlotIndex {
-    pub node: CoreNodeRef,
+pub struct SlotRef {
+    pub node: NodeRef,
     pub slot_index: usize,
 }
 
-pub trait CoreNode: Debug {
+pub trait Node: Debug {
     fn new(id: NodeId) -> Self
     where
         Self: std::marker::Sized;
 
-    fn descriptor(&self) -> &CoreNodeDescriptor;
-    fn descriptor_mut(&mut self) -> &mut CoreNodeDescriptor;
+    fn descriptor(&self) -> &NodeDescriptor;
+    fn descriptor_mut(&mut self) -> &mut NodeDescriptor;
 
     fn run(&mut self);
 }

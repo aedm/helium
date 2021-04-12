@@ -1,25 +1,25 @@
-use crate::node_ref::CoreNodeRef;
-use crate::provider::{CoreProvider, CoreProviderValue};
+use crate::node_ref::NodeRef;
+use crate::provider::{Provider, ProviderValue};
 use crate::rcell::RCell;
-use crate::slot::{CoreSlot, CoreSlotDefault, CoreSlotInner, SlotType};
+use crate::slot::{Slot, SlotDefaultValue, SlotInner, SlotType};
 
-pub struct NodeCoreSlot {
-    pub slot: RCell<CoreSlot>,
+pub struct NodeSlot {
+    pub slot: RCell<Slot>,
 }
 
-impl NodeCoreSlot {
-    pub fn new(name: &str) -> NodeCoreSlot {
-        let inner = Box::new(NodeCoreSlotInner {});
-        let default = CoreSlotDefault::None;
-        NodeCoreSlot {
-            slot: RCell::new(CoreSlot::new(name, false, inner, default)),
+impl NodeSlot {
+    pub fn new(name: &str) -> NodeSlot {
+        let inner = Box::new(NodeSlotInner {});
+        let default = SlotDefaultValue::None;
+        NodeSlot {
+            slot: RCell::new(Slot::new(name, false, inner, default)),
         }
     }
 
-    pub fn _get(self: &Self) -> Option<CoreNodeRef> {
+    pub fn _get(self: &Self) -> Option<NodeRef> {
         let slot = &self.slot.borrow();
         if let Some(provider) = slot.get_single_provider() {
-            if let CoreProviderValue::Node(value) = &provider.borrow().provider_value {
+            if let ProviderValue::Node(value) = &provider.borrow().provider_value {
                 let node_ref = value.upgrade();
                 if let None = node_ref {
                     panic!("Node slot connected to a node provider without owner");
@@ -32,12 +32,12 @@ impl NodeCoreSlot {
     }
 }
 
-struct NodeCoreSlotInner {}
+struct NodeSlotInner {}
 
-impl CoreSlotInner for NodeCoreSlotInner {
-    fn can_connect(self: &Self, provider: &CoreProvider) -> bool {
+impl SlotInner for NodeSlotInner {
+    fn can_connect(self: &Self, provider: &Provider) -> bool {
         match provider.provider_value {
-            CoreProviderValue::Node(_) => true,
+            ProviderValue::Node(_) => true,
             _ => false,
         }
     }

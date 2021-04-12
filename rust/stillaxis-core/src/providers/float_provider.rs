@@ -1,18 +1,18 @@
-use crate::provider::{CoreProvider, CoreProviderValue};
+use crate::provider::{Provider, ProviderValue};
 use crate::rcell::RCell;
 
-pub struct FloatCoreProvider {
-    pub provider: RCell<CoreProvider>,
+pub struct FloatProvider {
+    pub provider: RCell<Provider>,
 }
 
-impl FloatCoreProvider {
-    pub fn new(name: &str) -> FloatCoreProvider {
-        FloatCoreProvider {
-            provider: RCell::new(CoreProvider::new(name, CoreProviderValue::Float32(0.0))),
+impl FloatProvider {
+    pub fn new(name: &str) -> FloatProvider {
+        FloatProvider {
+            provider: RCell::new(Provider::new(name, ProviderValue::Float32(0.0))),
         }
     }
 
     pub fn set(self: &mut Self, value: f32) {
-        self.provider.borrow_mut().provider_value = CoreProviderValue::Float32(value);
+        self.provider.borrow_mut().provider_value = ProviderValue::Float32(value);
     }
 }
