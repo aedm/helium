@@ -1,9 +1,9 @@
 use crate::dom::document::Document;
-use crate::dom::flow_node::{Element, ElementRef, ElementProviderRef};
+use crate::dom::flow_node::{Element, ElementProviderRef, ElementRef};
 use crate::dom::mutation::FlowMutation;
 use stillaxis_core::node::{Node, ProviderRef};
-use stillaxis_core::render::render_graph::{RenderGraph, ProviderValueRequest};
-use stillaxis_core::render::render_graph::Message::{Mutate, GetProviderValue};
+use stillaxis_core::render::render_graph::Message::{GetProviderValue, Mutate};
+use stillaxis_core::render::render_graph::{ProviderValueRequest, RenderGraph};
 
 pub struct Stillaxis {
     pub core_dom: RenderGraph,
@@ -68,8 +68,8 @@ mod tests {
     use stillaxis_core::nodes::float_node::FloatNode;
     use stillaxis_core::nodes::sum_node::SumNode;
     use stillaxis_core::provider::ProviderValue;
-    use stillaxis_core::slot::SlotDefaultValue;
     use stillaxis_core::render::render_graph::Message;
+    use stillaxis_core::slot::SlotDefaultValue;
 
     fn get_incoming(stillaxis: &mut Stillaxis) -> Box<Message> {
         stillaxis

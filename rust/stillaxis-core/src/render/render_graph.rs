@@ -10,8 +10,8 @@ use crate::node::{Node, ProviderRef};
 use crate::node_ref::NodeRef;
 use crate::nodes::root_node::RootNode;
 use crate::provider::ProviderValue;
-use crate::render::render_thread::RenderThread;
 use crate::render::render_graph::Message::Stop;
+use crate::render::render_thread::RenderThread;
 
 #[derive(IntoStaticStr)]
 pub enum Message {
@@ -67,8 +67,7 @@ impl RenderGraph {
     pub fn new_node<T: 'static + Node>(&self) -> NodeRef {
         let id = self.node_id_generator.fetch_add(1, Ordering::Relaxed);
         let node = NodeRef::new(Box::new(T::new(id)));
-        node
-            .borrow_mut()
+        node.borrow_mut()
             .descriptor_mut()
             .seal(self.get_render_thread_id(), &node);
         node

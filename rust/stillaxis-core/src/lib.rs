@@ -1,14 +1,14 @@
 pub mod mutation;
-pub mod node_descriptor;
 pub mod node;
+pub mod node_descriptor;
 pub mod node_ref;
 pub mod nodes;
 pub mod provider;
 pub mod providers;
 pub mod rcell;
+pub mod render;
 pub mod slot;
 pub mod slots;
-pub mod render;
 
 #[cfg(test)]
 mod module_tests {

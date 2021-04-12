@@ -1,5 +1,5 @@
-use crate::node_descriptor::{NodeDescriptor, NodeId};
 use crate::node::Node;
+use crate::node_descriptor::{NodeDescriptor, NodeId};
 use crate::slots::node_slot::NodeSlot;
 use std::fmt;
 

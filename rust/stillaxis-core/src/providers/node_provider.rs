@@ -9,10 +9,7 @@ pub struct NodeProvider {
 impl NodeProvider {
     pub fn new(name: &str) -> NodeProvider {
         NodeProvider {
-            provider: RCell::new(Provider::new(
-                name,
-                ProviderValue::Node(NodeWeakRef::new()),
-            )),
+            provider: RCell::new(Provider::new(name, ProviderValue::Node(NodeWeakRef::new()))),
         }
     }
 

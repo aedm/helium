@@ -31,7 +31,7 @@ impl TopologicalOrder {
 
 #[cfg(test)]
 mod tests {
-    use crate::dom::flow_node::{Element, ElementRef, ElementProviderRef};
+    use crate::dom::flow_node::{Element, ElementProviderRef, ElementRef};
     use crate::dom::topological_order::TopologicalOrder;
     use stillaxis_core::node::Node;
     use stillaxis_core::node_ref::NodeRef;

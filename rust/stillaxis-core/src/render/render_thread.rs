@@ -1,8 +1,8 @@
 use crate::node_ref::NodeRef;
+use crate::render::render_graph::{Message, ProviderValueRequest};
 use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
 use std::time::Duration;
-use crate::render::render_graph::{Message, ProviderValueRequest};
 
 pub struct RenderThread {
     pub root_node: NodeRef,
